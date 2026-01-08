@@ -3,20 +3,18 @@ package com.joshtechnologygroup.minisocial.bean;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-@Getter
-@Setter
+@Data
 @Entity
 @Table(name = "user_details")
 public class UserDetail {
     @Id
-    @Column(name = "user_id", nullable = false)
-    private Long id;
+    @Column(nullable = false)
+    private Long userId;
 
     @MapsId
     @OneToOne(fetch = FetchType.LAZY, optional = false)
@@ -26,26 +24,24 @@ public class UserDetail {
 
     @Size(max = 255)
     @NotNull
-    @Column(name = "first_name", nullable = false)
+    @Column(nullable = false)
     private String firstName;
 
     @Size(max = 255)
-    @Column(name = "last_name")
+    @Column
     private String lastName;
 
-    @Column(name = "age", columnDefinition = "int UNSIGNED")
+    @Column(columnDefinition = "int UNSIGNED")
     private Integer age;
 
     @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(name = "gender", nullable = false)
+    @Column(nullable = false)
     private Gender gender;
 
     @NotNull
     @ColumnDefault("'single'")
     @Enumerated(EnumType.STRING)
-    @Column(name = "marital_status", nullable = false)
+    @Column(nullable = false)
     private MaritalStatus maritalStatus;
-
-
 }

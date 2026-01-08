@@ -3,19 +3,17 @@ package com.joshtechnologygroup.minisocial.bean;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-@Getter
-@Setter
+@Data
 @Entity
 @Table(name = "residential_details")
 public class ResidentialDetail {
     @Id
-    @Column(name = "user_id", nullable = false)
-    private Long id;
+    @Column(nullable = false)
+    private Long userId;
 
     @MapsId
     @OneToOne(fetch = FetchType.LAZY, optional = false)
@@ -25,32 +23,30 @@ public class ResidentialDetail {
 
     @Size(max = 255)
     @NotNull
-    @Column(name = "address", nullable = false)
+    @Column(nullable = false)
     private String address;
 
     @Size(max = 255)
     @NotNull
-    @Column(name = "city", nullable = false)
+    @Column(nullable = false)
     private String city;
 
     @Size(max = 255)
     @NotNull
-    @Column(name = "state", nullable = false)
+    @Column(nullable = false)
     private String state;
 
     @Size(max = 255)
     @NotNull
-    @Column(name = "country", nullable = false)
+    @Column(nullable = false)
     private String country;
 
     @Size(max = 255)
     @NotNull
-    @Column(name = "contact_no_1", nullable = false)
+    @Column(nullable = false)
     private String contactNo1;
 
     @Size(max = 255)
-    @Column(name = "contact_no_2")
+    @Column
     private String contactNo2;
-
-
 }

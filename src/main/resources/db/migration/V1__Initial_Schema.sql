@@ -10,12 +10,12 @@ CREATE TABLE users
 
 CREATE TABLE user_details
 (
-    user_id        BIGINT UNSIGNED PRIMARY KEY ,
-    first_name     VARCHAR(255)    NOT NULL,
+    user_id        BIGINT UNSIGNED PRIMARY KEY,
+    first_name     VARCHAR(255) NOT NULL,
     last_name      VARCHAR(255),
     age            INT UNSIGNED    NOT NULL,
-    gender         ENUM('male', 'female', 'other') NOT NULL,
-    marital_status ENUM('single', 'married', 'divorced', 'unknown') NOT NULL DEFAULT 'single',
+    gender         ENUM('MALE', 'FEMALE') NOT NULL,
+    marital_status ENUM('SINGLE', 'MARRIED', 'DIVORCED', 'UNKNOWN') NOT NULL DEFAULT 'SINGLE',
 
     FOREIGN KEY (user_id)
         REFERENCES users (id) ON DELETE CASCADE
@@ -27,13 +27,13 @@ CREATE INDEX idx_user_marital_status ON user_details (marital_status);
 
 CREATE TABLE residential_details
 (
-    user_id      BIGINT UNSIGNED PRIMARY KEY ,
-    address      VARCHAR(255)    NOT NULL,
-    city         VARCHAR(255)    NOT NULL,
-    state        VARCHAR(255)    NOT NULL,
-    country      VARCHAR(255)    NOT NULL,
-    contact_no_1 VARCHAR(255)    NOT NULL,
-    contact_no_2 VARCHAR(255),
+    user_id     BIGINT UNSIGNED PRIMARY KEY,
+    address     VARCHAR(255) NOT NULL,
+    city        VARCHAR(255) NOT NULL,
+    state       VARCHAR(255) NOT NULL,
+    country     VARCHAR(255) NOT NULL,
+    contact_no1 VARCHAR(255) NOT NULL,
+    contact_no2 VARCHAR(255),
 
     FOREIGN KEY (user_id)
         REFERENCES users (id) ON DELETE CASCADE
@@ -44,14 +44,14 @@ CREATE INDEX idx_residential_city ON residential_details (city);
 CREATE TABLE official_details
 (
     user_id               BIGINT UNSIGNED PRIMARY KEY,
-    employee_code         VARCHAR(255)    NOT NULL,
-    address               VARCHAR(255)    NOT NULL,
-    city                  VARCHAR(255)    NOT NULL,
-    state                 VARCHAR(255)    NOT NULL,
-    country               VARCHAR(255)    NOT NULL,
-    company_contact_no    VARCHAR(255)    NOT NULL,
-    company_contact_email VARCHAR(255)    NOT NULL,
-    company_name          VARCHAR(255)    NOT NULL,
+    employee_code         VARCHAR(255) NOT NULL,
+    address               VARCHAR(255) NOT NULL,
+    city                  VARCHAR(255) NOT NULL,
+    state                 VARCHAR(255) NOT NULL,
+    country               VARCHAR(255) NOT NULL,
+    company_contact_no    VARCHAR(255) NOT NULL,
+    company_contact_email VARCHAR(255) NOT NULL,
+    company_name          VARCHAR(255) NOT NULL,
 
     FOREIGN KEY (user_id)
         REFERENCES users (id) ON DELETE CASCADE
