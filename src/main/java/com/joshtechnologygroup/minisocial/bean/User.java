@@ -1,6 +1,5 @@
 package com.joshtechnologygroup.minisocial.bean;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -18,7 +17,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @Size(max = 255)
     @NotNull
@@ -33,6 +32,10 @@ public class User {
     @ColumnDefault("0")
     @Column(name = "active")
     private Boolean active;
+
+    @ColumnDefault("CURRENT_TIMESTAMP")
+    @Column(name = "created_at")
+    private Instant createdAt;
 
     @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "last_modified")

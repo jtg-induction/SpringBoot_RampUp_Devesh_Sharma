@@ -6,7 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
-
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Getter
 @Setter
@@ -14,9 +15,14 @@ import org.hibernate.annotations.ColumnDefault;
 @Table(name = "user_details")
 public class UserDetail {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
-    private Integer id;
+    @Column(name = "user_id", nullable = false)
+    private Long id;
+
+    @MapsId
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @Size(max = 255)
     @NotNull
@@ -27,12 +33,10 @@ public class UserDetail {
     @Column(name = "last_name")
     private String lastName;
 
-    @NotNull
-    @Column(name = "age", nullable = false)
+    @Column(name = "age", columnDefinition = "int UNSIGNED")
     private Integer age;
 
     @NotNull
-    @ColumnDefault("'female'")
     @Enumerated(EnumType.STRING)
     @Column(name = "gender", nullable = false)
     private Gender gender;
@@ -42,11 +46,6 @@ public class UserDetail {
     @Enumerated(EnumType.STRING)
     @Column(name = "marital_status", nullable = false)
     private MaritalStatus maritalStatus;
-
-    @NotNull
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
 
 
 }
