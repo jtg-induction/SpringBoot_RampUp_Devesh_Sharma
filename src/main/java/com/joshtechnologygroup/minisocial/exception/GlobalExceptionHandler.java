@@ -7,6 +7,17 @@ import org.springframework.web.bind.annotation.*;
 // Class with handlers for custom exceptions
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler(InvalidUserCredentialsException.class)
+    public ProblemDetail handleUserDoesNotExistException(InvalidUserCredentialsException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.UNAUTHORIZED,
+                e.getMessage()
+        );
+        problemDetail.setTitle("Invalid username or password");
+
+        return problemDetail;
+    }
+
     // Default Exception Handler
     @ExceptionHandler(MiniSocialException.class)
     public ProblemDetail handleMiniSocialException(MiniSocialException e) {
