@@ -62,7 +62,14 @@ public class UpdatePasswordTest {
 
     @Test
     void changePassword() throws Exception {
+<<<<<<< HEAD
         UpdatePasswordRequest req = new UpdatePasswordRequest(TEST_EMAIL, TEST_PASSWORD, SECOND_PASSWORD);
+=======
+        UpdatePasswordRequest req = new UpdatePasswordRequest();
+        req.setEmail(TEST_EMAIL);
+        req.setOldPassword(TEST_PASSWORD);
+        req.setNewPassword(SECOND_PASSWORD);
+>>>>>>> 0b4eb02 (feat: Authentication)
 
         mockMvc.perform(post("/api/user/update-password")
                         .header("Authorization", "Bearer " + authToken)
@@ -73,7 +80,14 @@ public class UpdatePasswordTest {
 
     @Test
     void changePasswordInvalidEmail() throws Exception {
+<<<<<<< HEAD
         UpdatePasswordRequest req = new UpdatePasswordRequest("wrong-email", TEST_PASSWORD, SECOND_PASSWORD);
+=======
+        UpdatePasswordRequest req = new UpdatePasswordRequest();
+        req.setEmail("wrong-email");
+        req.setOldPassword(TEST_PASSWORD);
+        req.setNewPassword(SECOND_PASSWORD);
+>>>>>>> 0b4eb02 (feat: Authentication)
 
         mockMvc.perform(post("/api/user/update-password")
                         .header("Authorization", "Bearer " + authToken)
@@ -84,7 +98,14 @@ public class UpdatePasswordTest {
 
     @Test
     void changePasswordWrongPassword() throws Exception {
+<<<<<<< HEAD
         UpdatePasswordRequest req = new UpdatePasswordRequest(TEST_EMAIL, "wrong-pass", SECOND_PASSWORD);
+=======
+        UpdatePasswordRequest req = new UpdatePasswordRequest();
+        req.setEmail(TEST_EMAIL);
+        req.setOldPassword("wrong-pass");
+        req.setNewPassword(SECOND_PASSWORD);
+>>>>>>> 0b4eb02 (feat: Authentication)
         mockMvc.perform(post("/api/user/update-password")
                         .header("Authorization", "Bearer " + authToken)
                         .contentType(MediaType.APPLICATION_JSON)
