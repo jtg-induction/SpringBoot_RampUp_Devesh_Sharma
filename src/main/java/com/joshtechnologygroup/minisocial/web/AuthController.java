@@ -44,31 +44,17 @@ class AuthController {
     @PostMapping("/authenticate")
     public ResponseEntity<String> authenticate(@RequestBody UserLogin user) {
         try {
-<<<<<<< HEAD
-            log.info("Attempting to authenticate user {}", user.email());
+            log.debug("Attempting to authenticate user {}", user.email());
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.email(), user.password()));
             Optional<User> dbUser = userRepository.findByEmail(user.email());
             if (dbUser.isEmpty()) throw new RuntimeException();
             String jwt = jwtUtil.generateToken(user.email(), dbUser.get().getId());
 
-            log.debug("Successful login for user {}, JWT issued: {}", user.email(), jwt);
+            log.info("Successful login for user {}, JWT issued: {}", user.email(), jwt);
 
             return new ResponseEntity<>(jwt, HttpStatus.OK);
         } catch (Exception e) {
             log.debug("Exception in authenticate(): {}", e.getMessage());
-=======
-            log.debug("Attempting to authenticate user {}", user.getEmail());
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
-            UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
-            Optional<User> dbUser = userRepository.findByEmail(userDetails.getUsername());
-            if (dbUser.isEmpty()) throw new RuntimeException();
-            String jwt = jwtUtil.generateToken(user.getEmail(), dbUser.get().getId());
-
-            log.info("Successful login for user {}, JWT issued: {}", user.getEmail(), jwt);
-
-            return new ResponseEntity<>(jwt, HttpStatus.OK);
-        } catch (Exception e) {
->>>>>>> 0b4eb02 (feat: Authentication)
             throw new InvalidUserCredentialsException();
         }
     }
@@ -76,11 +62,7 @@ class AuthController {
     @PostMapping("/update-password")
     public ResponseEntity<String> updatePassword(@RequestBody UpdatePasswordRequest updatePasswordRequest) {
         try {
-<<<<<<< HEAD
             log.debug("Password change requested for user: {}", updatePasswordRequest.email());
-=======
-            log.debug("Password change requested for user: {}", updatePasswordRequest.getEmail());
->>>>>>> 0b4eb02 (feat: Authentication)
             userService.updateUserPassword(updatePasswordRequest);
             return new ResponseEntity<>("Password changed successfully", HttpStatus.OK);
         } catch (BadCredentialsException e) {
