@@ -2,7 +2,6 @@ package com.joshtechnologygroup.minisocial.web;
 
 import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.dao.UserRepository;
-import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.dto.UserLogin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,9 +14,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -53,9 +52,7 @@ class AuthenticationTest {
 
     @Test
     void authenticateUser_Success() throws Exception {
-        UserLogin loginRequest = new UserLogin();
-        loginRequest.setEmail(TEST_EMAIL);
-        loginRequest.setPassword(TEST_PASSWORD);
+        UserLogin loginRequest = new UserLogin(TEST_EMAIL, TEST_PASSWORD);
 
         String response = mockMvc.perform(post("/api/user/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -70,9 +67,7 @@ class AuthenticationTest {
 
     @Test
     void authenticateUser_WrongPassword() throws Exception {
-        UserLogin loginRequest = new UserLogin();
-        loginRequest.setEmail(TEST_EMAIL);
-        loginRequest.setPassword("wrong-password");
+        UserLogin loginRequest = new UserLogin(TEST_EMAIL, "wrong-password");
 
         mockMvc.perform(post("/api/user/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -82,9 +77,7 @@ class AuthenticationTest {
 
     @Test
     void authenticateUser_InvalidEmail() throws Exception {
-        UserLogin loginRequest = new UserLogin();
-        loginRequest.setEmail("nonexistent@example.com");
-        loginRequest.setPassword(TEST_PASSWORD);
+        UserLogin loginRequest = new UserLogin("nonexistent@example.com", TEST_PASSWORD);
 
         mockMvc.perform(post("/api/user/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)

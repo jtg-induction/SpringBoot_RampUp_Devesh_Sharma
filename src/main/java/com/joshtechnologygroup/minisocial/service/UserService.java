@@ -5,8 +5,6 @@ import com.joshtechnologygroup.minisocial.dao.UserRepository;
 import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,13 +26,13 @@ public class UserService {
     }
 
     public void updateUserPassword(UpdatePasswordRequest request) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getOldPassword()));
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.oldPassword()));
 
-        Optional<User> user = userRepository.findByEmail(request.getEmail());
+        Optional<User> user = userRepository.findByEmail(request.email());
         if (user.isEmpty()) throw new InvalidUserCredentialsException();
 
-        user.get().setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.get().setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user.get());
-        log.info("Successfully Updated password for user {}", request.getEmail());
+        log.info("Successfully Updated password for user {}", request.email());
     }
 }
