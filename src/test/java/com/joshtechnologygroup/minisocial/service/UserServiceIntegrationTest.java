@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -63,6 +65,27 @@ class UserServiceIntegrationTest {
 
         assertThat(userRepository.count()).isEqualTo(1);
         assertThat(userRepository.findByEmail("john.doe@example.com")).isPresent();
+    }
+
+    @Test
+    void getUser_Integration_ShouldFetchFullGraphFromDatabase() {
+        UserCreateRequest request = getUserCreateRequest();
+        UserDTO savedUser = userService.createUser(request);
+        Long id = savedUser.id();
+
+        Optional<UserDTO> result = userService.getUser(id);
+
+        assertThat(result).isPresent();
+        UserDTO dto = result.get();
+
+        assertThat(dto.email()).isEqualTo("john.doe@example.com");
+        assertThat(dto.userDetails()).isNotNull();
+
+        assertThat(dto.userDetails().residentialDetails()).isNotNull();
+        assertThat(dto.userDetails().officialDetails()).isNotNull();
+
+        assertThat(dto.userDetails().residentialDetails().city()).isEqualTo("Delhi");
+        assertThat(dto.userDetails().officialDetails().companyName()).isEqualTo("Company");
     }
 
     private static @NonNull UserCreateRequest getUserCreateRequest() {

@@ -9,6 +9,7 @@ import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailCreat
 import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailMapper;
 import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailMapper;
+import com.joshtechnologygroup.minisocial.dto.user.PopulatedUser;
 import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserMapper;
@@ -21,6 +22,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -123,6 +126,54 @@ class UserServiceTest {
         when(userRepository.save(any())).thenReturn(new User());
 
         assertThrows(NullPointerException.class, () -> userService.createUser(request));
+    }
+
+    @Test
+    void getUser_ShouldReturnUserDTO_WhenUserExists() {
+        // Setup
+        Long userId = 1L;
+        User userEntity = new User();
+        userEntity.setId(userId);
+        userEntity.setEmail("alex@example.com");
+
+        UserDetail userDetail = new UserDetail();
+        ResidentialDetail resDetail = new ResidentialDetail();
+        OfficialDetail offDetail = new OfficialDetail();
+
+        PopulatedUser mockPopulated = new PopulatedUser(userEntity, userDetail, resDetail, offDetail);
+
+        UserDetailDTO mockDetailDTO = UserDetailDTO.builder().firstName("Alex").build();
+        UserDTO expectedDTO = UserDTO.builder().id(userId).email("alex@example.com").userDetails(mockDetailDTO).build();
+
+        // Mock behavior
+        when(userRepository.findUserPopulated(userId)).thenReturn(Optional.of(mockPopulated));
+        when(userDetailMapper.toDto(userDetail, resDetail, offDetail)).thenReturn(mockDetailDTO);
+        when(userMapper.toDto(userEntity, mockDetailDTO)).thenReturn(expectedDTO);
+
+        // Execute
+        Optional<UserDTO> result = userService.getUser(userId);
+
+        // Verify
+        assertTrue(result.isPresent());
+        assertEquals("alex@example.com", result.get().email());
+        assertEquals("Alex", result.get().userDetails().firstName());
+
+        verify(userRepository).findUserPopulated(userId);
+        verify(userDetailMapper).toDto(any(), any(), any());
+    }
+
+    @Test
+    void getUser_ShouldReturnEmpty_WhenUserDoesNotExist() {
+        // Mock
+        when(userRepository.findUserPopulated(99L)).thenReturn(Optional.empty());
+
+        // Execute
+        Optional<UserDTO> result = userService.getUser(99L);
+
+        // Verify
+        assertTrue(result.isEmpty());
+        verifyNoInteractions(userDetailMapper);
+        verifyNoInteractions(userMapper);
     }
 
     private ResidentialDetailCreateRequest mockResRequest() {

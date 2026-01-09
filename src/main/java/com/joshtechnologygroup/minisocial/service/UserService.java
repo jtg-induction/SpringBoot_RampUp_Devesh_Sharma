@@ -9,9 +9,9 @@ import com.joshtechnologygroup.minisocial.dao.ResidentialDetailRepository;
 import com.joshtechnologygroup.minisocial.dao.UserDetailRepository;
 import com.joshtechnologygroup.minisocial.dao.UserRepository;
 import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
-import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailDTO;
 import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailMapper;
 import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailMapper;
+import com.joshtechnologygroup.minisocial.dto.user.PopulatedUser;
 import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserMapper;
@@ -59,7 +59,8 @@ public class UserService {
         Optional<User> user = userRepository.findByEmail(request.email());
         if (user.isEmpty()) throw new InvalidUserCredentialsException();
 
-        user.get().setPassword(passwordEncoder.encode(request.newPassword()));
+        user.get()
+                .setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user.get());
         log.info("Successfully Updated password for user {}", request.email());
     }
@@ -72,11 +73,13 @@ public class UserService {
         userDetail.setUser(user);
         userDetailRepository.save(userDetail);
 
-        ResidentialDetail residentialDetail = residentialDetailMapper.toResidentialDetail(req.userDetails().residentialDetails());
+        ResidentialDetail residentialDetail = residentialDetailMapper.toResidentialDetail(req.userDetails()
+                .residentialDetails());
         residentialDetail.setUser(user);
         residentialDetailRepository.save(residentialDetail);
 
-        OfficialDetail officialDetail = officialDetailMapper.toOfficialDetail(req.userDetails().officialDetails());
+        OfficialDetail officialDetail = officialDetailMapper.toOfficialDetail(req.userDetails()
+                .officialDetails());
         officialDetail.setUser(user);
         officialDetailRepository.save(officialDetail);
 
@@ -84,5 +87,14 @@ public class UserService {
 
         log.info("New user created with ID {}: {}", user.getId(), user.getEmail());
         return userMapper.toDto(user, detailDTO);
+    }
+
+    public Optional<UserDTO> getUser(Long id) {
+        Optional<PopulatedUser> userWrapper = userRepository.findUserPopulated(id);
+        if (userWrapper.isEmpty()) return Optional.empty();
+        PopulatedUser user = userWrapper.get();
+
+        UserDetailDTO detailDTO = userDetailMapper.toDto(user.userDetail(), user.residentialDetail(), user.officialDetail());
+        return Optional.of(userMapper.toDto(user.user(), detailDTO));
     }
 }
