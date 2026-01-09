@@ -44,17 +44,18 @@ class AuthController {
     @PostMapping("/authenticate")
     public ResponseEntity<String> authenticate(@RequestBody UserLogin user) {
         try {
-            log.debug("Attempting to authenticate user {}", user.getEmail());
+            log.info("Attempting to authenticate user {}", user.getEmail());
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
             UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
             Optional<User> dbUser = userRepository.findByEmail(userDetails.getUsername());
             if (dbUser.isEmpty()) throw new RuntimeException();
             String jwt = jwtUtil.generateToken(user.getEmail(), dbUser.get().getId());
 
-            log.info("Successful login for user {}, JWT issued: {}", user.getEmail(), jwt);
+            log.debug("Successful login for user {}, JWT issued: {}", user.getEmail(), jwt);
 
             return new ResponseEntity<>(jwt, HttpStatus.OK);
         } catch (Exception e) {
+            log.debug("Exception in authenticate(): {}", e.getMessage());
             throw new InvalidUserCredentialsException();
         }
     }

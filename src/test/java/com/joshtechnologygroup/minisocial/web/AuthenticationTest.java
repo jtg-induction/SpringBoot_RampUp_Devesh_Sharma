@@ -37,15 +37,11 @@ class AuthenticationTest {
     private PasswordEncoder passwordEncoder;
 
     private final String TEST_EMAIL = "test@example.com";
-    private String TEST_PASSWORD;
-    private String SECOND_PASSWORD;
+    private final String TEST_PASSWORD = "password123";
 
     @BeforeEach
     void setup() {
         userRepository.deleteAll();
-
-        TEST_PASSWORD = "password123";
-        SECOND_PASSWORD = "second-password";
 
         // Create a test user
         User user = new User();
