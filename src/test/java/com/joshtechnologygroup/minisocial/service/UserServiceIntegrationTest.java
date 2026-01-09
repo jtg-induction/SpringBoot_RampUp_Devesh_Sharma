@@ -1,5 +1,8 @@
 package com.joshtechnologygroup.minisocial.service;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import com.joshtechnologygroup.minisocial.bean.Gender;
 import com.joshtechnologygroup.minisocial.bean.MaritalStatus;
 import com.joshtechnologygroup.minisocial.bean.User;
@@ -14,18 +17,16 @@ import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailDTO;
+import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
 @Transactional
@@ -54,25 +55,23 @@ class UserServiceIntegrationTest {
         assertThat(result.email()).isEqualTo("john.doe@example.com");
 
         assertThat(result.userDetails()).isNotNull();
-        assertThat(result.userDetails()
-                .firstName()).isEqualTo("John");
-        assertThat(result.userDetails()
-                .gender()).isEqualTo(Gender.MALE);
+        assertThat(result.userDetails().firstName()).isEqualTo("John");
+        assertThat(result.userDetails().gender()).isEqualTo(Gender.MALE);
 
-        assertThat(result.userDetails()
-                .residentialDetails()).isNotNull();
-        assertThat(result.userDetails()
-                .residentialDetails()
-                .city()).isEqualTo("Delhi");
+        assertThat(result.userDetails().residentialDetails()).isNotNull();
+        assertThat(result.userDetails().residentialDetails().city()).isEqualTo(
+            "Delhi"
+        );
 
-        assertThat(result.userDetails()
-                .officialDetails()).isNotNull();
-        assertThat(result.userDetails()
-                .officialDetails()
-                .companyName()).isEqualTo("Company");
+        assertThat(result.userDetails().officialDetails()).isNotNull();
+        assertThat(
+            result.userDetails().officialDetails().companyName()
+        ).isEqualTo("Company");
 
         assertThat(userRepository.count()).isEqualTo(1);
-        assertThat(userRepository.findByEmail("john.doe@example.com")).isPresent();
+        assertThat(
+            userRepository.findByEmail("john.doe@example.com")
+        ).isPresent();
     }
 
     @Test
@@ -89,30 +88,55 @@ class UserServiceIntegrationTest {
         assertThat(dto.email()).isEqualTo("john.doe@example.com");
         assertThat(dto.userDetails()).isNotNull();
 
-        assertThat(dto.userDetails()
-                .residentialDetails()).isNotNull();
-        assertThat(dto.userDetails()
-                .officialDetails()).isNotNull();
+        assertThat(dto.userDetails().residentialDetails()).isNotNull();
+        assertThat(dto.userDetails().officialDetails()).isNotNull();
 
-        assertThat(dto.userDetails()
-                .residentialDetails()
-                .city()).isEqualTo("Delhi");
-        assertThat(dto.userDetails()
-                .officialDetails()
-                .companyName()).isEqualTo("Company");
+        assertThat(dto.userDetails().residentialDetails().city()).isEqualTo(
+            "Delhi"
+        );
+        assertThat(dto.userDetails().officialDetails().companyName()).isEqualTo(
+            "Company"
+        );
     }
 
     private static @NonNull UserCreateRequest getUserCreateRequest() {
         OfficialDetailCreateRequest offReq = new OfficialDetailCreateRequest(
-                "EMP001", "Office 101", "Gurgaon", "Haryana", "India", "999", "hr@company.com", "Company");
+            "EMP001",
+            "Office 101",
+            "Gurgaon",
+            "Haryana",
+            "India",
+            "999",
+            "hr@company.com",
+            "Company"
+        );
 
-        ResidentialDetailCreateRequest resReq = new ResidentialDetailCreateRequest(
-                "House 1", "Delhi", "Delhi", "India", "111", "222");
+        ResidentialDetailCreateRequest resReq =
+            new ResidentialDetailCreateRequest(
+                "House 1",
+                "Delhi",
+                "Delhi",
+                "India",
+                "111",
+                "222"
+            );
 
         UserDetailCreateRequest detailReq = new UserDetailCreateRequest(
-                "John", "Doe", 25, Gender.MALE, MaritalStatus.SINGLE, resReq, offReq);
+            "John",
+            "Doe",
+            25,
+            Gender.MALE,
+            MaritalStatus.SINGLE,
+            resReq,
+            offReq
+        );
 
-        return new UserCreateRequest("john.doe@example.com", "securePass123", true, detailReq);
+        return new UserCreateRequest(
+            "john.doe@example.com",
+            "securePass123",
+            true,
+            detailReq
+        );
     }
 
     @Test
@@ -136,8 +160,7 @@ class UserServiceIntegrationTest {
         // Verify
         assertThat(result.size()).isEqualTo(1);
         assertThat(result.get(0)).isNotNull();
-        assertThat(result.get(0)
-                .email()).isEqualTo("active@company.com");
+        assertThat(result.get(0).email()).isEqualTo("active@company.com");
     }
 
     @Test
@@ -156,29 +179,105 @@ class UserServiceIntegrationTest {
 
         // Verify
         assertThat(result.email()).isEqualTo("updated@test.com");
-        assertThat(result.userDetails()
-                .maritalStatus()).isEqualTo(MaritalStatus.MARRIED);
-        assertThat(result.userDetails()
-                .residentialDetails()
-                .city()).isEqualTo("Mumbai");
+        assertThat(result.userDetails().maritalStatus()).isEqualTo(
+            MaritalStatus.MARRIED
+        );
+        assertThat(result.userDetails().residentialDetails().city()).isEqualTo(
+            "Mumbai"
+        );
 
         Optional<UserDTO> fetched = userService.getUser(userId);
         assertThat(fetched).isPresent();
-        assertThat(fetched.get()
-                .email()).isEqualTo("updated@test.com");
+        assertThat(fetched.get().email()).isEqualTo("updated@test.com");
     }
 
-    private static @NonNull UserUpdateRequest getUserUpdateRequest(UserCreateRequest createReq, Long userId) {
+    private static @NonNull UserUpdateRequest getUserUpdateRequest(
+        UserCreateRequest createReq,
+        Long userId
+    ) {
         OfficialDetailDTO offDet = new OfficialDetailDTO(
-                userId, "E100", "1234 St", "Ludhiana", "Punjab", "India", "+91 1234567890", "company@mail.com", "company"
+            userId,
+            "E100",
+            "1234 St",
+            "Ludhiana",
+            "Punjab",
+            "India",
+            "+91 1234567890",
+            "company@mail.com",
+            "company"
         );
-        ResidentialDetailDTO resUpdate = new ResidentialDetailDTO(userId,
-                "New Address", "Mumbai", "Maharashtra", "India", "900", "901");
+        ResidentialDetailDTO resUpdate = new ResidentialDetailDTO(
+            userId,
+            "New Address",
+            "Mumbai",
+            "Maharashtra",
+            "India",
+            "900",
+            "901"
+        );
 
-        UserDetailDTO detailUpdate = new UserDetailDTO(userId,
-                "John", "Doe", 26, Gender.MALE, MaritalStatus.MARRIED, resUpdate,
-                offDet);
+        UserDetailDTO detailUpdate = new UserDetailDTO(
+            userId,
+            "John",
+            "Doe",
+            26,
+            Gender.MALE,
+            MaritalStatus.MARRIED,
+            resUpdate,
+            offDet
+        );
 
-        return new UserUpdateRequest(userId, "updated@test.com", "123434", true, Instant.now(), detailUpdate);
+        return new UserUpdateRequest(
+            userId,
+            "updated@test.com",
+            "123434",
+            true,
+            Instant.now(),
+            detailUpdate
+        );
+    }
+
+    @Test
+    void deleteUser_Integration_ShouldDeleteUserAndAllRelatedEntities() {
+        // Create a user first
+        UserCreateRequest createReq = getUserCreateRequest();
+        UserDTO createdUser = userService.createUser(createReq);
+        Long userId = createdUser.id();
+
+        // Verify user exists
+        assertThat(userRepository.findById(userId)).isPresent();
+        assertThat(userService.getUser(userId)).isPresent();
+
+        // Execute delete
+        UserDTO deletedUser = userService.deleteUser(userId);
+
+        // Verify the returned DTO contains the correct data
+        assertThat(deletedUser).isNotNull();
+        assertThat(deletedUser.id()).isEqualTo(userId);
+        assertThat(deletedUser.email()).isEqualTo("john.doe@example.com");
+        assertThat(deletedUser.userDetails()).isNotNull();
+        assertThat(deletedUser.userDetails().firstName()).isEqualTo("John");
+        assertThat(deletedUser.userDetails().residentialDetails()).isNotNull();
+        assertThat(deletedUser.userDetails().officialDetails()).isNotNull();
+
+        // Verify user is actually deleted from database
+        assertThat(userRepository.findById(userId)).isEmpty();
+        assertThat(userService.getUser(userId)).isEmpty();
+
+        // Verify total user count is 0
+        assertThat(userRepository.count()).isEqualTo(0);
+    }
+
+    @Test
+    void deleteUser_Integration_ShouldThrowException_WhenUserDoesNotExist() {
+        Long nonExistentId = 999L;
+
+        // Verify user doesn't exist
+        assertThat(userRepository.findById(nonExistentId)).isEmpty();
+
+        // Execute and verify exception
+        assertThrows(UserDoesNotExistException.class, () ->
+            userService.deleteUser(nonExistentId)
+        );
     }
 }

@@ -327,6 +327,81 @@ class UserServiceTest {
         verify(userRepository, never()).save(any());
     }
 
+    @Test
+    void deleteUser_ShouldReturnUserDTO_WhenUserExists() {
+        // Setup
+        Long userId = 1L;
+        User userEntity = new User();
+        userEntity.setId(userId);
+        userEntity.setEmail("delete@example.com");
+        userEntity.setPassword("1234");
+
+        UserDetail userDetail = new UserDetail();
+        ResidentialDetail resDetail = new ResidentialDetail();
+        OfficialDetail offDetail = new OfficialDetail();
+
+        PopulatedUser mockPopulated = new PopulatedUser(
+            userEntity,
+            userDetail,
+            resDetail,
+            offDetail
+        );
+
+        UserDetailDTO mockDetailDTO = UserDetailDTO.builder()
+            .firstName("ToDelete")
+            .lastName("User")
+            .build();
+        UserDTO expectedDTO = UserDTO.builder()
+            .id(userId)
+            .email("delete@example.com")
+            .userDetails(mockDetailDTO)
+            .build();
+
+        // Mock behavior
+        when(userRepository.findUserPopulated(userId)).thenReturn(
+            Optional.of(mockPopulated)
+        );
+        when(
+            userDetailMapper.toDto(userDetail, resDetail, offDetail)
+        ).thenReturn(mockDetailDTO);
+        when(userMapper.toDto(userEntity, mockDetailDTO)).thenReturn(
+            expectedDTO
+        );
+
+        // Execute
+        UserDTO result = userService.deleteUser(userId);
+
+        // Verify
+        assertNotNull(result);
+        assertEquals(userId, result.id());
+        assertEquals("delete@example.com", result.email());
+        assertEquals("ToDelete", result.userDetails().firstName());
+
+        verify(userRepository).findUserPopulated(userId);
+        verify(userRepository).deleteById(userId);
+        verify(userDetailMapper).toDto(userDetail, resDetail, offDetail);
+        verify(userMapper).toDto(userEntity, mockDetailDTO);
+    }
+
+    @Test
+    void deleteUser_ShouldThrowException_WhenUserDoesNotExist() {
+        // Setup
+        Long nonExistentId = 999L;
+        when(userRepository.findUserPopulated(nonExistentId)).thenReturn(
+            Optional.empty()
+        );
+
+        // Execute & Verify
+        assertThrows(UserDoesNotExistException.class, () ->
+            userService.deleteUser(nonExistentId)
+        );
+
+        verify(userRepository).findUserPopulated(nonExistentId);
+        verify(userRepository, never()).deleteById(any());
+        verifyNoInteractions(userDetailMapper);
+        verifyNoInteractions(userMapper);
+    }
+
     private UserUpdateRequest createUpdateReq(Long id, String email) {
         ResidentialDetailDTO residentialDetails = ResidentialDetailDTO.builder()
             .userId(id)
