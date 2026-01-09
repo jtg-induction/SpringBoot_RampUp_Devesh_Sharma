@@ -2,9 +2,11 @@ package com.joshtechnologygroup.minisocial.service;
 
 import com.joshtechnologygroup.minisocial.bean.Gender;
 import com.joshtechnologygroup.minisocial.bean.MaritalStatus;
+import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.dao.UserRepository;
 import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailCreateRequest;
+import com.joshtechnologygroup.minisocial.dto.user.ActiveUserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailCreateRequest;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -99,5 +102,29 @@ class UserServiceIntegrationTest {
                 "John", "Doe", 25, Gender.MALE, MaritalStatus.SINGLE, resReq, offReq);
 
         return new UserCreateRequest("john.doe@example.com", "securePass123", true, detailReq);
+    }
+
+    @Test
+    void getActiveUsers_Integration_ShouldOnlyReturnActiveUsers() {
+        // Add users
+        User activeUser = new User();
+        activeUser.setEmail("active@company.com");
+        activeUser.setActive(true);
+        activeUser.setPassword("1234");
+        userRepository.save(activeUser);
+
+        User inactiveUser = new User();
+        inactiveUser.setEmail("inactive@company.com");
+        inactiveUser.setActive(false);
+        inactiveUser.setPassword("4567");
+        userRepository.save(inactiveUser);
+
+        // Execute
+        List<ActiveUserDTO> result = userService.getActiveUsers();
+
+        // Verify
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0)).isNotNull();
+        assertThat(result.get(0).email()).isEqualTo("active@company.com");
     }
 }

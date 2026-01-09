@@ -142,8 +142,14 @@ class UserServiceTest {
 
         PopulatedUser mockPopulated = new PopulatedUser(userEntity, userDetail, resDetail, offDetail);
 
-        UserDetailDTO mockDetailDTO = UserDetailDTO.builder().firstName("Alex").build();
-        UserDTO expectedDTO = UserDTO.builder().id(userId).email("alex@example.com").userDetails(mockDetailDTO).build();
+        UserDetailDTO mockDetailDTO = UserDetailDTO.builder()
+                .firstName("Alex")
+                .build();
+        UserDTO expectedDTO = UserDTO.builder()
+                .id(userId)
+                .email("alex@example.com")
+                .userDetails(mockDetailDTO)
+                .build();
 
         // Mock behavior
         when(userRepository.findUserPopulated(userId)).thenReturn(Optional.of(mockPopulated));
@@ -155,8 +161,11 @@ class UserServiceTest {
 
         // Verify
         assertTrue(result.isPresent());
-        assertEquals("alex@example.com", result.get().email());
-        assertEquals("Alex", result.get().userDetails().firstName());
+        assertEquals("alex@example.com", result.get()
+                .email());
+        assertEquals("Alex", result.get()
+                .userDetails()
+                .firstName());
 
         verify(userRepository).findUserPopulated(userId);
         verify(userDetailMapper).toDto(any(), any(), any());

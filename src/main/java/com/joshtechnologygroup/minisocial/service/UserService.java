@@ -11,10 +11,7 @@ import com.joshtechnologygroup.minisocial.dao.UserRepository;
 import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailMapper;
 import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailMapper;
-import com.joshtechnologygroup.minisocial.dto.user.PopulatedUser;
-import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
-import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
-import com.joshtechnologygroup.minisocial.dto.user.UserMapper;
+import com.joshtechnologygroup.minisocial.dto.user.*;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailDTO;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailMapper;
 import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsException;
@@ -24,6 +21,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -96,5 +94,9 @@ public class UserService {
 
         UserDetailDTO detailDTO = userDetailMapper.toDto(user.userDetail(), user.residentialDetail(), user.officialDetail());
         return Optional.of(userMapper.toDto(user.user(), detailDTO));
+    }
+
+    public List<ActiveUserDTO> getActiveUsers() {
+        return userRepository.findActiveUsers();
     }
 }
