@@ -18,6 +18,8 @@ import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsExcept
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
 import java.util.List;
 import java.util.Optional;
+
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -63,6 +65,7 @@ public class UserService {
         this.officialDetailMapper = officialDetailMapper;
     }
 
+    @Transactional
     public void updateUserPassword(UpdatePasswordRequest request) {
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
@@ -79,6 +82,7 @@ public class UserService {
         log.info("Successfully Updated password for user {}", request.email());
     }
 
+    @Transactional
     public UserDTO createUser(UserCreateRequest req) {
         User user = userMapper.createDtoToUser(req);
         userRepository.save(user);
@@ -135,6 +139,7 @@ public class UserService {
         return userRepository.findActiveUsers();
     }
 
+    @Transactional
     public UserDTO updateUser(UserUpdateRequest req) {
         if (
             userRepository.findById(req.id()).isEmpty()
@@ -173,6 +178,7 @@ public class UserService {
         return userMapper.toDto(user, detailDTO);
     }
 
+    @Transactional
     public UserDTO deleteUser(Long id) {
         // Get user data
         Optional<PopulatedUser> userWrapper = userRepository.findUserPopulated(
