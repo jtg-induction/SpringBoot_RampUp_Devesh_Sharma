@@ -3,14 +3,13 @@ package com.joshtechnologygroup.minisocial.bean;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
+import java.util.Set;
 
-@Getter
-@Setter
+@Data
 @Entity
 @Table(name = "users")
 public class User {
@@ -29,17 +28,23 @@ public class User {
     @Column(name = "password", nullable = false, length = 512)
     private String password;
 
-    @ColumnDefault("0")
     @Column(name = "active")
     private Boolean active;
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "created_at")
-    private Instant createdAt;
+    private Instant createdAt = Instant.now();
 
-    @ColumnDefault("CURRENT_TIMESTAMP")
     @Column(name = "last_modified")
-    private Instant lastModified;
+    private Instant lastModified = Instant.now();
 
+    @ManyToMany(mappedBy = "followers")
+    Set<User> followed;
 
+    @ManyToMany
+    @JoinTable(
+            name = "followers",
+            joinColumns = @JoinColumn(name = "followed_user"),
+            inverseJoinColumns = @JoinColumn(name = "following_user")
+    )
+    Set<User> followers;
 }

@@ -2,7 +2,8 @@ package com.joshtechnologygroup.minisocial.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 // Class with handlers for custom exceptions
 @RestControllerAdvice
