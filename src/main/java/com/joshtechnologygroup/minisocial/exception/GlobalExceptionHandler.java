@@ -8,8 +8,24 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 // Class with handlers for custom exceptions
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(UserDoesNotExistException.class)
+    public ProblemDetail handleUserDoesNotExistException(
+            UserDoesNotExistException e
+    ) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.NOT_FOUND,
+                e.getMessage()
+        );
+        problemDetail.setTitle("User Not Found");
+
+        return problemDetail;
+    }
+
     @ExceptionHandler(InvalidUserCredentialsException.class)
-    public ProblemDetail handleUserDoesNotExistException(InvalidUserCredentialsException e) {
+    public ProblemDetail handleInvalidUserCredentialsException(
+            InvalidUserCredentialsException e
+    ) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.UNAUTHORIZED,
                 e.getMessage()

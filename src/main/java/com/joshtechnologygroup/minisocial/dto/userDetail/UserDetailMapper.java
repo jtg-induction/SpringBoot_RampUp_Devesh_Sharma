@@ -14,6 +14,9 @@ public interface UserDetailMapper {
     @Mapping(target = "user", ignore = true)
     UserDetail toUserDetail(UserDetailCreateRequest req);
 
+    @Mapping(target = "user", ignore = true)
+    UserDetail dtoToUserDetail(UserDetailDTO dto);
+
     @Mapping(source = "userDetail.userId", target = "userId")
     @Mapping(source = "res", target = "residentialDetails")
     @Mapping(source = "off", target = "officialDetails")

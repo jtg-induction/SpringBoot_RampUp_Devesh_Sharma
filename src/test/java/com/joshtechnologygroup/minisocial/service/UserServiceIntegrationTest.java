@@ -5,11 +5,15 @@ import com.joshtechnologygroup.minisocial.bean.MaritalStatus;
 import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.dao.UserRepository;
 import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailCreateRequest;
+import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailDTO;
 import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailCreateRequest;
+import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailDTO;
 import com.joshtechnologygroup.minisocial.dto.user.ActiveUserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
+import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailCreateRequest;
+import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailDTO;
 import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,10 +21,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
 @Transactional
@@ -84,11 +89,17 @@ class UserServiceIntegrationTest {
         assertThat(dto.email()).isEqualTo("john.doe@example.com");
         assertThat(dto.userDetails()).isNotNull();
 
-        assertThat(dto.userDetails().residentialDetails()).isNotNull();
-        assertThat(dto.userDetails().officialDetails()).isNotNull();
+        assertThat(dto.userDetails()
+                .residentialDetails()).isNotNull();
+        assertThat(dto.userDetails()
+                .officialDetails()).isNotNull();
 
-        assertThat(dto.userDetails().residentialDetails().city()).isEqualTo("Delhi");
-        assertThat(dto.userDetails().officialDetails().companyName()).isEqualTo("Company");
+        assertThat(dto.userDetails()
+                .residentialDetails()
+                .city()).isEqualTo("Delhi");
+        assertThat(dto.userDetails()
+                .officialDetails()
+                .companyName()).isEqualTo("Company");
     }
 
     private static @NonNull UserCreateRequest getUserCreateRequest() {
@@ -123,8 +134,51 @@ class UserServiceIntegrationTest {
         List<ActiveUserDTO> result = userService.getActiveUsers();
 
         // Verify
-        assertThat(result).hasSize(1);
+        assertThat(result.size()).isEqualTo(1);
         assertThat(result.get(0)).isNotNull();
-        assertThat(result.get(0).email()).isEqualTo("active@company.com");
+        assertThat(result.get(0)
+                .email()).isEqualTo("active@company.com");
+    }
+
+    @Test
+    void updateUser_Integration_ShouldReflectChangesInDatabase() {
+        // Create a user
+        UserCreateRequest createReq = getUserCreateRequest();
+        UserDTO initialUser = userService.createUser(createReq);
+        Long userId = initialUser.id();
+
+        // Prepare Request
+        // Change the city in residential details and the email
+        UserUpdateRequest updateReq = getUserUpdateRequest(createReq, userId);
+
+        // Execute
+        UserDTO result = userService.updateUser(updateReq);
+
+        // Verify
+        assertThat(result.email()).isEqualTo("updated@test.com");
+        assertThat(result.userDetails()
+                .maritalStatus()).isEqualTo(MaritalStatus.MARRIED);
+        assertThat(result.userDetails()
+                .residentialDetails()
+                .city()).isEqualTo("Mumbai");
+
+        Optional<UserDTO> fetched = userService.getUser(userId);
+        assertThat(fetched).isPresent();
+        assertThat(fetched.get()
+                .email()).isEqualTo("updated@test.com");
+    }
+
+    private static @NonNull UserUpdateRequest getUserUpdateRequest(UserCreateRequest createReq, Long userId) {
+        OfficialDetailDTO offDet = new OfficialDetailDTO(
+                userId, "E100", "1234 St", "Ludhiana", "Punjab", "India", "+91 1234567890", "company@mail.com", "company"
+        );
+        ResidentialDetailDTO resUpdate = new ResidentialDetailDTO(userId,
+                "New Address", "Mumbai", "Maharashtra", "India", "900", "901");
+
+        UserDetailDTO detailUpdate = new UserDetailDTO(userId,
+                "John", "Doe", 26, Gender.MALE, MaritalStatus.MARRIED, resUpdate,
+                offDet);
+
+        return new UserUpdateRequest(userId, "updated@test.com", "123434", true, Instant.now(), detailUpdate);
     }
 }

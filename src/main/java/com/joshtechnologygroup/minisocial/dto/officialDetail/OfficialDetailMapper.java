@@ -9,4 +9,7 @@ public interface OfficialDetailMapper {
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "user", ignore = true)
     OfficialDetail toOfficialDetail(OfficialDetailCreateRequest req);
+
+    @Mapping(target = "user", ignore = true)
+    OfficialDetail dtoToOfficialDetail(OfficialDetailDTO dto);
 }

@@ -9,4 +9,7 @@ public interface ResidentialDetailMapper {
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "user", ignore = true)
     ResidentialDetail toResidentialDetail(ResidentialDetailCreateRequest req);
+
+    @Mapping(target = "user", ignore = true)
+    ResidentialDetail dtoToResidentialDetail(ResidentialDetailDTO dto);
 }

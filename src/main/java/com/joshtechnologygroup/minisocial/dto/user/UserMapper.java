@@ -12,9 +12,14 @@ public interface UserMapper {
     @Mapping(target = "followed", ignore = true)
     @Mapping(target = "followers", ignore = true)
     @Mapping(target = "id", ignore = true)
-    User toUser(UserCreateRequest req);
+    User createDtoToUser(UserCreateRequest req);
 
     @Mapping(source = "user.lastModified", target = "last_modified")
     @Mapping(source = "details", target = "userDetails")
     UserDTO toDto(User user, UserDetailDTO details);
+
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "followed", ignore = true)
+    @Mapping(target = "followers", ignore = true)
+    User updateDtoToUser(UserUpdateRequest req);
 }

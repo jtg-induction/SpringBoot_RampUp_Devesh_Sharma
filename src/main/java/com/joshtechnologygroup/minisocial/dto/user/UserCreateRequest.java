@@ -7,7 +7,7 @@ import lombok.Builder;
 public record UserCreateRequest(
         String email,
         String password,
-        boolean active,
+        Boolean active,
         UserDetailCreateRequest userDetails
 ) {
 }

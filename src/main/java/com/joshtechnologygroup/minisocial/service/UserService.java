@@ -15,6 +15,7 @@ import com.joshtechnologygroup.minisocial.dto.user.*;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailDTO;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailMapper;
 import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsException;
+import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -64,7 +65,7 @@ public class UserService {
     }
 
     public UserDTO createUser(UserCreateRequest req) {
-        User user = userMapper.toUser(req);
+        User user = userMapper.createDtoToUser(req);
         userRepository.save(user);
 
         UserDetail userDetail = userDetailMapper.toUserDetail(req.userDetails());
@@ -98,5 +99,31 @@ public class UserService {
 
     public List<ActiveUserDTO> getActiveUsers() {
         return userRepository.findActiveUsers();
+    }
+
+    public UserDTO updateUser(UserUpdateRequest req) {
+        if(userRepository.findById(req.id()).isEmpty()) throw new UserDoesNotExistException();
+
+        User user = userMapper.updateDtoToUser(req);
+        userRepository.save(user);
+
+        UserDetail userDetail = userDetailMapper.dtoToUserDetail(req.userDetails());
+        userDetail.setUser(user);
+        userDetailRepository.save(userDetail);
+
+        ResidentialDetail residentialDetail = residentialDetailMapper.dtoToResidentialDetail(req.userDetails()
+                .residentialDetails());
+        residentialDetail.setUser(user);
+        residentialDetailRepository.save(residentialDetail);
+
+        OfficialDetail officialDetail = officialDetailMapper.dtoToOfficialDetail(req.userDetails()
+                .officialDetails());
+        officialDetail.setUser(user);
+        officialDetailRepository.save(officialDetail);
+
+        UserDetailDTO detailDTO = userDetailMapper.toDto(userDetail, residentialDetail, officialDetail);
+
+        log.info("User updated with ID {}: {}", user.getId(), user.getEmail());
+        return userMapper.toDto(user, detailDTO);
     }
 }

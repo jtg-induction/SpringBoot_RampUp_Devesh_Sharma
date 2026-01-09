@@ -10,7 +10,7 @@ public record UserUpdateRequest(
         Long id,
         String email,
         String password,
-        boolean active,
+        Boolean active,
         Instant lastModified,
 
         UserDetailDTO userDetails

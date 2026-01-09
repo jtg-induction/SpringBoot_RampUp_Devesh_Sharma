@@ -9,7 +9,7 @@ import java.time.Instant;
 public record UserDTO(
         Long id,
         String email,
-        boolean active,
+        Boolean active,
         Instant last_modified,
 
         UserDetailDTO userDetails
