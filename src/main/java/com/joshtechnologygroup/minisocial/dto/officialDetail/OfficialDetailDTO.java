@@ -1,5 +1,8 @@
 package com.joshtechnologygroup.minisocial.dto.officialDetail;
 
+import lombok.Builder;
+
+@Builder
 public record OfficialDetailDTO(
         Long userId,
         String employeeCode,
