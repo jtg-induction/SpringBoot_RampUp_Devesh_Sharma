@@ -8,6 +8,7 @@ import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsExcept
 import com.joshtechnologygroup.minisocial.service.UserDetailsServiceImpl;
 import com.joshtechnologygroup.minisocial.service.UserService;
 import com.joshtechnologygroup.minisocial.util.JwtUtil;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +43,7 @@ class AuthController {
 
 
     @PostMapping("/authenticate")
-    public ResponseEntity<String> authenticate(@RequestBody UserLogin user) {
+    public ResponseEntity<String> authenticate(@Valid @RequestBody UserLogin user) {
         try {
             log.info("Attempting to authenticate user {}", user.email());
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.email(), user.password()));
@@ -60,7 +61,7 @@ class AuthController {
     }
 
     @PostMapping("/update-password")
-    public ResponseEntity<String> updatePassword(@RequestBody UpdatePasswordRequest updatePasswordRequest) {
+    public ResponseEntity<String> updatePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) {
         try {
             log.debug("Password change requested for user: {}", updatePasswordRequest.email());
             userService.updateUserPassword(updatePasswordRequest);

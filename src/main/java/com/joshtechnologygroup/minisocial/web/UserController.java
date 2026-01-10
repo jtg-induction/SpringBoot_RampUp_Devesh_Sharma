@@ -6,6 +6,8 @@ import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
 import com.joshtechnologygroup.minisocial.service.UserService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,24 +30,24 @@ class UserController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<UserDTO> createUser(@RequestBody UserCreateRequest req) {
+    public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserCreateRequest req) {
         return new ResponseEntity<>(userService.createUser(req), HttpStatus.CREATED);
     }
 
     @PutMapping("/")
-    public ResponseEntity<UserDTO> updateUser(@RequestBody UserUpdateRequest req) {
+    public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserUpdateRequest req) {
         return new ResponseEntity<>(userService.updateUser(req), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUser(@PathVariable Long id) {
+    public ResponseEntity<UserDTO> getUser(@PositiveOrZero @PathVariable Long id) {
         Optional<UserDTO> dto = userService.getUser(id);
         if (dto.isEmpty()) throw new UserDoesNotExistException();
         return new ResponseEntity<>(dto.get(), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<UserDTO> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<UserDTO> deleteUser(@PositiveOrZero @PathVariable Long id) {
         return new ResponseEntity<>(userService.deleteUser(id), HttpStatus.OK);
     }
 }

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -66,7 +67,7 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUserPassword(UpdatePasswordRequest request) {
+    public void updateUserPassword(@Valid UpdatePasswordRequest request) {
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
                 request.email(),
@@ -83,7 +84,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO createUser(UserCreateRequest req) {
+    public UserDTO createUser(@Valid UserCreateRequest req) {
         User user = userMapper.createDtoToUser(req);
         userRepository.save(user);
 
@@ -140,7 +141,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO updateUser(UserUpdateRequest req) {
+    public UserDTO updateUser(@Valid UserUpdateRequest req) {
         if (
             userRepository.findById(req.id()).isEmpty()
         ) throw new UserDoesNotExistException();
@@ -179,7 +180,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO deleteUser(Long id) {
+    public UserDTO deleteUser(@Valid Long id) {
         // Get user data
         Optional<PopulatedUser> userWrapper = userRepository.findUserPopulated(
             id

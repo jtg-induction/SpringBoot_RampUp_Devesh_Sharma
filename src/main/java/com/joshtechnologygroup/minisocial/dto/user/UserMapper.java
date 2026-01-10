@@ -14,7 +14,6 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     User createDtoToUser(UserCreateRequest req);
 
-    @Mapping(source = "user.lastModified", target = "last_modified")
     @Mapping(source = "details", target = "userDetails")
     UserDTO toDto(User user, UserDetailDTO details);
 

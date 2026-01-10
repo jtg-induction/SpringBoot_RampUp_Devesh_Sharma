@@ -73,7 +73,7 @@ public class UpdatePasswordTest {
 
     @Test
     void changePasswordInvalidEmail() throws Exception {
-        UpdatePasswordRequest req = new UpdatePasswordRequest("wrong-email", TEST_PASSWORD, SECOND_PASSWORD);
+        UpdatePasswordRequest req = new UpdatePasswordRequest("wrong-email@mail.com", TEST_PASSWORD, SECOND_PASSWORD);
 
         mockMvc.perform(post("/api/user/update-password")
                         .header("Authorization", "Bearer " + authToken)
