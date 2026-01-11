@@ -15,6 +15,7 @@ import com.joshtechnologygroup.minisocial.dto.user.*;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailDTO;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailMapper;
 import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsException;
+import com.joshtechnologygroup.minisocial.exception.UnauthorizedException;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
 import java.util.List;
 import java.util.Optional;
@@ -141,10 +142,13 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO updateUser(@Valid UserUpdateRequest req) {
-        if (
-            userRepository.findById(req.id()).isEmpty()
-        ) throw new UserDoesNotExistException();
+    public UserDTO updateUser(@Valid UserUpdateRequest req, String userEmail) {
+        Optional<User> existingUser = userRepository.findById(req.id());
+        if (existingUser.isEmpty())
+            throw new UserDoesNotExistException();
+        if (!existingUser.get().getEmail().equals(userEmail)) {
+            throw new UnauthorizedException("Attempted to modify another user");
+        }
 
         User user = userMapper.updateDtoToUser(req);
         userRepository.save(user);

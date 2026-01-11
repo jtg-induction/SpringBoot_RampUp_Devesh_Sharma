@@ -1,16 +1,13 @@
 package com.joshtechnologygroup.minisocial.dto.officialDetail;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.PositiveOrZero;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 
 import static com.joshtechnologygroup.minisocial.util.Constants.PHONE_NUMBER_REGEX;
 
 @Builder
 public record OfficialDetailDTO(
-        @NotBlank(message = "User ID is required")
+        @NotNull(message = "User ID is required")
         @PositiveOrZero(message = "User ID must be unsigned")
         Long userId,
 

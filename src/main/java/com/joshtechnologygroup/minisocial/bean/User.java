@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.builder.HashCodeExclude;
 
 import java.time.Instant;
 import java.util.Set;
@@ -37,9 +39,11 @@ public class User {
     private Instant lastModified = Instant.now();
 
     @ManyToMany(mappedBy = "followers")
+    @EqualsAndHashCode.Exclude
     Set<User> followed;
 
     @ManyToMany
+    @EqualsAndHashCode.Exclude
     @JoinTable(
             name = "followers",
             joinColumns = @JoinColumn(name = "followed_user"),

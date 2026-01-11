@@ -12,4 +12,6 @@ public interface OfficialDetailMapper {
 
     @Mapping(target = "user", ignore = true)
     OfficialDetail dtoToOfficialDetail(OfficialDetailDTO dto);
+
+    OfficialDetailDTO entityToDTO(OfficialDetail officialDetail);
 }

@@ -12,4 +12,6 @@ public interface ResidentialDetailMapper {
 
     @Mapping(target = "user", ignore = true)
     ResidentialDetail dtoToResidentialDetail(ResidentialDetailDTO dto);
+
+    ResidentialDetailDTO entityToDTO(ResidentialDetail residentialDetail);
 }
