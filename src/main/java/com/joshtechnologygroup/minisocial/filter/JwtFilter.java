@@ -23,7 +23,7 @@ import java.io.IOException;
 public class JwtFilter extends OncePerRequestFilter {
     JwtUtil jwtUtil;
 
-    UserDetailsServiceImpl userDetailsService;
+    private final UserDetailsServiceImpl userDetailsService;
 
     public JwtFilter(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService) {
         this.jwtUtil = jwtUtil;
@@ -47,7 +47,7 @@ public class JwtFilter extends OncePerRequestFilter {
             email = jwtUtil.extractEmail(token);
         } catch (JwtException e) {
             filterChain.doFilter(request, response);
-            log.warn("Failed to parse JWT in Authorization Header");
+            log.warn("Failed to parse JWT in Authorization Header: {}", e.getMessage());
             return;
         }
 
@@ -58,11 +58,11 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         // Check if user exists
-        log.info("Successfully authenticated user {}", email);
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(auth);
+        log.info("Successfully authenticated user {}", email);
         filterChain.doFilter(request, response);
     }
 }

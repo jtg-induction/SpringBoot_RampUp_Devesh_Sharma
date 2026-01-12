@@ -21,12 +21,9 @@ import org.springframework.stereotype.Component;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    UserDetailsServiceImpl userDetailsService;
+    private final JwtFilter jwtFilter;
 
-    JwtFilter jwtFilter;
-
-    public SecurityConfig(UserDetailsServiceImpl userDetailsService, JwtFilter jwtFilter) {
-        this.userDetailsService = userDetailsService;
+    public SecurityConfig(JwtFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
     }
 
@@ -36,14 +33,12 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(request ->
                         request
-                                .requestMatchers("/public/**", "/health")
+                                .requestMatchers("/public/**", "/health") // Public endpoints
                                 .permitAll()
-                                .requestMatchers("/swagger-ui/**", "/openapi/**")
+                                .requestMatchers("/swagger-ui/**", "/openapi/**", "/docs") // Docs endpoints
                                 .permitAll()
-                                .requestMatchers("/api/user/authenticate")
+                                .requestMatchers("/api/user/authenticate")// Login endpoint
                                 .permitAll()
-                                .requestMatchers("/api/**")
-                                .authenticated()
                                 .anyRequest()
                                 .authenticated()
                 )
@@ -56,14 +51,6 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .build();
-    }
-
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth)
-            throws Exception {
-        auth
-                .userDetailsService(userDetailsService)
-                .passwordEncoder(new BCryptPasswordEncoder());
     }
 
     @Bean

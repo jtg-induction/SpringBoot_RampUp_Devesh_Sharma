@@ -1,6 +1,7 @@
 package com.joshtechnologygroup.minisocial.util;
 
 import com.joshtechnologygroup.minisocial.web.config.ApiConfig;
+import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,7 +71,7 @@ class JwtUtilTest {
     void validateTamperedToken() {
         String tamperedToken = token + "modified";
         // This will throw a SignatureException when parsing
-        assertThrows(Exception.class, () -> jwtUtil.validateToken(tamperedToken));
+        assertThrows(JwtException.class, () -> jwtUtil.extractEmail(tamperedToken));
     }
 
     @Test
@@ -79,5 +80,18 @@ class JwtUtilTest {
         String newToken = jwtUtil.generateToken(mail, 2L);
         assertEquals(mail, jwtUtil.extractEmail(newToken));
         assertEquals(2L, jwtUtil.extractUserId(newToken));
+    }
+
+    @Test
+    void validateExpiredToken() throws InterruptedException {
+        // Create a JwtUtil with a very short expiry for testing
+        when(apiConfig.getJwtExpiry()).thenReturn(500L); // 0.5 second
+        JwtUtil shortLivedJwtUtil = new JwtUtil(apiConfig);
+        String shortLivedToken = shortLivedJwtUtil.generateToken(TEST_MAIL, TEST_ID);
+
+        // Wait for the token to expire
+        Thread.sleep(1000L);
+
+        assertThrows(JwtException.class, () -> shortLivedJwtUtil.extractEmail(shortLivedToken));
     }
 }
