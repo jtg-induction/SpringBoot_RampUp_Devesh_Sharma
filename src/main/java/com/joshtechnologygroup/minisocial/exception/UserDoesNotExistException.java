@@ -2,6 +2,10 @@ package com.joshtechnologygroup.minisocial.exception;
 
 public class UserDoesNotExistException extends MiniSocialException {
     public UserDoesNotExistException() {
-        super("THe user you attempted to access does not exist in the database");
+        super("The user you attempted to access does not exist in the database");
+    }
+
+    public UserDoesNotExistException(String message) {
+        super("The user you attempted to access does not exist in the database: "  + message);
     }
 }

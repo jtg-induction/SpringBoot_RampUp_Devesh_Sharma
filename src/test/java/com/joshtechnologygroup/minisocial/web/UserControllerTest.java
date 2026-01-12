@@ -7,7 +7,6 @@ import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
 import com.joshtechnologygroup.minisocial.factory.UserFactory;
-import com.joshtechnologygroup.minisocial.service.UserService;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +34,6 @@ class UserControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private UserService userService;
     @Autowired
     private UserRepository userRepository;
 
@@ -100,7 +97,7 @@ class UserControllerTest {
     @WithMockUser(username = "john.doe@test.com")
     void updateUser_shouldReturnDTO_validUser() throws Exception {
         Optional<User> user = userRepository.findById(1L);
-        if(user.isEmpty()) throw new Exception("User not found in test database");
+        if (user.isEmpty()) throw new Exception("User not found in test database");
         UserUpdateRequest userUpdateRequest = UserFactory.defaultUserUpdateRequest(user.get())
                 .build();
         String res = mockMvc.perform(put("/api/user").contentType(MediaType.APPLICATION_JSON)
