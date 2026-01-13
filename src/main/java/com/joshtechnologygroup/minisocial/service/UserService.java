@@ -87,6 +87,7 @@ public class UserService {
     @Transactional
     public UserDTO createUser(@Valid UserCreateRequest req) {
         User user = userMapper.createDtoToUser(req);
+        user.setPassword(passwordEncoder.encode(req.password()));
         userRepository.save(user);
 
         UserDetail userDetail = userDetailMapper.toUserDetail(
