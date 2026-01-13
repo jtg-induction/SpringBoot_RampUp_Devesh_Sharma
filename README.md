@@ -32,6 +32,10 @@ A collection of APIs and java tools to manage list of users available on a socia
 - Documentation & API
   - Springdoc
 
+- Import tool
+  - Spring Shell
+  - OpenCSV
+
 ## Installation & Setup
 1. Clone the repository:
    ```bash
@@ -53,6 +57,13 @@ A collection of APIs and java tools to manage list of users available on a socia
 
 6. Docs are accessible at `/swagger-ui/index.html`
 
+## Spring Shell
+
+The project includes a Spring Shell component that provides a command-line interface for utility tools for the application. 
+To use the Spring Shell, run the application jar with the `--shell` argument
+```sh
+./gradlew build && java -jar build/libs/minisocial-0.0.1-SNAPSHOT.jar --shell`
+```
 ## Additional Resources
 - [Design Document](https://docs.google.com/document/d/18DldasPoUK8Pp5TlUITPDnU2d9lvr2p6V0CjDahxNfo/edit?usp=sharing)
 - [WBS](https://docs.google.com/spreadsheets/d/1w_lIvqW8_LCA_-W7phpHCAJYh4Wj7_bCFDvFw5shcVo/edit?usp=sharing)
