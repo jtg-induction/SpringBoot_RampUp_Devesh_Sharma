@@ -1,4 +1,4 @@
-package com.joshtechnologygroup.minisocial.dao;
+package com.joshtechnologygroup.minisocial.repository;
 
 import com.joshtechnologygroup.minisocial.bean.User;
 import org.springframework.data.jpa.repository.JpaRepository;

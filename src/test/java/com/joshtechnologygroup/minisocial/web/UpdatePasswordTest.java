@@ -1,9 +1,8 @@
 package com.joshtechnologygroup.minisocial.web;
 
 import com.joshtechnologygroup.minisocial.bean.User;
-import com.joshtechnologygroup.minisocial.dao.UserRepository;
+import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
-import com.joshtechnologygroup.minisocial.dto.UserLogin;
 import com.joshtechnologygroup.minisocial.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -88,5 +87,15 @@ public class UpdatePasswordTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void changePasswordSameAsOld() throws Exception {
+        UpdatePasswordRequest req = new UpdatePasswordRequest(TEST_EMAIL, TEST_PASSWORD, TEST_PASSWORD);
+        mockMvc.perform(post("/api/user/update-password")
+                        .header("Authorization", "Bearer " + authToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isConflict());
     }
 }

@@ -33,9 +33,9 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(request ->
                         request
-                                .requestMatchers("/public/**", "/health") // Public endpoints
+                                .requestMatchers("/public/**", "/actuator/**")
                                 .permitAll()
-                                .requestMatchers("/swagger-ui/**", "/openapi/**", "/docs") // Docs endpoints
+                                .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html") // Docs endpoints
                                 .permitAll()
                                 .requestMatchers("/api/user/authenticate")// Login endpoint
                                 .permitAll()

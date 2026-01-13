@@ -1,7 +1,8 @@
 package com.joshtechnologygroup.minisocial.service;
 
 import com.joshtechnologygroup.minisocial.bean.User;
-import com.joshtechnologygroup.minisocial.dao.UserRepository;
+import com.joshtechnologygroup.minisocial.exception.ValueConflictException;
+import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsException;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,9 @@ public class UserService {
 
     public void updateUserPassword(UpdatePasswordRequest request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.oldPassword()));
+        if(request.newPassword().equals(request.oldPassword())) {
+            throw new ValueConflictException("New password must be different from old password");
+        }
 
         Optional<User> user = userRepository.findByEmail(request.email());
         if (user.isEmpty()) throw new InvalidUserCredentialsException();

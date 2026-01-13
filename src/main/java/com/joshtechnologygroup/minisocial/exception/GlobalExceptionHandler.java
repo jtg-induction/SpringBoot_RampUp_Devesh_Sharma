@@ -19,6 +19,17 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(ValueConflictException.class)
+    public ProblemDetail handleValueConflictException(ValueConflictException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT,
+                e.getMessage()
+        );
+        problemDetail.setTitle("Value Conflict");
+
+        return problemDetail;
+    }
+
     // Default Exception Handler
     @ExceptionHandler(MiniSocialException.class)
     public ProblemDetail handleMiniSocialException(MiniSocialException e) {
