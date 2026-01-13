@@ -1,11 +1,9 @@
 package com.joshtechnologygroup.minisocial.exception;
 
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
@@ -64,12 +62,25 @@ public class GlobalExceptionHandler {
 
         // Extract each specific field error and message
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage())
-        );
+        ex.getBindingResult()
+                .getFieldErrors()
+                .forEach(error ->
+                        errors.put(error.getField(), error.getDefaultMessage())
+                );
 
         // Add the field-level errors as custom properties
         problemDetail.setProperty("invalid_params", errors);
+
+        return problemDetail;
+    }
+
+    @ExceptionHandler(ValueConflictException.class)
+    public ProblemDetail handleValueConflictException(ValueConflictException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT,
+                e.getMessage()
+        );
+        problemDetail.setTitle("Value Conflict");
 
         return problemDetail;
     }

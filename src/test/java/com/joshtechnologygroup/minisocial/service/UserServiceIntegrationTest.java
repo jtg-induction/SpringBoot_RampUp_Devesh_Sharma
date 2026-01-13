@@ -1,10 +1,6 @@
 package com.joshtechnologygroup.minisocial.service;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import com.joshtechnologygroup.minisocial.bean.MaritalStatus;
-import com.joshtechnologygroup.minisocial.dao.UserRepository;
 import com.joshtechnologygroup.minisocial.dto.user.ActiveUserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
@@ -13,13 +9,18 @@ import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
 import com.joshtechnologygroup.minisocial.factory.ResidentialDetailFactory;
 import com.joshtechnologygroup.minisocial.factory.UserDetailFactory;
 import com.joshtechnologygroup.minisocial.factory.UserFactory;
-import java.util.List;
-import java.util.Optional;
+import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
@@ -50,14 +51,22 @@ class UserServiceIntegrationTest {
         assertThat(result.email()).isEqualTo("john.doe@example.com");
 
         assertThat(result.userDetails()).isNotNull();
-        assertThat(result.userDetails().firstName()).isNotNull();
-        assertThat(result.userDetails().gender()).isNotNull();
+        assertThat(result.userDetails()
+                .firstName()).isNotNull();
+        assertThat(result.userDetails()
+                .gender()).isNotNull();
 
-        assertThat(result.userDetails().residentialDetails()).isNotNull();
-        assertThat(result.userDetails().residentialDetails().city()).isNotNull();
+        assertThat(result.userDetails()
+                .residentialDetails()).isNotNull();
+        assertThat(result.userDetails()
+                .residentialDetails()
+                .city()).isNotNull();
 
-        assertThat(result.userDetails().officialDetails()).isNotNull();
-        assertThat(result.userDetails().officialDetails().companyName()).isNotNull();
+        assertThat(result.userDetails()
+                .officialDetails()).isNotNull();
+        assertThat(result.userDetails()
+                .officialDetails()
+                .companyName()).isNotNull();
 
         assertThat(userRepository.count()).isEqualTo(1);
         assertThat(userRepository.findByEmail("john.doe@example.com")).isPresent();
@@ -79,13 +88,20 @@ class UserServiceIntegrationTest {
         assertThat(dto.email()).isEqualTo("john.doe@example.com");
         assertThat(dto.userDetails()).isNotNull();
 
-        assertThat(dto.userDetails().residentialDetails()).isNotNull();
-        assertThat(dto.userDetails().officialDetails()).isNotNull();
+        assertThat(dto.userDetails()
+                .residentialDetails()).isNotNull();
+        assertThat(dto.userDetails()
+                .officialDetails()).isNotNull();
 
         // Verify all nested data is properly loaded
-        assertThat(dto.userDetails().firstName()).isNotNull();
-        assertThat(dto.userDetails().residentialDetails().city()).isNotNull();
-        assertThat(dto.userDetails().officialDetails().companyName()).isNotNull();
+        assertThat(dto.userDetails()
+                .firstName()).isNotNull();
+        assertThat(dto.userDetails()
+                .residentialDetails()
+                .city()).isNotNull();
+        assertThat(dto.userDetails()
+                .officialDetails()
+                .companyName()).isNotNull();
     }
 
     @Test
@@ -109,13 +125,15 @@ class UserServiceIntegrationTest {
         // Verify
         assertThat(result.size()).isEqualTo(1);
         assertThat(result.get(0)).isNotNull();
-        assertThat(result.get(0).email()).isEqualTo("active@company.com");
+        assertThat(result.get(0)
+                .email()).isEqualTo("active@company.com");
     }
 
     @Test
     void updateUser_Integration_ShouldReflectChangesInDatabase() {
         // Create a user
-        UserCreateRequest createReq = UserFactory.defaultUserCreateRequest().build();
+        UserCreateRequest createReq = UserFactory.defaultUserCreateRequest()
+                .build();
         UserDTO initialUser = userService.createUser(createReq);
         Long userId = initialUser.id();
 
@@ -136,12 +154,16 @@ class UserServiceIntegrationTest {
 
         // Verify
         assertThat(result.email()).isEqualTo("updated@test.com");
-        assertThat(result.userDetails().maritalStatus()).isEqualTo(MaritalStatus.MARRIED);
-        assertThat(result.userDetails().residentialDetails().city()).isEqualTo("Mumbai");
+        assertThat(result.userDetails()
+                .maritalStatus()).isEqualTo(MaritalStatus.MARRIED);
+        assertThat(result.userDetails()
+                .residentialDetails()
+                .city()).isEqualTo("Mumbai");
 
         Optional<UserDTO> fetched = userService.getUser(userId);
         assertThat(fetched).isPresent();
-        assertThat(fetched.orElseThrow().email()).isEqualTo("updated@test.com");
+        assertThat(fetched.orElseThrow()
+                .email()).isEqualTo("updated@test.com");
     }
 
     @Test
@@ -165,9 +187,12 @@ class UserServiceIntegrationTest {
         assertThat(deletedUser.id()).isEqualTo(userId);
         assertThat(deletedUser.email()).isEqualTo("john.doe@example.com");
         assertThat(deletedUser.userDetails()).isNotNull();
-        assertThat(deletedUser.userDetails().firstName()).isNotNull();
-        assertThat(deletedUser.userDetails().residentialDetails()).isNotNull();
-        assertThat(deletedUser.userDetails().officialDetails()).isNotNull();
+        assertThat(deletedUser.userDetails()
+                .firstName()).isNotNull();
+        assertThat(deletedUser.userDetails()
+                .residentialDetails()).isNotNull();
+        assertThat(deletedUser.userDetails()
+                .officialDetails()).isNotNull();
 
         // Verify user is actually deleted from database
         assertThat(userRepository.findById(userId)).isEmpty();
@@ -186,7 +211,7 @@ class UserServiceIntegrationTest {
 
         // Execute and verify exception
         assertThrows(UserDoesNotExistException.class, () ->
-            userService.deleteUser(nonExistentId)
+                userService.deleteUser(nonExistentId)
         );
     }
 }

@@ -4,10 +4,6 @@ import com.joshtechnologygroup.minisocial.bean.OfficialDetail;
 import com.joshtechnologygroup.minisocial.bean.ResidentialDetail;
 import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.bean.UserDetail;
-import com.joshtechnologygroup.minisocial.dao.OfficialDetailRepository;
-import com.joshtechnologygroup.minisocial.dao.ResidentialDetailRepository;
-import com.joshtechnologygroup.minisocial.dao.UserDetailRepository;
-import com.joshtechnologygroup.minisocial.dao.UserRepository;
 import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailMapper;
 import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailMapper;
@@ -17,9 +13,11 @@ import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailMapper;
 import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsException;
 import com.joshtechnologygroup.minisocial.exception.UnauthorizedException;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
-import java.util.List;
-import java.util.Optional;
-
+import com.joshtechnologygroup.minisocial.exception.ValueConflictException;
+import com.joshtechnologygroup.minisocial.repository.OfficialDetailRepository;
+import com.joshtechnologygroup.minisocial.repository.ResidentialDetailRepository;
+import com.joshtechnologygroup.minisocial.repository.UserDetailRepository;
+import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -28,10 +26,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @Slf4j
 public class UserService {
-
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
@@ -44,16 +44,16 @@ public class UserService {
     private final OfficialDetailMapper officialDetailMapper;
 
     public UserService(
-        UserRepository userRepository,
-        AuthenticationManager authenticationManager,
-        PasswordEncoder passwordEncoder,
-        UserDetailRepository userDetailRepository,
-        ResidentialDetailRepository residentialDetailRepository,
-        OfficialDetailRepository officialDetailRepository,
-        UserMapper userMapper,
-        UserDetailMapper userDetailMapper,
-        ResidentialDetailMapper residentialDetailMapper,
-        OfficialDetailMapper officialDetailMapper
+            UserRepository userRepository,
+            AuthenticationManager authenticationManager,
+            PasswordEncoder passwordEncoder,
+            UserDetailRepository userDetailRepository,
+            ResidentialDetailRepository residentialDetailRepository,
+            OfficialDetailRepository officialDetailRepository,
+            UserMapper userMapper,
+            UserDetailMapper userDetailMapper,
+            ResidentialDetailMapper residentialDetailMapper,
+            OfficialDetailMapper officialDetailMapper
     ) {
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
@@ -70,16 +70,21 @@ public class UserService {
     @Transactional
     public void updateUserPassword(@Valid UpdatePasswordRequest request) {
         authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                request.email(),
-                request.oldPassword()
-            )
+                new UsernamePasswordAuthenticationToken(
+                        request.email(),
+                        request.oldPassword()
+                )
         );
+        if (request.newPassword()
+                .equals(request.oldPassword())) {
+            throw new ValueConflictException("New password must be different from old password");
+        }
 
         Optional<User> user = userRepository.findByEmail(request.email());
         if (user.isEmpty()) throw new InvalidUserCredentialsException();
 
-        user.get().setPassword(passwordEncoder.encode(request.newPassword()));
+        user.get()
+                .setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user.get());
         log.info("Successfully Updated password for user {}", request.email());
     }
@@ -91,49 +96,51 @@ public class UserService {
         userRepository.save(user);
 
         UserDetail userDetail = userDetailMapper.toUserDetail(
-            req.userDetails()
+                req.userDetails()
         );
         userDetail.setUser(user);
         userDetailRepository.save(userDetail);
 
         ResidentialDetail residentialDetail =
-            residentialDetailMapper.toResidentialDetail(
-                req.userDetails().residentialDetails()
-            );
+                residentialDetailMapper.toResidentialDetail(
+                        req.userDetails()
+                                .residentialDetails()
+                );
         residentialDetail.setUser(user);
         residentialDetailRepository.save(residentialDetail);
 
         OfficialDetail officialDetail = officialDetailMapper.toOfficialDetail(
-            req.userDetails().officialDetails()
+                req.userDetails()
+                        .officialDetails()
         );
         officialDetail.setUser(user);
         officialDetailRepository.save(officialDetail);
 
         UserDetailDTO detailDTO = userDetailMapper.toDto(
-            userDetail,
-            residentialDetail,
-            officialDetail
+                userDetail,
+                residentialDetail,
+                officialDetail
         );
 
         log.info(
-            "New user created with ID {}: {}",
-            user.getId(),
-            user.getEmail()
+                "New user created with ID {}: {}",
+                user.getId(),
+                user.getEmail()
         );
         return userMapper.toDto(user, detailDTO);
     }
 
     public Optional<UserDTO> getUser(Long id) {
         Optional<PopulatedUser> userWrapper = userRepository.findUserPopulated(
-            id
+                id
         );
         if (userWrapper.isEmpty()) return Optional.empty();
         PopulatedUser user = userWrapper.get();
 
         UserDetailDTO detailDTO = userDetailMapper.toDto(
-            user.userDetail(),
-            user.residentialDetail(),
-            user.officialDetail()
+                user.userDetail(),
+                user.residentialDetail(),
+                user.officialDetail()
         );
         return Optional.of(userMapper.toDto(user.user(), detailDTO));
     }
@@ -147,7 +154,9 @@ public class UserService {
         Optional<User> existingUser = userRepository.findById(req.id());
         if (existingUser.isEmpty())
             throw new UserDoesNotExistException();
-        if (!existingUser.get().getEmail().equals(userEmail)) {
+        if (!existingUser.get()
+                .getEmail()
+                .equals(userEmail)) {
             throw new UnauthorizedException("Attempted to modify another user");
         }
 
@@ -155,29 +164,31 @@ public class UserService {
         userRepository.save(user);
 
         UserDetail userDetail = userDetailMapper.dtoToUserDetail(
-            req.userDetails()
+                req.userDetails()
         );
         userDetail.setUser(user);
         userDetailRepository.save(userDetail);
 
         ResidentialDetail residentialDetail =
-            residentialDetailMapper.dtoToResidentialDetail(
-                req.userDetails().residentialDetails()
-            );
+                residentialDetailMapper.dtoToResidentialDetail(
+                        req.userDetails()
+                                .residentialDetails()
+                );
         residentialDetail.setUser(user);
         residentialDetailRepository.save(residentialDetail);
 
         OfficialDetail officialDetail =
-            officialDetailMapper.dtoToOfficialDetail(
-                req.userDetails().officialDetails()
-            );
+                officialDetailMapper.dtoToOfficialDetail(
+                        req.userDetails()
+                                .officialDetails()
+                );
         officialDetail.setUser(user);
         officialDetailRepository.save(officialDetail);
 
         UserDetailDTO detailDTO = userDetailMapper.toDto(
-            userDetail,
-            residentialDetail,
-            officialDetail
+                userDetail,
+                residentialDetail,
+                officialDetail
         );
 
         log.info("User updated with ID {}: {}", user.getId(), user.getEmail());
@@ -188,7 +199,7 @@ public class UserService {
     public UserDTO deleteUser(@Valid Long id) {
         // Get user data
         Optional<PopulatedUser> userWrapper = userRepository.findUserPopulated(
-            id
+                id
         );
         if (userWrapper.isEmpty()) {
             throw new UserDoesNotExistException();
@@ -199,9 +210,9 @@ public class UserService {
 
         // Create the DTO
         UserDetailDTO detailDTO = userDetailMapper.toDto(
-            populatedUser.userDetail(),
-            populatedUser.residentialDetail(),
-            populatedUser.officialDetail()
+                populatedUser.userDetail(),
+                populatedUser.residentialDetail(),
+                populatedUser.officialDetail()
         );
         UserDTO userDTO = userMapper.toDto(user, detailDTO);
 

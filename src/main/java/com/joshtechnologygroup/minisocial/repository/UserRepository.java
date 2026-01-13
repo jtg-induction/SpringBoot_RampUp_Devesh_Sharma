@@ -1,4 +1,4 @@
-package com.joshtechnologygroup.minisocial.dao;
+package com.joshtechnologygroup.minisocial.repository;
 
 import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.dto.user.ActiveUserDTO;
@@ -14,16 +14,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
     @Query("""
-SELECT u, ud, rd, od FROM User u
-LEFT JOIN FETCH UserDetail ud on ud.userId = u.id
-LEFT JOIN FETCH ResidentialDetail rd ON rd.userId = u.id
-LEFT JOIN FETCH OfficialDetail od ON od.userId = u.id
-WHERE u.id = :id
-""")
+            SELECT u, ud, rd, od FROM User u
+            LEFT JOIN FETCH UserDetail ud on ud.userId = u.id
+            LEFT JOIN FETCH ResidentialDetail rd ON rd.userId = u.id
+            LEFT JOIN FETCH OfficialDetail od ON od.userId = u.id
+            WHERE u.id = :id
+            """)
     Optional<PopulatedUser> findUserPopulated(@Param("id") Long id);
 
     @Query("""
-SELECT id as userId, email FROM User WHERE active = true
-""")
+            SELECT id as userId, email FROM User WHERE active = true
+            """)
     List<ActiveUserDTO> findActiveUsers();
 }
