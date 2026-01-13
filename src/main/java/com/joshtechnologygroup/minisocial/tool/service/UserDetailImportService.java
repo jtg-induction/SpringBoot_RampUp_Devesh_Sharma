@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,8 +31,36 @@ public class UserDetailImportService {
 
     @Transactional
     public void importUserDetails(List<UserDetailRow> userDetailRows) {
-        // Import User Details
+        // Prepare batch lists
+        List<User> users = new ArrayList<>();
+        List<UserDetail> userDetails = new ArrayList<>();
+        List<ResidentialDetail> residentialDetails = new ArrayList<>();
+        List<OfficialDetail> officialDetails = new ArrayList<>();
+
+        // Build entities for batch processing
         for (UserDetailRow row : userDetailRows) {
+            User user = new User();
+            user.setEmail(row.getEmailId());
+            user.setPassword(row.getPassword());
+            user.setActive(true);
+
+            UserDetail userDetail = new UserDetail();
+            userDetail.setFirstName(row.getFirstName());
+            userDetail.setLastName(row.getLastName());
+            userDetail.setGender(row.getGender());
+            userDetail.setAge(row.getAge());
+            userDetail.setMaritalStatus(row.getMaritalStatus());
+            userDetail.setUser(user);
+
+            ResidentialDetail residentialDetail = new ResidentialDetail();
+            residentialDetail.setCity(row.getResidentialCity());
+            residentialDetail.setState(row.getResidentialState());
+            residentialDetail.setCountry(row.getResidentialCountry());
+            residentialDetail.setAddress(row.getResidentialAddress());
+            residentialDetail.setContactNo1(row.getPrimaryContactNumber());
+            residentialDetail.setContactNo2(row.getSecondaryContactNumber());
+            residentialDetail.setUser(user);
+
             OfficialDetail officialDetail = new OfficialDetail();
             officialDetail.setAddress(row.getOfficeAddress());
             officialDetail.setCity(row.getOfficeCity());
@@ -41,40 +70,35 @@ public class UserDetailImportService {
             officialDetail.setCompanyName(row.getCompanyName());
             officialDetail.setCompanyContactEmail(row.getCompanyContactEmail());
             officialDetail.setCompanyContactNo(row.getCompanyContactNumber());
-
-            ResidentialDetail residentialDetail = new ResidentialDetail();
-            residentialDetail.setCity(row.getResidentialCity());
-            residentialDetail.setState(row.getResidentialState());
-            residentialDetail.setCountry(row.getResidentialCountry());
-            residentialDetail.setAddress(row.getResidentialAddress());
-            residentialDetail.setContactNo1(row.getPrimaryContactNumber());
-            residentialDetail.setContactNo2(row.getSecondaryContactNumber());
-
-            UserDetail userDetail = new UserDetail();
-            userDetail.setFirstName(row.getFirstName());
-            userDetail.setLastName(row.getLastName());
-            userDetail.setGender(row.getGender());
-            userDetail.setAge(row.getAge());
-            userDetail.setMaritalStatus(row.getMaritalStatus());
-
-            User user = new User();
-            user.setEmail(row.getEmailId());
-            user.setPassword(row.getPassword());
-            user.setActive(true);
-            userDetail.setUser(user);
             officialDetail.setUser(user);
-            residentialDetail.setUser(user);
 
-            userRepository.save(user);
-            userDetailRepository.save(userDetail);
-            residentialDetailRepository.save(residentialDetail);
-            officialDetailRepository.save(officialDetail);
+            users.add(user);
+            userDetails.add(userDetail);
+            residentialDetails.add(residentialDetail);
+            officialDetails.add(officialDetail);
         }
+
+        // Perform batch saves
+        log.debug("Saving {} users in batch", users.size());
+        userRepository.saveAll(users);
+
+        log.debug("Saving {} user details in batch", userDetails.size());
+        userDetailRepository.saveAll(userDetails);
+
+        log.debug("Saving {} residential details in batch", residentialDetails.size());
+        residentialDetailRepository.saveAll(residentialDetails);
+
+        log.debug("Saving {} official details in batch", officialDetails.size());
+        officialDetailRepository.saveAll(officialDetails);
+
+        log.debug("Batch import completed for {} user records", users.size());
     }
 
     @Transactional
     public void importFollowingDetails(List<UserFollowingDetailRow> rows) {
-        // Import User Following Details
+        // Import User Following Details with batch processing
+        List<User> usersToUpdate = new ArrayList<>();
+
         for (UserFollowingDetailRow row : rows) {
             User user = userRepository.findByEmail(row.getUserEmail())
                     .orElse(null);
@@ -83,6 +107,7 @@ public class UserDetailImportService {
                 continue;
             }
 
+            boolean userModified = false;
             for (String followedEmail : row.getFollowing()) {
                 User followedUser = userRepository.findByEmail(followedEmail)
                         .orElse(null);
@@ -91,8 +116,19 @@ public class UserDetailImportService {
                     continue;
                 }
                 user.addFollowed(followedUser);
+                userModified = true;
             }
-            userRepository.save(user);
+
+            if (userModified) {
+                usersToUpdate.add(user);
+            }
+        }
+
+        // Perform batch save of all modified users
+        if (!usersToUpdate.isEmpty()) {
+            log.debug("Saving {} users with following relationships in batch", usersToUpdate.size());
+            userRepository.saveAll(usersToUpdate);
+            log.debug("Batch save completed for following relationships");
         }
     }
 
