@@ -4,6 +4,7 @@ import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.dao.UserRepository;
 import com.joshtechnologygroup.minisocial.exception.InvalidValueException;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ public class FollowerService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public void updateFollowed(List<Long> followedIds, String userEmail) {
         // Find user
         log.debug("Updating followed list for user {}: {}", userEmail, followedIds);
