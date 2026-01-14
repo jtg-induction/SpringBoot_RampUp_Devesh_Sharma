@@ -17,7 +17,6 @@ import com.joshtechnologygroup.minisocial.repository.OfficialDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.ResidentialDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.UserDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -66,8 +65,7 @@ public class UserService {
         this.officialDetailMapper = officialDetailMapper;
     }
 
-    @Transactional
-    public void updateUserPassword(@Valid UpdatePasswordRequest request) {
+    public void updateUserPassword(UpdatePasswordRequest request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.oldPassword()));
 
         Optional<User> user = userRepository.findByEmail(request.email());
@@ -80,7 +78,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO createUser(@Valid UserCreateRequest req) {
+    public UserDTO createUser(UserCreateRequest req) {
         User user = userMapper.createDtoToUser(req);
         user.setPassword(passwordEncoder.encode(req.password()));
         UserDetail userDetail = userDetailMapper.toUserDetail(
@@ -136,7 +134,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO updateUser(@Valid UserUpdateRequest req, String userEmail, Long id) {
+    public UserDTO updateUser(UserUpdateRequest req, String userEmail, Long id) {
         Optional<User> existingUser = userRepository.findById(id);
         if (existingUser.isEmpty())
             throw new UserDoesNotExistException();
@@ -183,7 +181,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO deleteUser(@Valid Long id) {
+    public UserDTO deleteUser(Long id) {
         // Get user data
         Optional<User> userWrapper = userRepository.findById(id);
         if (userWrapper.isEmpty()) {
