@@ -1,10 +1,10 @@
 package com.joshtechnologygroup.minisocial.tool.service;
 
 import com.joshtechnologygroup.minisocial.bean.User;
-import com.joshtechnologygroup.minisocial.dao.OfficialDetailRepository;
-import com.joshtechnologygroup.minisocial.dao.ResidentialDetailRepository;
-import com.joshtechnologygroup.minisocial.dao.UserDetailRepository;
-import com.joshtechnologygroup.minisocial.dao.UserRepository;
+import com.joshtechnologygroup.minisocial.repository.OfficialDetailRepository;
+import com.joshtechnologygroup.minisocial.repository.ResidentialDetailRepository;
+import com.joshtechnologygroup.minisocial.repository.UserDetailRepository;
+import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import com.joshtechnologygroup.minisocial.factory.UserDetailRowFactory;
 import com.joshtechnologygroup.minisocial.factory.UserFactory;
 import com.joshtechnologygroup.minisocial.factory.UserFollowingDetailRowFactory;

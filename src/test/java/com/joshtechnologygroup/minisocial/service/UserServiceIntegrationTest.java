@@ -1,10 +1,8 @@
 package com.joshtechnologygroup.minisocial.service;
 
+import com.joshtechnologygroup.minisocial.dto.user.*;
 import com.joshtechnologygroup.minisocial.enums.MaritalStatus;
-import com.joshtechnologygroup.minisocial.dto.user.ActiveUserDTO;
-import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
-import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
 import com.joshtechnologygroup.minisocial.factory.ResidentialDetailFactory;
 import com.joshtechnologygroup.minisocial.factory.UserDetailFactory;
@@ -120,7 +118,7 @@ class UserServiceIntegrationTest {
         userService.createUser(inactiveUserReq);
 
         // Execute
-        List<ActiveUserDTO> result = userService.getActiveUsers();
+        List<UserDTO> result = userService.getAllUsers(UserFactory.activeUserQueryParams());
 
         // Verify
         assertThat(result.size()).isEqualTo(1);

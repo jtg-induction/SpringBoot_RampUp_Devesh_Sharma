@@ -1,7 +1,7 @@
 package com.joshtechnologygroup.minisocial.tool.bean;
 
-import com.joshtechnologygroup.minisocial.bean.Gender;
-import com.joshtechnologygroup.minisocial.bean.MaritalStatus;
+import com.joshtechnologygroup.minisocial.enums.Gender;
+import com.joshtechnologygroup.minisocial.enums.MaritalStatus;
 import com.opencsv.bean.CsvBindByName;
 import jakarta.validation.constraints.*;
 import lombok.Data;

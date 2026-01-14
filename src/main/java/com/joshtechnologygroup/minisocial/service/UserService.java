@@ -17,7 +17,9 @@ import com.joshtechnologygroup.minisocial.repository.OfficialDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.ResidentialDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.UserDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
+import com.joshtechnologygroup.minisocial.specification.UserSpecificationBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -129,8 +131,33 @@ public class UserService {
         return Optional.of(userMapper.toDto(user, detailDTO));
     }
 
-    public List<ActiveUserDTO> getActiveUsers() {
-        return userRepository.findActiveUsers();
+    public List<UserDTO> getAllUsers(UserQueryParams userQueryParams) {
+        Specification<User> userSpecification = new UserSpecificationBuilder().withMinAge(userQueryParams.minAge())
+                .withMaxAge(userQueryParams.maxAge())
+                .withMinFollowers(userQueryParams.minFollowerCount())
+                .withMaxFollowers(userQueryParams.maxFollowerCount())
+                .withMinFollowing(userQueryParams.minFollowingCount())
+                .withMaxFollowing(userQueryParams.maxFollowingCount())
+                .withFirstName(userQueryParams.firstName())
+                .withLastName(userQueryParams.lastName())
+                .withGender(userQueryParams.gender())
+                .withMaritalStatus(userQueryParams.maritalStatus())
+                .residentialCityIn(userQueryParams.residentialCities())
+                .officialCityIn(userQueryParams.officialCities())
+                .companyNameIn(userQueryParams.companyName())
+                .isActive(userQueryParams.active())
+                .build();
+        List<User> users = userRepository.findAll(userSpecification);
+        return users.stream()
+                .map(user -> {
+                    UserDetailDTO detailDTO = userDetailMapper.toDto(
+                            user.getUserDetail(),
+                            user.getResidentialDetail(),
+                            user.getOfficialDetail()
+                    );
+                    return userMapper.toDto(user, detailDTO);
+                })
+                .toList();
     }
 
     @Transactional

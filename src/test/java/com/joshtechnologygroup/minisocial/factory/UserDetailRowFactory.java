@@ -1,8 +1,8 @@
 package com.joshtechnologygroup.minisocial.factory;
 
 import com.joshtechnologygroup.minisocial.TestDataConfig;
-import com.joshtechnologygroup.minisocial.bean.Gender;
-import com.joshtechnologygroup.minisocial.bean.MaritalStatus;
+import com.joshtechnologygroup.minisocial.enums.Gender;
+import com.joshtechnologygroup.minisocial.enums.MaritalStatus;
 import com.joshtechnologygroup.minisocial.tool.bean.UserDetailRow;
 import net.datafaker.Faker;
 

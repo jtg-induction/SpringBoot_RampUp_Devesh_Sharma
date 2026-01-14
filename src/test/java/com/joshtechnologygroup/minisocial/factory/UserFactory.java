@@ -4,6 +4,7 @@ import com.joshtechnologygroup.minisocial.TestDataConfig;
 import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
+import com.joshtechnologygroup.minisocial.dto.user.UserQueryParams;
 import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
 import net.datafaker.Faker;
 
@@ -72,5 +73,13 @@ public class UserFactory {
                 .active(user.getActive())
                 .userDetails(UserDetailFactory.defaultUserDetailDTO(user.getId())
                         .build());
+    }
+
+    public static UserQueryParams emptyUserQueryParams() {
+        return new UserQueryParams(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+    }
+
+    public static UserQueryParams activeUserQueryParams() {
+        return new UserQueryParams(null, null, null, null, null, null, null, null, null, null, null, null, null, true, null);
     }
 }

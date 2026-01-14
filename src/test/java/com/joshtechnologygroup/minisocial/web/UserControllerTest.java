@@ -1,7 +1,6 @@
 package com.joshtechnologygroup.minisocial.web;
 
 import com.joshtechnologygroup.minisocial.bean.User;
-import com.joshtechnologygroup.minisocial.dto.user.ActiveUserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
@@ -41,14 +40,40 @@ class UserControllerTest {
     @Test
     @WithMockUser(username = "test@gmail.com")
     void getActiveUsers() throws Exception {
+        String res = mockMvc.perform(get("/api/users?active=true"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        List<UserDTO> list = objectMapper.readerForListOf(UserDTO.class)
+                .readValue(res);
+        assert (list.size() == 3);
+    }
+
+    @Test
+    @WithMockUser(username = "test@gmail.com")
+    void getAllUsers_shouldReturnAllUsers() throws Exception {
         String res = mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        List<ActiveUserDTO> list = objectMapper.readerForListOf(ActiveUserDTO.class)
+        List<UserDTO> list = objectMapper.readerForListOf(UserDTO.class)
                 .readValue(res);
-        assert (list.size() == 3);
+        assert (list.size() == 5);
+    }
+
+    @Test
+    @WithMockUser(username = "test@gmail.com")
+    void getActiveUsers_shouldReturnFilteredUsers() throws Exception {
+        String res = mockMvc.perform(get("/api/users?active=true&firstName=John"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        List<UserDTO> list = objectMapper.readerForListOf(UserDTO.class)
+                .readValue(res);
+        assert (list.size() == 1);
     }
 
     @Test
