@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.util.Set;
@@ -35,6 +36,7 @@ public class User {
     private Instant createdAt = Instant.now();
 
     @Column(name = "last_modified")
+    @UpdateTimestamp
     private Instant lastModified = Instant.now();
 
     @ManyToMany(mappedBy = "followers")

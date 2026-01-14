@@ -87,9 +87,8 @@ class UserControllerTest {
     @WithMockUser(username = "test@gmail.com")
     void updateUser_shouldReturn404_NonExistingUser() throws Exception {
         UserUpdateRequest userUpdateRequest = UserFactory.defaultUserUpdateRequest()
-                .id(999L)
                 .build();
-        mockMvc.perform(put("/api/user").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/api/user/999").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userUpdateRequest)))
                 .andExpect(status().isNotFound());
     }
@@ -101,7 +100,7 @@ class UserControllerTest {
         if(user.isEmpty()) throw new Exception("User not found in test database");
         UserUpdateRequest userUpdateRequest = UserFactory.defaultUserUpdateRequest(user.get())
                 .build();
-        String res = mockMvc.perform(put("/api/user").contentType(MediaType.APPLICATION_JSON)
+        String res = mockMvc.perform(put("/api/user/1").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userUpdateRequest)))
                 .andExpect(status().isOk())
                 .andReturn()
@@ -118,9 +117,8 @@ class UserControllerTest {
     @WithMockUser(username = "john.doe@test.com")
     void updateUser_shouldReturn403_whenWrongUser() throws Exception {
         UserUpdateRequest userUpdateRequest = UserFactory.defaultUserUpdateRequest()
-                .id(5L)
                 .build();
-        mockMvc.perform(put("/api/user").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/api/user/5").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userUpdateRequest)))
                 .andExpect(status().isForbidden());
     }

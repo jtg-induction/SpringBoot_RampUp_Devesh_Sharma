@@ -55,15 +55,15 @@ class UserController {
         return new ResponseEntity<>(userService.createUser(req), HttpStatus.CREATED);
     }
 
-    @PutMapping("/user")
+    @PutMapping("/user/{id}")
     @Operation(description = "Update an existing user account", summary = "Update User")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User updated successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
     })
-    public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserUpdateRequest req, @AuthenticationPrincipal UserDetails userDetails) {
-        return new ResponseEntity<>(userService.updateUser(req, userDetails.getUsername()), HttpStatus.OK);
+    public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserUpdateRequest req, @AuthenticationPrincipal UserDetails userDetails, @PositiveOrZero @PathVariable Long id) {
+        return new ResponseEntity<>(userService.updateUser(req, userDetails.getUsername(), id), HttpStatus.OK);
     }
 
     @GetMapping("/user/{id}")

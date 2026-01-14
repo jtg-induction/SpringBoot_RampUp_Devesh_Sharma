@@ -140,8 +140,8 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO updateUser(@Valid UserUpdateRequest req, String userEmail) {
-        Optional<User> existingUser = userRepository.findById(req.id());
+    public UserDTO updateUser(@Valid UserUpdateRequest req, String userEmail, Long id) {
+        Optional<User> existingUser = userRepository.findById(id);
         if (existingUser.isEmpty())
             throw new UserDoesNotExistException();
         if (!existingUser.get()
@@ -151,6 +151,7 @@ public class UserService {
         }
 
         User user = userMapper.updateDtoToUser(req);
+        user.setId(id);
         userRepository.save(user);
 
         UserDetail userDetail = userDetailMapper.dtoToUserDetail(

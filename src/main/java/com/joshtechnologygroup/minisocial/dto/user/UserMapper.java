@@ -18,6 +18,7 @@ public interface UserMapper {
     UserDTO toDto(User user, UserDetailDTO details);
 
     @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "lastModified", ignore = true)
     @Mapping(target = "followed", ignore = true)
     @Mapping(target = "followers", ignore = true)
     User updateDtoToUser(UserUpdateRequest req);

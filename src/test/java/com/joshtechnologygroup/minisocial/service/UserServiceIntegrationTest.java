@@ -139,7 +139,6 @@ class UserServiceIntegrationTest {
 
         // Prepare Update Request with changes
         UserUpdateRequest updateReq = UserFactory.defaultUserUpdateRequest()
-                .id(userId)
                 .email("updated@test.com")
                 .userDetails(UserDetailFactory.defaultUserDetailDTO(userId)
                         .maritalStatus(MaritalStatus.MARRIED)
@@ -150,7 +149,7 @@ class UserServiceIntegrationTest {
                 .build();
 
         // Execute
-        UserDTO result = userService.updateUser(updateReq, initialUser.email());
+        UserDTO result = userService.updateUser(updateReq, initialUser.email(), userId);
 
         // Verify
         assertThat(result.email()).isEqualTo("updated@test.com");

@@ -247,7 +247,7 @@ class UserServiceTest {
         when(userMapper.toDto(any(), any())).thenReturn(finalDTO);
 
         // 2. Act
-        UserDTO result = userService.updateUser(updateReq, user.getEmail());
+        UserDTO result = userService.updateUser(updateReq, user.getEmail(), user.getId());
 
         // 3. Assert
         assertEquals("new-email@company.com", result.email());
@@ -260,13 +260,12 @@ class UserServiceTest {
     @Test
     void updateUser_ShouldThrowException_WhenUserNotFound() {
         UserUpdateRequest req = UserFactory.defaultUserUpdateRequest()
-                .id(999L)
                 .email("ghost@test.com")
                 .build();
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
         assertThrows(UserDoesNotExistException.class, () ->
-                userService.updateUser(req, "test@mail.com")
+                userService.updateUser(req, "test@mail.com", 999L)
         );
         verify(userRepository, never()).save(any());
     }
