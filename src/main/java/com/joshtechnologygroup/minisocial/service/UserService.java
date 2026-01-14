@@ -17,7 +17,6 @@ import com.joshtechnologygroup.minisocial.repository.OfficialDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.ResidentialDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.UserDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -66,8 +65,7 @@ public class UserService {
         this.officialDetailMapper = officialDetailMapper;
     }
 
-    @Transactional
-    public void updateUserPassword(@Valid UpdatePasswordRequest request) {
+    public void updateUserPassword(UpdatePasswordRequest request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.oldPassword()));
 
         Optional<User> user = userRepository.findByEmail(request.email());
@@ -80,31 +78,29 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO createUser(@Valid UserCreateRequest req) {
+    public UserDTO createUser(UserCreateRequest req) {
         User user = userMapper.createDtoToUser(req);
         user.setPassword(passwordEncoder.encode(req.password()));
-        userRepository.save(user);
-
         UserDetail userDetail = userDetailMapper.toUserDetail(
                 req.userDetails()
         );
-        userDetail.setUser(user);
-        userDetailRepository.save(userDetail);
-
+        OfficialDetail officialDetail = officialDetailMapper.toOfficialDetail(
+                req.userDetails()
+                        .officialDetails()
+        );
         ResidentialDetail residentialDetail =
                 residentialDetailMapper.toResidentialDetail(
                         req.userDetails()
                                 .residentialDetails()
                 );
-        residentialDetail.setUser(user);
-        residentialDetailRepository.save(residentialDetail);
-
-        OfficialDetail officialDetail = officialDetailMapper.toOfficialDetail(
-                req.userDetails()
-                        .officialDetails()
-        );
+        userDetail.setUser(user);
         officialDetail.setUser(user);
-        officialDetailRepository.save(officialDetail);
+        residentialDetail.setUser(user);
+        user.setUserDetail(userDetail);
+        user.setOfficialDetail(officialDetail);
+        user.setResidentialDetail(residentialDetail);
+
+        userRepository.save(user);
 
         UserDetailDTO detailDTO = userDetailMapper.toDto(
                 userDetail,
@@ -121,18 +117,16 @@ public class UserService {
     }
 
     public Optional<UserDTO> getUser(Long id) {
-        Optional<PopulatedUser> userWrapper = userRepository.findUserPopulated(
-                id
-        );
+        Optional<User> userWrapper = userRepository.findById(id);
         if (userWrapper.isEmpty()) return Optional.empty();
-        PopulatedUser user = userWrapper.get();
+        User user = userWrapper.get();
 
         UserDetailDTO detailDTO = userDetailMapper.toDto(
-                user.userDetail(),
-                user.residentialDetail(),
-                user.officialDetail()
+                user.getUserDetail(),
+                user.getResidentialDetail(),
+                user.getOfficialDetail()
         );
-        return Optional.of(userMapper.toDto(user.user(), detailDTO));
+        return Optional.of(userMapper.toDto(user, detailDTO));
     }
 
     public List<ActiveUserDTO> getActiveUsers() {
@@ -140,7 +134,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO updateUser(@Valid UserUpdateRequest req, String userEmail, Long id) {
+    public UserDTO updateUser(UserUpdateRequest req, String userEmail, Long id) {
         Optional<User> existingUser = userRepository.findById(id);
         if (existingUser.isEmpty())
             throw new UserDoesNotExistException();
@@ -187,23 +181,20 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO deleteUser(@Valid Long id) {
+    public UserDTO deleteUser(Long id) {
         // Get user data
-        Optional<PopulatedUser> userWrapper = userRepository.findUserPopulated(
-                id
-        );
+        Optional<User> userWrapper = userRepository.findById(id);
         if (userWrapper.isEmpty()) {
             throw new UserDoesNotExistException();
         }
 
-        PopulatedUser populatedUser = userWrapper.get();
-        User user = populatedUser.user();
+        User user = userWrapper.get();
 
         // Create the DTO
         UserDetailDTO detailDTO = userDetailMapper.toDto(
-                populatedUser.userDetail(),
-                populatedUser.residentialDetail(),
-                populatedUser.officialDetail()
+                user.getUserDetail(),
+                user.getResidentialDetail(),
+                user.getOfficialDetail()
         );
         UserDTO userDTO = userMapper.toDto(user, detailDTO);
 
