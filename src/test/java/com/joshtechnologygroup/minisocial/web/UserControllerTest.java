@@ -1,13 +1,12 @@
 package com.joshtechnologygroup.minisocial.web;
 
 import com.joshtechnologygroup.minisocial.bean.User;
-import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import com.joshtechnologygroup.minisocial.dto.user.ActiveUserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
 import com.joshtechnologygroup.minisocial.factory.UserFactory;
-import com.joshtechnologygroup.minisocial.service.UserService;
+import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +34,7 @@ class UserControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private UserService userService;
+
     @Autowired
     private UserRepository userRepository;
 
@@ -65,24 +63,24 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(username = "test@gmail.com")
-    void createUser_shouldReturn400_whenMissingFields() throws Exception {
+    void createUser_shouldReturn422_whenMissingFields() throws Exception {
         UserCreateRequest userCreateRequest = UserFactory.defaultUserCreateRequest()
                 .userDetails(null)
                 .build();
         mockMvc.perform(post("/api/user").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userCreateRequest)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableContent());
     }
 
     @Test
     @WithMockUser(username = "test@gmail.com")
-    void createUser_shouldReturn400_whenInvalidEmail() throws Exception {
+    void createUser_shouldReturn422_whenInvalidEmail() throws Exception {
         UserCreateRequest userCreateRequest = UserFactory.defaultUserCreateRequest()
                 .email("invalid-email")
                 .build();
         mockMvc.perform(post("/api/user").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userCreateRequest)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableContent());
     }
 
     @Test

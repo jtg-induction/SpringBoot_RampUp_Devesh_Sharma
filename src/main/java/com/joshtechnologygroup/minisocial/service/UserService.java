@@ -13,18 +13,17 @@ import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailMapper;
 import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsException;
 import com.joshtechnologygroup.minisocial.exception.UnauthorizedException;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
-import com.joshtechnologygroup.minisocial.exception.ValueConflictException;
 import com.joshtechnologygroup.minisocial.repository.OfficialDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.ResidentialDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.UserDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -69,16 +68,7 @@ public class UserService {
 
     @Transactional
     public void updateUserPassword(@Valid UpdatePasswordRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.email(),
-                        request.oldPassword()
-                )
-        );
-        if (request.newPassword()
-                .equals(request.oldPassword())) {
-            throw new ValueConflictException("New password must be different from old password");
-        }
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.oldPassword()));
 
         Optional<User> user = userRepository.findByEmail(request.email());
         if (user.isEmpty()) throw new InvalidUserCredentialsException();

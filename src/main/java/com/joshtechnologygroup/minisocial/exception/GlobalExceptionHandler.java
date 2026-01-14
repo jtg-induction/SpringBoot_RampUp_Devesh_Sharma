@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidationErrors(MethodArgumentNotValidException ex) {
         // Create a standard RFC 7807 ProblemDetail object
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
         problemDetail.setTitle("Validation Failed");
         problemDetail.setDetail("One or more fields in the request are invalid.");
 
@@ -70,17 +70,6 @@ public class GlobalExceptionHandler {
 
         // Add the field-level errors as custom properties
         problemDetail.setProperty("invalid_params", errors);
-
-        return problemDetail;
-    }
-
-    @ExceptionHandler(ValueConflictException.class)
-    public ProblemDetail handleValueConflictException(ValueConflictException e) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.CONFLICT,
-                e.getMessage()
-        );
-        problemDetail.setTitle("Value Conflict");
 
         return problemDetail;
     }
