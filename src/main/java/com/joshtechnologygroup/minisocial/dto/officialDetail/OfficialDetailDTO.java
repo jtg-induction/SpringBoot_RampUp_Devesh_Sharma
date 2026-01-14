@@ -3,7 +3,7 @@ package com.joshtechnologygroup.minisocial.dto.officialDetail;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 
-import static com.joshtechnologygroup.minisocial.util.Constants.PHONE_NUMBER_REGEX;
+import static com.joshtechnologygroup.minisocial.constants.ValidationConstants.PHONE_NUMBER_REGEX;
 
 @Builder
 public record OfficialDetailDTO(
