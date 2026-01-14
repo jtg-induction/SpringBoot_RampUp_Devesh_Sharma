@@ -3,7 +3,7 @@ package com.joshtechnologygroup.minisocial.dto.officialDetail;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 
-import static com.joshtechnologygroup.minisocial.util.Constants.PHONE_NUMBER_REGEX;
+import static com.joshtechnologygroup.minisocial.constants.ValidationConstants.PHONE_NUMBER_REGEX;
 
 @Builder
 public record OfficialDetailDTO(
@@ -11,7 +11,7 @@ public record OfficialDetailDTO(
         @PositiveOrZero(message = "User ID must be unsigned")
         Long userId,
 
-        @Size(min=3, max=100, message = "Employee Code must be between 3 and 100 characters long")
+        @Size(min = 3, max = 100, message = "Employee Code must be between 3 and 100 characters long")
         @NotBlank(message = "Employee Code is required")
         String employeeCode,
 
@@ -43,4 +43,5 @@ public record OfficialDetailDTO(
         @Size(max = 255, message = "Company Name must not exceed 255 characters")
         @NotBlank(message = "Company Name is required")
         String companyName
-) {}
+) {
+}

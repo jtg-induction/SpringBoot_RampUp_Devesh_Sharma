@@ -1,8 +1,8 @@
 package com.joshtechnologygroup.minisocial.web;
 
 import com.joshtechnologygroup.minisocial.bean.User;
-import com.joshtechnologygroup.minisocial.dao.UserRepository;
 import com.joshtechnologygroup.minisocial.dto.UserLogin;
+import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

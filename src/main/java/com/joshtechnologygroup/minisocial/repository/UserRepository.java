@@ -1,4 +1,4 @@
-package com.joshtechnologygroup.minisocial.dao;
+package com.joshtechnologygroup.minisocial.repository;
 
 import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.dto.user.ActiveUserDTO;

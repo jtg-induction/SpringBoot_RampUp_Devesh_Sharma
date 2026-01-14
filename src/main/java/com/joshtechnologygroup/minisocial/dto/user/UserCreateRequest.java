@@ -12,7 +12,7 @@ import lombok.Builder;
 public record UserCreateRequest(
         @Email(message = "Invalid Email format")
         @NotBlank(message = "Email is required")
-        @Size(max=255, message = "Email must not exceed 255 characters")
+        @Size(max = 255, message = "Email must not exceed 255 characters")
         String email,
 
         @NotBlank(message = "Password is required")

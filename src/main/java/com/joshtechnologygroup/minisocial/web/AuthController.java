@@ -60,7 +60,7 @@ class AuthController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
             ),
     })
-    public ResponseEntity<String> updatePassword(@RequestBody UpdatePasswordRequest updatePasswordRequest) {
+    public ResponseEntity<String> updatePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) {
         authService.updatePassword(updatePasswordRequest);
         return new ResponseEntity<>("Password changed successfully", HttpStatus.OK);
     }

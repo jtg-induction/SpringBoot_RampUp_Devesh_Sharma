@@ -21,7 +21,6 @@ CREATE TABLE user_details
         REFERENCES users (id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_user_details_gender ON user_details (gender);
 CREATE INDEX idx_user_details_age ON user_details (age);
 CREATE INDEX idx_user_marital_status ON user_details (marital_status);
 
@@ -56,7 +55,6 @@ CREATE TABLE official_details
     FOREIGN KEY (user_id)
         REFERENCES users (id) ON DELETE CASCADE
 );
-
 CREATE INDEX idx_official_city ON official_details (city);
 CREATE INDEX idx_company_name ON official_details (company_name);
 
@@ -71,5 +69,4 @@ CREATE TABLE followers
 );
 
 CREATE INDEX idx_followers_following ON followers (following_user);
-CREATE INDEX idx_followers_count ON followers (followed_user);
 

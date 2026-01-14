@@ -1,11 +1,9 @@
 package com.joshtechnologygroup.minisocial.dto.userDetail;
 
-import com.joshtechnologygroup.minisocial.bean.Gender;
-import com.joshtechnologygroup.minisocial.bean.MaritalStatus;
+import com.joshtechnologygroup.minisocial.enums.Gender;
+import com.joshtechnologygroup.minisocial.enums.MaritalStatus;
 import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailCreateRequest;
-import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailDTO;
 import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailCreateRequest;
-import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
