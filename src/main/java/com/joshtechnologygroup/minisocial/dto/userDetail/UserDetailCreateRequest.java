@@ -1,7 +1,7 @@
 package com.joshtechnologygroup.minisocial.dto.userDetail;
 
-import com.joshtechnologygroup.minisocial.bean.Gender;
-import com.joshtechnologygroup.minisocial.bean.MaritalStatus;
+import com.joshtechnologygroup.minisocial.enums.Gender;
+import com.joshtechnologygroup.minisocial.enums.MaritalStatus;
 import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailCreateRequest;
 import jakarta.validation.Valid;
