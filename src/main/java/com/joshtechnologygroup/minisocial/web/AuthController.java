@@ -3,6 +3,7 @@ package com.joshtechnologygroup.minisocial.web;
 import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.dto.UserLogin;
 import com.joshtechnologygroup.minisocial.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,13 +23,13 @@ class AuthController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<String> authenticate(@RequestBody UserLogin user) {
+    public ResponseEntity<String> authenticate(@Valid @RequestBody UserLogin user) {
         String jwt = authService.authenticate(user);
         return new ResponseEntity<>(jwt, HttpStatus.OK);
     }
 
     @PostMapping("/update-password")
-    public ResponseEntity<String> updatePassword(@RequestBody UpdatePasswordRequest updatePasswordRequest) {
+    public ResponseEntity<String> updatePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest) {
         authService.updatePassword(updatePasswordRequest);
         return new ResponseEntity<>("Password changed successfully", HttpStatus.OK);
     }

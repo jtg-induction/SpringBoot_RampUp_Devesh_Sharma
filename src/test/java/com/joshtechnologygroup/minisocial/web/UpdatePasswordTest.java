@@ -70,8 +70,28 @@ public class UpdatePasswordTest {
     }
 
     @Test
+    void changePasswordShortPassword() throws Exception {
+        UpdatePasswordRequest req = new UpdatePasswordRequest(TEST_EMAIL, TEST_PASSWORD, "short");
+        mockMvc.perform(post("/api/user/update-password")
+                        .header("Authorization", "Bearer " + authToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isUnprocessableContent());
+    }
+
+    @Test
     void changePasswordInvalidEmail() throws Exception {
-        UpdatePasswordRequest req = new UpdatePasswordRequest("wrong-email", TEST_PASSWORD, SECOND_PASSWORD);
+        UpdatePasswordRequest req = new UpdatePasswordRequest("invalid-email", TEST_PASSWORD, SECOND_PASSWORD);
+        mockMvc.perform(post("/api/user/update-password")
+                        .header("Authorization", "Bearer " + authToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isUnprocessableContent());
+    }
+
+    @Test
+    void changePasswordWrongEmail() throws Exception {
+        UpdatePasswordRequest req = new UpdatePasswordRequest("wrong-email@mail.com", TEST_PASSWORD, SECOND_PASSWORD);
         mockMvc.perform(post("/api/user/update-password")
                         .header("Authorization", "Bearer " + authToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -96,6 +116,6 @@ public class UpdatePasswordTest {
                         .header("Authorization", "Bearer " + authToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isConflict());
+                .andExpect(status().isUnprocessableContent());
     }
 }

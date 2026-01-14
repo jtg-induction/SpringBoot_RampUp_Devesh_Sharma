@@ -6,6 +6,7 @@ import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.dto.UserLogin;
 import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsException;
 import com.joshtechnologygroup.minisocial.util.JwtUtil;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -29,7 +30,7 @@ public class AuthService {
         this.userService = userService;
     }
 
-    public String authenticate(UserLogin user) {
+    public String authenticate(@Valid UserLogin user) {
         try {
             log.debug("Attempting to authenticate user {}", user.email());
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.email(), user.password()));
@@ -46,7 +47,7 @@ public class AuthService {
         }
     }
 
-    public void updatePassword(UpdatePasswordRequest updatePasswordRequest) {
+    public void updatePassword(@Valid UpdatePasswordRequest updatePasswordRequest) {
         try {
             log.debug("Password change requested for user: {}", updatePasswordRequest.email());
             userService.updateUserPassword(updatePasswordRequest);
