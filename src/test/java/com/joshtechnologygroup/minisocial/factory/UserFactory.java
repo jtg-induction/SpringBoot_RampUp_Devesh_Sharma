@@ -67,11 +67,9 @@ public class UserFactory {
 
     public static UserUpdateRequest.UserUpdateRequestBuilder defaultUserUpdateRequest(User user) {
         return UserUpdateRequest.builder()
-                .id(user.getId())
                 .email(user.getEmail())
                 .password(user.getPassword())
                 .active(user.getActive())
-                .lastModified(user.getLastModified())
                 .userDetails(UserDetailFactory.defaultUserDetailDTO(user.getId())
                         .build());
     }

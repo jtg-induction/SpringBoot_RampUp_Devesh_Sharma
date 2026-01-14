@@ -1,11 +1,8 @@
 package com.joshtechnologygroup.minisocial.web.config;
 
 import com.joshtechnologygroup.minisocial.filter.JwtFilter;
-import com.joshtechnologygroup.minisocial.service.UserDetailsServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -33,9 +30,9 @@ public class SecurityConfig {
         return http
                 .authorizeHttpRequests(request ->
                         request
-                                .requestMatchers("/public/**", "/health") // Public endpoints
+                                .requestMatchers("/public/**", "/actuator/**")
                                 .permitAll()
-                                .requestMatchers("/swagger-ui/**", "/openapi/**", "/docs") // Docs endpoints
+                                .requestMatchers("/swagger-ui/**", "/api-docs/**", "/swagger-ui.html") // Docs endpoints
                                 .permitAll()
                                 .requestMatchers("/api/user/authenticate")// Login endpoint
                                 .permitAll()

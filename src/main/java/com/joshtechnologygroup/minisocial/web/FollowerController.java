@@ -32,7 +32,7 @@ class FollowerController {
         this.followerService = followerService;
     }
 
-    @PostMapping("/updateUserFollowingList")
+    @PostMapping("/following")
     @Operation(summary = "Update User's Following List", description = "Updates the list of users that the authenticated user is following.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successfully updated the following list", content = @Content),
@@ -46,7 +46,7 @@ class FollowerController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/getUserFollowers")
+    @GetMapping("/followers")
     @Operation(summary = "Get User Followers", description = "Retrieves the list of user IDs that are following the authenticated user.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successfully retrieved the followers list",
@@ -58,7 +58,7 @@ class FollowerController {
         return new ResponseEntity<>(followers, HttpStatus.OK);
     }
 
-    @GetMapping("/getUsersFollowedBy")
+    @GetMapping("/following")
     @Operation(summary = "Get Users Followed By", description = "Retrieves the list of user IDs that the authenticated user is following.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successfully retrieved the followed users list",

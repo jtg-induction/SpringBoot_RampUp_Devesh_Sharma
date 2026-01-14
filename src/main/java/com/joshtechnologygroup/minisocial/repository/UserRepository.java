@@ -1,4 +1,4 @@
-package com.joshtechnologygroup.minisocial.dao;
+package com.joshtechnologygroup.minisocial.repository;
 
 import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.dto.user.ActiveUserDTO;
@@ -28,7 +28,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<ActiveUserDTO> findActiveUsers();
 
     @Query("""
-            SELECT DISTINCT u.id FROM User u WHERE u.id IN :ids
+            SELECT u.id FROM User u WHERE u.id IN :ids
             """)
     List<Long> findExistingUserIds(@Param("ids") List<Long> ids);
 }

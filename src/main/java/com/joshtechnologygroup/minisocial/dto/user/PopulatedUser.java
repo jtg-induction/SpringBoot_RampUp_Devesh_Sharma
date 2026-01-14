@@ -8,16 +8,17 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 @Builder
-public record PopulatedUser (
-    @NotNull(message = "User is required")
-    User user,
+public record PopulatedUser(
+        @NotNull(message = "User is required")
+        User user,
 
-    @NotNull(message = "User Detail is required")
-    UserDetail userDetail,
+        @NotNull(message = "User Detail is required")
+        UserDetail userDetail,
 
-    @NotNull(message = "Residential Detail is required")
-    ResidentialDetail residentialDetail,
+        @NotNull(message = "Residential Detail is required")
+        ResidentialDetail residentialDetail,
 
-    @NotNull(message = "Official Detail is required")
-    OfficialDetail officialDetail
-){}
+        @NotNull(message = "Official Detail is required")
+        OfficialDetail officialDetail
+) {
+}

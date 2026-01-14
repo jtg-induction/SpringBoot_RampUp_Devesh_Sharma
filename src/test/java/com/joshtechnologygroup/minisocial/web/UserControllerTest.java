@@ -1,12 +1,12 @@
 package com.joshtechnologygroup.minisocial.web;
 
 import com.joshtechnologygroup.minisocial.bean.User;
-import com.joshtechnologygroup.minisocial.dao.UserRepository;
 import com.joshtechnologygroup.minisocial.dto.user.ActiveUserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
 import com.joshtechnologygroup.minisocial.factory.UserFactory;
+import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +34,7 @@ class UserControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
     @Autowired
     private UserRepository userRepository;
 
@@ -62,33 +63,32 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(username = "test@gmail.com")
-    void createUser_shouldReturn400_whenMissingFields() throws Exception {
+    void createUser_shouldReturn422_whenMissingFields() throws Exception {
         UserCreateRequest userCreateRequest = UserFactory.defaultUserCreateRequest()
                 .userDetails(null)
                 .build();
         mockMvc.perform(post("/api/user").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userCreateRequest)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableContent());
     }
 
     @Test
     @WithMockUser(username = "test@gmail.com")
-    void createUser_shouldReturn400_whenInvalidEmail() throws Exception {
+    void createUser_shouldReturn422_whenInvalidEmail() throws Exception {
         UserCreateRequest userCreateRequest = UserFactory.defaultUserCreateRequest()
                 .email("invalid-email")
                 .build();
         mockMvc.perform(post("/api/user").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userCreateRequest)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableContent());
     }
 
     @Test
     @WithMockUser(username = "test@gmail.com")
     void updateUser_shouldReturn404_NonExistingUser() throws Exception {
         UserUpdateRequest userUpdateRequest = UserFactory.defaultUserUpdateRequest()
-                .id(999L)
                 .build();
-        mockMvc.perform(put("/api/user").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/api/user/999").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userUpdateRequest)))
                 .andExpect(status().isNotFound());
     }
@@ -100,7 +100,7 @@ class UserControllerTest {
         if (user.isEmpty()) throw new Exception("User not found in test database");
         UserUpdateRequest userUpdateRequest = UserFactory.defaultUserUpdateRequest(user.get())
                 .build();
-        String res = mockMvc.perform(put("/api/user").contentType(MediaType.APPLICATION_JSON)
+        String res = mockMvc.perform(put("/api/user/1").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userUpdateRequest)))
                 .andExpect(status().isOk())
                 .andReturn()
@@ -117,9 +117,8 @@ class UserControllerTest {
     @WithMockUser(username = "john.doe@test.com")
     void updateUser_shouldReturn403_whenWrongUser() throws Exception {
         UserUpdateRequest userUpdateRequest = UserFactory.defaultUserUpdateRequest()
-                .id(5L)
                 .build();
-        mockMvc.perform(put("/api/user").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/api/user/5").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userUpdateRequest)))
                 .andExpect(status().isForbidden());
     }

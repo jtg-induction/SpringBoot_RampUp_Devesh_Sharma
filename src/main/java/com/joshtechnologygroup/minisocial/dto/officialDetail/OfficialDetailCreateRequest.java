@@ -5,11 +5,11 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
-import static com.joshtechnologygroup.minisocial.util.Constants.PHONE_NUMBER_REGEX;
+import static com.joshtechnologygroup.minisocial.constants.ValidationConstants.PHONE_NUMBER_REGEX;
 
 @Builder
 public record OfficialDetailCreateRequest(
-        @Size(min=3, max=100, message = "Employee Code must be between 3 and 100 characters long")
+        @Size(min = 3, max = 100, message = "Employee Code must be between 3 and 100 characters long")
         @NotBlank(message = "Employee Code is required")
         String employeeCode,
 
