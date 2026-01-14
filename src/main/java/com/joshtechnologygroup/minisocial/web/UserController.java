@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,7 +27,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
-@StandardSecurityResponse
 @Tag(name = "User Management", description = "APIs for managing user accounts and profiles")
 class UserController {
     private final UserService userService;
@@ -37,6 +37,7 @@ class UserController {
 
     @GetMapping("/users")
     @Operation(description = "Get a list of all active users", summary = "Retrieve Active Users")
+    @StandardSecurityResponse
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successfully retrieved list of active users",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ActiveUserDTO.class))),
@@ -50,6 +51,9 @@ class UserController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "User created successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))
+            )
     })
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserCreateRequest req) {
         return new ResponseEntity<>(userService.createUser(req), HttpStatus.CREATED);
@@ -57,6 +61,7 @@ class UserController {
 
     @PutMapping("/user/{id}")
     @Operation(description = "Update an existing user account", summary = "Update User")
+    @StandardSecurityResponse
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User updated successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
@@ -67,6 +72,7 @@ class UserController {
     }
 
     @GetMapping("/user/{id}")
+    @StandardSecurityResponse
     @Operation(description = "Get user details by ID", summary = "Retrieve User by ID")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User details retrieved successfully",
@@ -80,6 +86,7 @@ class UserController {
     }
 
     @DeleteMapping("/user/{id}")
+    @StandardSecurityResponse
     @Operation(description = "Delete a user account by ID", summary = "Delete User")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User deleted successfully",

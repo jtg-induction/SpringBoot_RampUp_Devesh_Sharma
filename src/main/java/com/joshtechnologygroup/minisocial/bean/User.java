@@ -47,11 +47,11 @@ public class User {
     @EqualsAndHashCode.Exclude
     private UserDetail userDetail;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
     @EqualsAndHashCode.Exclude
     private OfficialDetail officialDetail;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
     @EqualsAndHashCode.Exclude
     private ResidentialDetail residentialDetail;
 

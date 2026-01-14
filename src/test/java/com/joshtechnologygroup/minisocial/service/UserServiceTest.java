@@ -6,8 +6,10 @@ import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.bean.UserDetail;
 import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailMapper;
 import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailMapper;
-import com.joshtechnologygroup.minisocial.dto.user.*;
-import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailCreateRequest;
+import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
+import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
+import com.joshtechnologygroup.minisocial.dto.user.UserMapper;
+import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailDTO;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailMapper;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
@@ -83,16 +85,12 @@ class UserServiceTest {
 
         // Mock Mapper behaviors
         when(userMapper.createDtoToUser(any())).thenReturn(user);
-        when(userDetailMapper.toUserDetail(any())).thenReturn(userDetail);
-        when(residentialDetailMapper.toResidentialDetail(any())).thenReturn(resDetail);
-        when(officialDetailMapper.toOfficialDetail(any())).thenReturn(offDetail);
 
         // Mock Repository behaviors
         when(userRepository.save(any())).thenReturn(user);
 
         // Mock the Final DTO Mapping
-        when(userDetailMapper.toDto(any(), any(), any())).thenReturn(detailDTO);
-        when(userMapper.toDto(any(), any())).thenReturn(expectedResponse);
+        when(userMapper.toDto(any())).thenReturn(expectedResponse);
 
         when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
 
@@ -116,31 +114,11 @@ class UserServiceTest {
         when(userMapper.createDtoToUser(any())).thenReturn(new User());
         when(userRepository.save(any())).thenThrow(new DataIntegrityViolationException("Email exists"));
         when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
-        when(userDetailMapper.toUserDetail(any())).thenReturn(new UserDetail());
-        when(residentialDetailMapper.toResidentialDetail(any())).thenReturn(new ResidentialDetail());
-        when(officialDetailMapper.toOfficialDetail(any())).thenReturn(new OfficialDetail());
 
         assertThrows(DataIntegrityViolationException.class, () -> userService.createUser(request));
 
         verifyNoInteractions(userDetailRepository);
         verifyNoInteractions(residentialDetailRepository);
-    }
-
-    @Test
-    void createUser_ShouldHandleNullNestedDetails() {
-        // Request with null officialDetails
-        UserDetailCreateRequest userDetailCreateRequest = UserDetailFactory.defaultUserDetailCreateRequest()
-                .officialDetails(null)
-                .build();
-        UserCreateRequest request = UserFactory.defaultUserCreateRequest()
-                .userDetails(userDetailCreateRequest)
-                .build();
-
-        when(userMapper.createDtoToUser(any())).thenReturn(new User());
-
-        assertThrows(NullPointerException.class, () ->
-                userService.createUser(request)
-        );
     }
 
     @Test
@@ -166,10 +144,7 @@ class UserServiceTest {
         when(userRepository.findById(userEntity.getId())).thenReturn(
                 Optional.of(userEntity)
         );
-        when(
-                userDetailMapper.toDto(userDetail, resDetail, offDetail)
-        ).thenReturn(mockDetailDTO);
-        when(userMapper.toDto(userEntity, mockDetailDTO)).thenReturn(
+        when(userMapper.toDto(userEntity)).thenReturn(
                 expectedDTO
         );
 
@@ -185,7 +160,6 @@ class UserServiceTest {
                 .firstName());
 
         verify(userRepository).findById(userEntity.getId());
-        verify(userDetailMapper).toDto(any(), any(), any());
     }
 
     @Test
@@ -224,13 +198,6 @@ class UserServiceTest {
                 Optional.of(user)
         );
         when(userMapper.updateDtoToUser(updateReq)).thenReturn(updatedUser);
-        when(userDetailMapper.dtoToUserDetail(any())).thenReturn(updatedDetail);
-        when(residentialDetailMapper.dtoToResidentialDetail(any())).thenReturn(
-                updatedRes
-        );
-        when(officialDetailMapper.dtoToOfficialDetail(any())).thenReturn(
-                updatedOff
-        );
 
         // Mocking the return DTO construction
         UserDetailDTO detailDTO = UserDetailFactory.defaultUserDetailDTO(user.getId())
@@ -239,8 +206,7 @@ class UserServiceTest {
                 .email("new-email@company.com")
                 .build();
 
-        when(userDetailMapper.toDto(any(), any(), any())).thenReturn(detailDTO);
-        when(userMapper.toDto(any(), any())).thenReturn(finalDTO);
+        when(userMapper.toDto(any())).thenReturn(finalDTO);
 
         // 2. Act
         UserDTO result = userService.updateUser(updateReq, user.getEmail(), user.getId());
@@ -248,9 +214,6 @@ class UserServiceTest {
         // 3. Assert
         assertEquals("new-email@company.com", result.email());
         verify(userRepository).save(updatedUser);
-        verify(userDetailRepository).save(updatedDetail);
-        verify(residentialDetailRepository).save(updatedRes);
-        verify(officialDetailRepository).save(updatedOff);
     }
 
     @Test
@@ -290,10 +253,7 @@ class UserServiceTest {
         when(userRepository.findById(userId)).thenReturn(
                 Optional.of(userEntity)
         );
-        when(
-                userDetailMapper.toDto(userDetail, resDetail, offDetail)
-        ).thenReturn(mockDetailDTO);
-        when(userMapper.toDto(userEntity, mockDetailDTO)).thenReturn(
+        when(userMapper.toDto(userEntity)).thenReturn(
                 expectedDTO
         );
 
@@ -309,8 +269,7 @@ class UserServiceTest {
 
         verify(userRepository).findById(userId);
         verify(userRepository).deleteById(userId);
-        verify(userDetailMapper).toDto(userDetail, resDetail, offDetail);
-        verify(userMapper).toDto(userEntity, mockDetailDTO);
+        verify(userMapper).toDto(userEntity);
     }
 
     @Test

@@ -52,7 +52,6 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "test@gmail.com")
     void createUser_shouldReturn201_whenValidInput() throws Exception {
         UserCreateRequest userCreateRequest = UserFactory.defaultUserCreateRequest()
                 .build();
@@ -62,7 +61,6 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "test@gmail.com")
     void createUser_shouldReturn422_whenMissingFields() throws Exception {
         UserCreateRequest userCreateRequest = UserFactory.defaultUserCreateRequest()
                 .userDetails(null)
@@ -73,7 +71,6 @@ class UserControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "test@gmail.com")
     void createUser_shouldReturn422_whenInvalidEmail() throws Exception {
         UserCreateRequest userCreateRequest = UserFactory.defaultUserCreateRequest()
                 .email("invalid-email")
@@ -125,16 +122,9 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(username = "test@gmail.com")
-    void getUser_shouldReturnDTO_whenExists() throws Exception {
-        String res = mockMvc.perform(get("/api/user/1"))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        UserDTO dto = objectMapper.readerFor(UserDTO.class)
-                .readValue(res);
-
-        assert (dto.id() == 1);
+    void getUser_shouldReturn422_whenNegativeId() throws Exception {
+        mockMvc.perform(get("/api/user/-1"))
+                .andExpect(status().isUnprocessableContent());
     }
 
     @Test
