@@ -89,7 +89,6 @@ class UserServiceTest {
 
         // Mock Repository behaviors
         when(userRepository.save(any())).thenReturn(user);
-        when(userDetailRepository.save(any())).thenReturn(userDetail);
 
         // Mock the Final DTO Mapping
         when(userDetailMapper.toDto(any(), any(), any())).thenReturn(detailDTO);
@@ -107,9 +106,6 @@ class UserServiceTest {
         assertNotNull(result.userDetails());
 
         verify(userRepository, times(1)).save(any());
-        verify(userDetailRepository, times(1)).save(any());
-        verify(residentialDetailRepository, times(1)).save(any());
-        verify(officialDetailRepository, times(1)).save(any());
     }
 
     @Test
@@ -119,6 +115,10 @@ class UserServiceTest {
 
         when(userMapper.createDtoToUser(any())).thenReturn(new User());
         when(userRepository.save(any())).thenThrow(new DataIntegrityViolationException("Email exists"));
+        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
+        when(userDetailMapper.toUserDetail(any())).thenReturn(new UserDetail());
+        when(residentialDetailMapper.toResidentialDetail(any())).thenReturn(new ResidentialDetail());
+        when(officialDetailMapper.toOfficialDetail(any())).thenReturn(new OfficialDetail());
 
         assertThrows(DataIntegrityViolationException.class, () -> userService.createUser(request));
 
@@ -151,13 +151,9 @@ class UserServiceTest {
         UserDetail userDetail = UserDetailFactory.defaultUserDetail(userEntity.getId());
         ResidentialDetail resDetail = ResidentialDetailFactory.defaultResidentialDetail(userEntity.getId());
         OfficialDetail offDetail = OfficialDetailFactory.defaultOfficialDetail(userEntity.getId());
-
-        PopulatedUser mockPopulated = new PopulatedUser(
-                userEntity,
-                userDetail,
-                resDetail,
-                offDetail
-        );
+        userEntity.setUserDetail(userDetail);
+        userEntity.setResidentialDetail(resDetail);
+        userEntity.setOfficialDetail(offDetail);
 
         // Create DTO that matches the entity data
         UserDetailDTO mockDetailDTO = UserDetailFactory.defaultUserDetailDTO(userDetail)
@@ -167,8 +163,8 @@ class UserServiceTest {
                 .build();
 
         // Mock behavior
-        when(userRepository.findUserPopulated(userEntity.getId())).thenReturn(
-                Optional.of(mockPopulated)
+        when(userRepository.findById(userEntity.getId())).thenReturn(
+                Optional.of(userEntity)
         );
         when(
                 userDetailMapper.toDto(userDetail, resDetail, offDetail)
@@ -188,14 +184,14 @@ class UserServiceTest {
                 .userDetails()
                 .firstName());
 
-        verify(userRepository).findUserPopulated(userEntity.getId());
+        verify(userRepository).findById(userEntity.getId());
         verify(userDetailMapper).toDto(any(), any(), any());
     }
 
     @Test
     void getUser_ShouldReturnEmpty_WhenUserDoesNotExist() {
         // Mock
-        when(userRepository.findUserPopulated(99L)).thenReturn(
+        when(userRepository.findById(99L)).thenReturn(
                 Optional.empty()
         );
 
@@ -279,13 +275,9 @@ class UserServiceTest {
         UserDetail userDetail = UserDetailFactory.defaultUserDetail(userId);
         ResidentialDetail resDetail = ResidentialDetailFactory.defaultResidentialDetail(userId);
         OfficialDetail offDetail = OfficialDetailFactory.defaultOfficialDetail(userId);
-
-        PopulatedUser mockPopulated = new PopulatedUser(
-                userEntity,
-                userDetail,
-                resDetail,
-                offDetail
-        );
+        userEntity.setUserDetail(userDetail);
+        userEntity.setResidentialDetail(resDetail);
+        userEntity.setOfficialDetail(offDetail);
 
         // Create DTO that matches the entity data
         UserDetailDTO mockDetailDTO = UserDetailFactory.defaultUserDetailDTO(userDetail)
@@ -295,8 +287,8 @@ class UserServiceTest {
                 .build();
 
         // Mock behavior
-        when(userRepository.findUserPopulated(userId)).thenReturn(
-                Optional.of(mockPopulated)
+        when(userRepository.findById(userId)).thenReturn(
+                Optional.of(userEntity)
         );
         when(
                 userDetailMapper.toDto(userDetail, resDetail, offDetail)
@@ -315,7 +307,7 @@ class UserServiceTest {
         assertEquals(mockDetailDTO.firstName(), result.userDetails()
                 .firstName());
 
-        verify(userRepository).findUserPopulated(userId);
+        verify(userRepository).findById(userId);
         verify(userRepository).deleteById(userId);
         verify(userDetailMapper).toDto(userDetail, resDetail, offDetail);
         verify(userMapper).toDto(userEntity, mockDetailDTO);
@@ -325,7 +317,7 @@ class UserServiceTest {
     void deleteUser_ShouldThrowException_WhenUserDoesNotExist() {
         // Setup
         Long nonExistentId = 999L;
-        when(userRepository.findUserPopulated(nonExistentId)).thenReturn(
+        when(userRepository.findById(nonExistentId)).thenReturn(
                 Optional.empty()
         );
 
@@ -334,7 +326,7 @@ class UserServiceTest {
                 userService.deleteUser(nonExistentId)
         );
 
-        verify(userRepository).findUserPopulated(nonExistentId);
+        verify(userRepository).findById(nonExistentId);
         verify(userRepository, never()).deleteById(any());
         verifyNoInteractions(userDetailMapper);
         verifyNoInteractions(userMapper);

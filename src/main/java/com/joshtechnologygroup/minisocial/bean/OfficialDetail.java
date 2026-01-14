@@ -19,7 +19,7 @@ public class OfficialDetail {
     @MapsId
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     @EqualsAndHashCode.Exclude
     private User user;
 

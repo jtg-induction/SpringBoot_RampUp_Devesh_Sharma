@@ -22,8 +22,8 @@ public class UserDetail {
     @MapsId
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "user_id", nullable = false)
     @EqualsAndHashCode.Exclude
+    @JoinColumn(name = "user_id")
     private User user;
 
     @Size(max = 255)
