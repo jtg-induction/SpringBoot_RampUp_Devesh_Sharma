@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.util.Set;
@@ -32,10 +34,12 @@ public class User {
     private Boolean active;
 
     @Column(name = "created_at")
-    private Instant createdAt = Instant.now();
+    @CreationTimestamp(source = SourceType.DB)
+    private Instant createdAt;
 
     @Column(name = "last_modified")
-    private Instant lastModified = Instant.now();
+    @UpdateTimestamp(source = SourceType.DB)
+    private Instant lastModified;
 
     @ManyToMany(mappedBy = "followers")
     Set<User> followed;

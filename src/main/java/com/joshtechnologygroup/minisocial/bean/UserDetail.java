@@ -1,5 +1,7 @@
 package com.joshtechnologygroup.minisocial.bean;
 
+import com.joshtechnologygroup.minisocial.enums.Gender;
+import com.joshtechnologygroup.minisocial.enums.MaritalStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
