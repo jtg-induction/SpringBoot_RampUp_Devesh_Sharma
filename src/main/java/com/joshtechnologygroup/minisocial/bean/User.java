@@ -40,6 +40,18 @@ public class User {
     @UpdateTimestamp
     private Instant lastModified = Instant.now();
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @EqualsAndHashCode.Exclude
+    private UserDetail userDetail;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @EqualsAndHashCode.Exclude
+    private OfficialDetail officialDetail;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @EqualsAndHashCode.Exclude
+    private ResidentialDetail residentialDetail;
+
     @ManyToMany
     @EqualsAndHashCode.Exclude
     @JoinTable(

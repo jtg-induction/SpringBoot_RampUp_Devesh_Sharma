@@ -29,8 +29,8 @@ public class FollowerService {
                 .orElseThrow(UserDoesNotExistException::new);
         List<Long> validIds = userRepository.findExistingUserIds(followedIds);
         if (validIds.size() != followedIds.size()) {
-            log.warn("Some follower IDs do not exist. Requested: {}, Valid: {}", followedIds, validIds);
-            throw new InvalidValueException("One or more of the provided follower IDs do not exist.");
+            log.warn("Some user IDs do not exist. Requested: {}, Valid: {}", followedIds, validIds);
+            throw new InvalidValueException("One or more of the provided user IDs do not exist.");
         }
 
         // Find new followers
