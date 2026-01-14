@@ -1,14 +1,10 @@
 package com.joshtechnologygroup.minisocial.service;
 
-import com.joshtechnologygroup.minisocial.bean.OfficialDetail;
-import com.joshtechnologygroup.minisocial.bean.ResidentialDetail;
 import com.joshtechnologygroup.minisocial.bean.User;
-import com.joshtechnologygroup.minisocial.bean.UserDetail;
 import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailMapper;
 import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailMapper;
 import com.joshtechnologygroup.minisocial.dto.user.*;
-import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailDTO;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailMapper;
 import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsException;
 import com.joshtechnologygroup.minisocial.exception.UnauthorizedException;
@@ -81,39 +77,16 @@ public class UserService {
     public UserDTO createUser(UserCreateRequest req) {
         User user = userMapper.createDtoToUser(req);
         user.setPassword(passwordEncoder.encode(req.password()));
-        UserDetail userDetail = userDetailMapper.toUserDetail(
-                req.userDetails()
-        );
-        OfficialDetail officialDetail = officialDetailMapper.toOfficialDetail(
-                req.userDetails()
-                        .officialDetails()
-        );
-        ResidentialDetail residentialDetail =
-                residentialDetailMapper.toResidentialDetail(
-                        req.userDetails()
-                                .residentialDetails()
-                );
-        userDetail.setUser(user);
-        officialDetail.setUser(user);
-        residentialDetail.setUser(user);
-        user.setUserDetail(userDetail);
-        user.setOfficialDetail(officialDetail);
-        user.setResidentialDetail(residentialDetail);
 
         userRepository.save(user);
-
-        UserDetailDTO detailDTO = userDetailMapper.toDto(
-                userDetail,
-                residentialDetail,
-                officialDetail
-        );
 
         log.info(
                 "New user created with ID {}: {}",
                 user.getId(),
                 user.getEmail()
         );
-        return userMapper.toDto(user, detailDTO);
+
+        return userMapper.toDto(user);
     }
 
     public Optional<UserDTO> getUser(Long id) {
@@ -121,12 +94,7 @@ public class UserService {
         if (userWrapper.isEmpty()) return Optional.empty();
         User user = userWrapper.get();
 
-        UserDetailDTO detailDTO = userDetailMapper.toDto(
-                user.getUserDetail(),
-                user.getResidentialDetail(),
-                user.getOfficialDetail()
-        );
-        return Optional.of(userMapper.toDto(user, detailDTO));
+        return Optional.of(userMapper.toDto(user));
     }
 
     public List<ActiveUserDTO> getActiveUsers() {
@@ -148,36 +116,8 @@ public class UserService {
         user.setId(id);
         userRepository.save(user);
 
-        UserDetail userDetail = userDetailMapper.dtoToUserDetail(
-                req.userDetails()
-        );
-        userDetail.setUser(user);
-        userDetailRepository.save(userDetail);
-
-        ResidentialDetail residentialDetail =
-                residentialDetailMapper.dtoToResidentialDetail(
-                        req.userDetails()
-                                .residentialDetails()
-                );
-        residentialDetail.setUser(user);
-        residentialDetailRepository.save(residentialDetail);
-
-        OfficialDetail officialDetail =
-                officialDetailMapper.dtoToOfficialDetail(
-                        req.userDetails()
-                                .officialDetails()
-                );
-        officialDetail.setUser(user);
-        officialDetailRepository.save(officialDetail);
-
-        UserDetailDTO detailDTO = userDetailMapper.toDto(
-                userDetail,
-                residentialDetail,
-                officialDetail
-        );
-
         log.info("User updated with ID {}: {}", user.getId(), user.getEmail());
-        return userMapper.toDto(user, detailDTO);
+        return userMapper.toDto(user);
     }
 
     @Transactional
@@ -191,12 +131,7 @@ public class UserService {
         User user = userWrapper.get();
 
         // Create the DTO
-        UserDetailDTO detailDTO = userDetailMapper.toDto(
-                user.getUserDetail(),
-                user.getResidentialDetail(),
-                user.getOfficialDetail()
-        );
-        UserDTO userDTO = userMapper.toDto(user, detailDTO);
+        UserDTO userDTO = userMapper.toDto(user);
 
         userRepository.deleteById(id);
 
