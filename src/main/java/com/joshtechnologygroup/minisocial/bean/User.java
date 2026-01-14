@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -34,11 +36,12 @@ public class User {
     private Boolean active;
 
     @Column(name = "created_at")
-    private Instant createdAt = Instant.now();
+    @CreationTimestamp(source = SourceType.DB)
+    private Instant createdAt;
 
     @Column(name = "last_modified")
-    @UpdateTimestamp
-    private Instant lastModified = Instant.now();
+    @UpdateTimestamp(source = SourceType.DB)
+    private Instant lastModified;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @EqualsAndHashCode.Exclude
