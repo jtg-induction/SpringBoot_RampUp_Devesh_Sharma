@@ -4,7 +4,6 @@ import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsException;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,7 +25,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public void updateUserPassword(@Valid UpdatePasswordRequest request) {
+    public void updateUserPassword(UpdatePasswordRequest request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.oldPassword()));
 
         Optional<User> user = userRepository.findByEmail(request.email());
