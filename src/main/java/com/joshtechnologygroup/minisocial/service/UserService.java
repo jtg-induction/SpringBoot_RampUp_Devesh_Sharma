@@ -5,6 +5,7 @@ import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.dto.user.*;
 import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsException;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
+import com.joshtechnologygroup.minisocial.exception.ValueConflictException;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -50,6 +51,9 @@ public class UserService {
 
     @Transactional
     public UserDTO createUser(UserCreateRequest req) {
+        if(userRepository.findByEmail(req.email()).isPresent())
+            throw new ValueConflictException("Email already in use");
+
         User user = userMapper.createDtoToUser(req);
         user.setPassword(passwordEncoder.encode(req.password()));
 

@@ -4,6 +4,7 @@ import com.joshtechnologygroup.minisocial.error.ValidationError;
 import com.joshtechnologygroup.minisocial.error.ValidationProblemDetail;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -41,16 +42,15 @@ public class GlobalExceptionHandler {
 
         return problemDetail;
     }
-
-    @ExceptionHandler(UnauthorizedException.class)
-    public ProblemDetail handleUnauthorizedException(
-            UnauthorizedException e
+    @ExceptionHandler(ValueConflictException.class)
+    public ProblemDetail handleValueConflictException(
+            ValueConflictException e
     ) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.FORBIDDEN,
+                HttpStatus.CONFLICT,
                 e.getMessage()
         );
-        problemDetail.setTitle("Access Denied");
+        problemDetail.setTitle("Value Conflict");
 
         return problemDetail;
     }
@@ -91,6 +91,20 @@ public class GlobalExceptionHandler {
         });
 
         return new ValidationProblemDetail(errors);
+    }
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ProblemDetail handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex
+    ) {
+        String message = ex.getMessage();
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                message
+        );
+        problemDetail.setTitle("Invalid Request Body - Deserialization Failed");
+
+        return problemDetail;
     }
 
     // Default Exception Handler

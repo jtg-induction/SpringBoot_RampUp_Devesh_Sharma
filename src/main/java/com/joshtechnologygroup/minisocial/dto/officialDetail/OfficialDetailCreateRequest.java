@@ -2,6 +2,7 @@ package com.joshtechnologygroup.minisocial.dto.officialDetail;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -39,6 +40,7 @@ public record OfficialDetailCreateRequest(
 
         @Size(max = 255, message = "Company Contact Email must not exceed 255 characters")
         @NotBlank(message = "Company Contact Email is required")
+        @Email
         String companyContactEmail,
 
         @Size(max = 255, message = "Company Name must not exceed 255 characters")

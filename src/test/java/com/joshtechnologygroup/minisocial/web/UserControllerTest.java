@@ -81,11 +81,29 @@ class UserControllerTest {
     }
 
     @Test
+    void createUser_shouldReturn409_whenDuplicateEmail() throws Exception {
+        UserCreateRequest userCreateRequest = UserFactory.defaultUserCreateRequest()
+                .email("john.doe@test.com")
+                .build();
+
+        mockMvc.perform(post("/api/user").contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userCreateRequest))).andExpect(status().isConflict());
+    }
+    @Test
+    void createUser_shouldReturn400_whenBadJson() throws Exception {
+        String badJson = "{ email: test@gmail.com }";
+
+        mockMvc.perform(post("/api/user").contentType(MediaType.APPLICATION_JSON)
+                        .content(badJson))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     @WithMockUser(username = "test@gmail.com")
     void updateUser_shouldReturn404_NonExistingUser() throws Exception {
         UserUpdateRequest userUpdateRequest = UserFactory.defaultUserUpdateRequest()
                 .build();
-        mockMvc.perform(put("/api/user/").contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(put("/api/user/me").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userUpdateRequest)))
                 .andExpect(status().isNotFound());
     }
@@ -97,7 +115,7 @@ class UserControllerTest {
         if (user.isEmpty()) throw new Exception("User not found in test database");
         UserUpdateRequest userUpdateRequest = UserFactory.defaultUserUpdateRequest(user.get())
                 .build();
-        String res = mockMvc.perform(put("/api/user/").contentType(MediaType.APPLICATION_JSON)
+        String res = mockMvc.perform(put("/api/user/me").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userUpdateRequest)))
                 .andExpect(status().isOk())
                 .andReturn()
@@ -120,7 +138,7 @@ class UserControllerTest {
     @Test
     @WithMockUser(username = "jane.smith@test.com")
     void deleteUser_shouldReturn200_whenExists() throws Exception {
-        String res = mockMvc.perform(delete("/api/user/"))
+        String res = mockMvc.perform(delete("/api/user/me"))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -134,7 +152,7 @@ class UserControllerTest {
     @Test
     @WithMockUser(username = "test@gmail.com")
     void deleteUser_shouldReturn404_whenNotExists() throws Exception {
-        mockMvc.perform(delete("/api/user/"))
+        mockMvc.perform(delete("/api/user/me"))
                 .andExpect(status().isNotFound());
     }
 }
