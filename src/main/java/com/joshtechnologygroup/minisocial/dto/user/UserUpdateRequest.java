@@ -21,5 +21,5 @@ public record UserUpdateRequest(
         @NotNull(message = "User Details are required", groups = {Put.class})
         @Valid UserDetailDTO userDetails
 ) {
-        public interface Put {};
+        public interface Put {}
 }

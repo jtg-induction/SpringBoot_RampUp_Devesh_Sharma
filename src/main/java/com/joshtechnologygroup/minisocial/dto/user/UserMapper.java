@@ -23,11 +23,6 @@ public interface UserMapper {
     @Mapping(target = "active", ignore = true)
     User createDtoToUser(UserCreateRequest req);
 
-    @AfterMapping
-    default void afterUserCreateRequestConversion(UserCreateRequest req, @MappingTarget User user) {
-        linkUserDetails(user);
-    }
-
     @Mapping(source = "userDetail", target = "userDetails")
     UserDTO toDto(User user);
 

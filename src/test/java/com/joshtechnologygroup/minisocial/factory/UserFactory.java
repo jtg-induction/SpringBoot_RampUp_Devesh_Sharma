@@ -45,11 +45,6 @@ public class UserFactory {
                 .password(user.getPassword());
     }
 
-    public static UserDTO.UserDTOBuilder defaultUserDTO() {
-        User user = defaultUser();
-        return defaultUserDTO(user);
-    }
-
     public static UserDTO.UserDTOBuilder defaultUserDTO(User user) {
         return UserDTO.builder()
                 .id(user.getId())
@@ -71,10 +66,6 @@ public class UserFactory {
                 .active(user.getActive())
                 .userDetails(UserDetailFactory.defaultUserDetailDTO(user.getId())
                         .build());
-    }
-
-    public static UserQueryParams emptyUserQueryParams() {
-        return new UserQueryParams(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     public static UserQueryParams activeUserQueryParams() {

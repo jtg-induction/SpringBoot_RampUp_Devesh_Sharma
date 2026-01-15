@@ -33,11 +33,6 @@ public class OfficialDetailFactory {
         return officialDetail;
     }
 
-    public static OfficialDetailDTO.OfficialDetailDTOBuilder defaultOfficialDetailDTO() {
-        return defaultOfficialDetailDTO((long) FAKER.number()
-                .positive());
-    }
-
     public static OfficialDetailDTO.OfficialDetailDTOBuilder defaultOfficialDetailDTO(Long userId) {
         OfficialDetail officialDetail = defaultOfficialDetail();
         officialDetail.setUserId(userId);

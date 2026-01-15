@@ -29,11 +29,6 @@ public class ResidentialDetailFactory {
         return residentialDetail;
     }
 
-    public static ResidentialDetailDTO.ResidentialDetailDTOBuilder defaultResidentialDetailDTO() {
-        return defaultResidentialDetailDTO((long) FAKER.number()
-                .positive());
-    }
-
     public static ResidentialDetailDTO.ResidentialDetailDTOBuilder defaultResidentialDetailDTO(Long userId) {
         ResidentialDetail residentialDetail = defaultResidentialDetail();
         residentialDetail.setUserId(userId);

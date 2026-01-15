@@ -31,11 +31,6 @@ public class UserDetailFactory {
         return userDetail;
     }
 
-    public static UserDetailDTO.UserDetailDTOBuilder defaultUserDetailDTO() {
-        return defaultUserDetailDTO((long) FAKER.number()
-                .positive());
-    }
-
     public static UserDetailDTO.UserDetailDTOBuilder defaultUserDetailDTO(Long userId) {
         UserDetail userDetail = defaultUserDetail();
         userDetail.setUserId(userId);

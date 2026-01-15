@@ -10,10 +10,6 @@ import org.mapstruct.*;
         OfficialDetailMapper.class
 })
 public interface UserDetailMapper {
-    @Mapping(target = "user", ignore = true)
-    @Mapping(target = "userId", ignore = true)
-    UserDetail dtoToUserDetail(UserDetailDTO dto);
-
     @Mapping(source = "userDetail.user.residentialDetail", target = "residentialDetails")
     @Mapping(source = "userDetail.user.officialDetail", target = "officialDetails")
     UserDetailDTO toDto(UserDetail userDetail);
