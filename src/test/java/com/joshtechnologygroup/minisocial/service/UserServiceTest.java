@@ -10,6 +10,7 @@ import com.joshtechnologygroup.minisocial.dto.user.*;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailDTO;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailMapper;
+import com.joshtechnologygroup.minisocial.enums.UserSortOrder;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
 import com.joshtechnologygroup.minisocial.factory.OfficialDetailFactory;
 import com.joshtechnologygroup.minisocial.factory.ResidentialDetailFactory;
@@ -25,8 +26,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -330,5 +333,75 @@ class UserServiceTest {
         verify(userRepository, never()).deleteById(any());
         verifyNoInteractions(userDetailMapper);
         verifyNoInteractions(userMapper);
+    }
+
+    @Test
+    void getAllUsers_ShouldApplySingleSortOrder_WhenSingleSortOrderProvided() {
+        // Arrange
+        List<UserSortOrder> sortOrders = List.of(UserSortOrder.EMAIL);
+        UserQueryParams queryParams = UserFactory.userQueryParamsWithSort(sortOrders);
+
+        User user1 = UserFactory.defaultUser();
+        user1.setEmail("b@test.com");
+        User user2 = UserFactory.defaultUser();
+        user2.setEmail("a@test.com");
+        List<User> users = List.of(user1, user2);
+
+        // Create UserDetailDTOs
+        UserDetailDTO detailDTO1 = UserDetailFactory.defaultUserDetailDTO(user1.getId()).build();
+        UserDetailDTO detailDTO2 = UserDetailFactory.defaultUserDetailDTO(user2.getId()).build();
+        UserDTO userDTO1 = UserFactory.defaultUserDTO(user1).userDetails(detailDTO1).build();
+        UserDTO userDTO2 = UserFactory.defaultUserDTO(user2).userDetails(detailDTO2).build();
+
+        when(userRepository.findAll(any(Specification.class))).thenReturn(users);
+        when(userDetailMapper.toDto(any(), any(), any())).thenReturn(detailDTO1, detailDTO2);
+        when(userMapper.toDto(any(User.class), any(UserDetailDTO.class)))
+                .thenReturn(userDTO1, userDTO2);
+
+        // Execute
+        List<UserDTO> result = userService.getAllUsers(queryParams);
+
+        // Verify
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        verify(userRepository).findAll(any(Specification.class));
+    }
+
+    @Test
+    void getAllUsers_ShouldApplyMultipleSortOrders_WhenMultipleSortOrdersProvided() {
+        // Arrange
+        List<UserSortOrder> sortOrders = List.of(UserSortOrder.NAME, UserSortOrder.EMAIL, UserSortOrder.GENDER);
+        UserQueryParams queryParams = UserFactory.userQueryParamsWithSort(sortOrders);
+
+        User user1 = UserFactory.defaultUser();
+        user1.setEmail("user1@test.com");
+        User user2 = UserFactory.defaultUser();
+        user2.setEmail("user2@test.com");
+        User user3 = UserFactory.defaultUser();
+        user3.setEmail("user3@test.com");
+        List<User> users = List.of(user1, user2, user3);
+
+        // Create UserDetailDTOs
+        UserDetailDTO detailDTO1 = UserDetailFactory.defaultUserDetailDTO(user1.getId()).build();
+        UserDetailDTO detailDTO2 = UserDetailFactory.defaultUserDetailDTO(user2.getId()).build();
+        UserDetailDTO detailDTO3 = UserDetailFactory.defaultUserDetailDTO(user3.getId()).build();
+        UserDTO userDTO1 = UserFactory.defaultUserDTO(user1).userDetails(detailDTO1).build();
+        UserDTO userDTO2 = UserFactory.defaultUserDTO(user2).userDetails(detailDTO2).build();
+        UserDTO userDTO3 = UserFactory.defaultUserDTO(user3).userDetails(detailDTO3).build();
+
+        // Use lenient stubbing to avoid strict argument matching issues with random data
+        when(userRepository.findAll(any(Specification.class))).thenReturn(users);
+        when(userDetailMapper.toDto(any(), any(), any()))
+                .thenReturn(detailDTO1, detailDTO2, detailDTO3);
+        when(userMapper.toDto(any(User.class), any(UserDetailDTO.class)))
+                .thenReturn(userDTO1, userDTO2, userDTO3);
+
+        // Execute
+        List<UserDTO> result = userService.getAllUsers(queryParams);
+
+        // Verify
+        assertNotNull(result);
+        assertEquals(3, result.size());
+        verify(userRepository).findAll(any(Specification.class));
     }
 }

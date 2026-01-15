@@ -6,10 +6,12 @@ import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserQueryParams;
 import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
+import com.joshtechnologygroup.minisocial.enums.UserSortOrder;
 import net.datafaker.Faker;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.List;
 
 public class UserFactory {
     private static final Faker FAKER = TestDataConfig.FAKER;
@@ -81,5 +83,9 @@ public class UserFactory {
 
     public static UserQueryParams activeUserQueryParams() {
         return new UserQueryParams(null, null, null, null, null, null, null, null, null, null, null, null, null, true, null);
+    }
+
+    public static UserQueryParams userQueryParamsWithSort(List<UserSortOrder> sort) {
+        return new UserQueryParams(null, null, null, null, null, null, null, null, null, null, null, null, null, null, sort);
     }
 }

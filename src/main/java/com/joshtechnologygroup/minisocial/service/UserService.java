@@ -146,6 +146,7 @@ public class UserService {
                 .officialCityIn(userQueryParams.officialCities())
                 .companyNameIn(userQueryParams.companyName())
                 .isActive(userQueryParams.active())
+                .orderBy(userQueryParams.sortOrders())
                 .build();
         List<User> users = userRepository.findAll(userSpecification);
         return users.stream()

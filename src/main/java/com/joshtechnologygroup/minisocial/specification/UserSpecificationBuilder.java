@@ -3,8 +3,11 @@ package com.joshtechnologygroup.minisocial.specification;
 import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.enums.Gender;
 import com.joshtechnologygroup.minisocial.enums.MaritalStatus;
+import com.joshtechnologygroup.minisocial.enums.UserSortOrder;
+import jakarta.persistence.criteria.Order;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserSpecificationBuilder {
@@ -18,7 +21,8 @@ public class UserSpecificationBuilder {
         if (firstName != null && !firstName.isEmpty()) {
             spec = spec.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.like(
-                            criteriaBuilder.lower(root.join("userDetail").get("firstName")),
+                            criteriaBuilder.lower(root.join("userDetail")
+                                    .get("firstName")),
                             "%" + firstName.toLowerCase() + "%"
                     )
             );
@@ -30,7 +34,8 @@ public class UserSpecificationBuilder {
         if (lastName != null && !lastName.isEmpty()) {
             spec = spec.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.like(
-                            criteriaBuilder.lower(root.join("userDetail").get("lastName")),
+                            criteriaBuilder.lower(root.join("userDetail")
+                                    .get("lastName")),
                             "%" + lastName.toLowerCase() + "%"
                     )
             );
@@ -151,6 +156,51 @@ public class UserSpecificationBuilder {
             spec = spec.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.equal(root.get("active"), isActive)
             );
+        }
+        return this;
+    }
+
+    public UserSpecificationBuilder orderBy(List<UserSortOrder> order) {
+        if (order != null && !order.isEmpty()) {
+            spec = spec.and((root, query, criteriaBuilder) -> {
+                List<Order> orders = new ArrayList<>();
+
+                for (UserSortOrder ord : order) {
+                    switch (ord) {
+                        case NAME -> {
+                            // Order by first and last name
+                            orders.add(criteriaBuilder.desc(root.join("userDetail")
+                                    .get("firstName")));
+                            orders.add(criteriaBuilder.desc(root.join("userDetail")
+                                    .get("lastName")));
+                        }
+                        case EMAIL -> orders.add(criteriaBuilder.desc(root.get("email")));
+                        case RESIDENTIAL_DETAIL -> {
+                            orders.add(criteriaBuilder.desc(root.join("residentialDetail")
+                                    .get("city")));
+                            orders.add(criteriaBuilder.desc(root.join("residentialDetail")
+                                    .get("state")));
+                            orders.add(criteriaBuilder.desc(root.join("residentialDetail")
+                                    .get("country")));
+                        }
+                        case FOLLOWING_COUNT -> orders.add(criteriaBuilder.desc(
+                                criteriaBuilder.size(root.get("followed"))));
+                        case FOLLOWER_COUNT -> orders.add(criteriaBuilder.desc(
+                                criteriaBuilder.size(root.get("followers"))));
+                        case GENDER -> orders.add(criteriaBuilder.desc(root.join("userDetail")
+                                .get("gender")));
+                        case MARITAL_STATUS -> orders.add(criteriaBuilder.desc(root.join("userDetail")
+                                .get("maritalStatus")));
+                        case COMPANY_NAME -> orders.add(criteriaBuilder.desc(root.join("officialDetail")
+                                .get("companyName")));
+                    }
+                }
+
+                if (!orders.isEmpty()) {
+                    query.orderBy(orders.toArray(new Order[0]));
+                }
+                return criteriaBuilder.conjunction();
+            });
         }
         return this;
     }
