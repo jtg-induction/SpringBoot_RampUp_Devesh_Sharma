@@ -2,7 +2,9 @@ package com.joshtechnologygroup.minisocial.service;
 
 import com.joshtechnologygroup.minisocial.dto.user.*;
 import com.joshtechnologygroup.minisocial.enums.MaritalStatus;
+import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
+import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
 import com.joshtechnologygroup.minisocial.factory.ResidentialDetailFactory;
 import com.joshtechnologygroup.minisocial.factory.UserDetailFactory;
@@ -15,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -78,10 +79,9 @@ class UserServiceIntegrationTest {
         UserDTO savedUser = userService.createUser(request);
         Long id = savedUser.id();
 
-        Optional<UserDTO> result = userService.getUser(id);
+        UserDTO dto = userService.getUser(id);
 
-        assertThat(result).isPresent();
-        UserDTO dto = result.orElseThrow();
+        assertThat(dto).isNotNull();
 
         assertThat(dto.email()).isEqualTo("john.doe@example.com");
         assertThat(dto.userDetails()).isNotNull();
@@ -147,7 +147,7 @@ class UserServiceIntegrationTest {
                 .build();
 
         // Execute
-        UserDTO result = userService.updateUser(updateReq, initialUser.email(), userId);
+        UserDTO result = userService.updateUser(updateReq, initialUser.email());
 
         // Verify
         assertThat(result.email()).isEqualTo("updated@test.com");
@@ -157,10 +157,9 @@ class UserServiceIntegrationTest {
                 .residentialDetails()
                 .city()).isEqualTo("Mumbai");
 
-        Optional<UserDTO> fetched = userService.getUser(userId);
-        assertThat(fetched).isPresent();
-        assertThat(fetched.orElseThrow()
-                .email()).isEqualTo("updated@test.com");
+        UserDTO fetched = userService.getUser(userId);
+        assertThat(fetched).isNotNull();
+        assertThat(fetched.email()).isEqualTo("updated@test.com");
     }
 
     @Test
@@ -170,18 +169,18 @@ class UserServiceIntegrationTest {
                 .email("john.doe@example.com")
                 .build();
         UserDTO createdUser = userService.createUser(createReq);
-        Long userId = createdUser.id();
+        String userEmail = createdUser.email();
 
         // Verify user exists
-        assertThat(userRepository.findById(userId)).isPresent();
-        assertThat(userService.getUser(userId)).isPresent();
+        assertThat(userRepository.findByEmail(userEmail)).isPresent();
+        assertThat(userService.getUser(createdUser.id())).isNotNull();
 
         // Execute delete
-        UserDTO deletedUser = userService.deleteUser(userId);
+        UserDTO deletedUser = userService.deleteUser(userEmail);
 
         // Verify the returned DTO contains the correct data
         assertThat(deletedUser).isNotNull();
-        assertThat(deletedUser.id()).isEqualTo(userId);
+        assertThat(deletedUser.id()).isEqualTo(createdUser.id());
         assertThat(deletedUser.email()).isEqualTo("john.doe@example.com");
         assertThat(deletedUser.userDetails()).isNotNull();
         assertThat(deletedUser.userDetails()
@@ -192,8 +191,10 @@ class UserServiceIntegrationTest {
                 .officialDetails()).isNotNull();
 
         // Verify user is actually deleted from database
-        assertThat(userRepository.findById(userId)).isEmpty();
-        assertThat(userService.getUser(userId)).isEmpty();
+        assertThat(userRepository.findByEmail(userEmail)).isEmpty();
+        assertThrows(UserDoesNotExistException.class, () ->
+                userService.getUser(createdUser.id())
+        );
 
         // Verify total user count is 0
         assertThat(userRepository.count()).isEqualTo(0);
@@ -201,14 +202,14 @@ class UserServiceIntegrationTest {
 
     @Test
     void deleteUser_Integration_ShouldThrowException_WhenUserDoesNotExist() {
-        Long nonExistentId = 999L;
+        String nonExistentEmail = "test@company.com";
 
         // Verify user doesn't exist
-        assertThat(userRepository.findById(nonExistentId)).isEmpty();
+        assertThat(userRepository.findByEmail(nonExistentEmail)).isEmpty();
 
         // Execute and verify exception
         assertThrows(UserDoesNotExistException.class, () ->
-                userService.deleteUser(nonExistentId)
+                userService.deleteUser(nonExistentEmail)
         );
     }
 }

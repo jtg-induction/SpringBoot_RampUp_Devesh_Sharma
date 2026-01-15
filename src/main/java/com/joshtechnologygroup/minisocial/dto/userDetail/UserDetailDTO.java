@@ -1,5 +1,7 @@
 package com.joshtechnologygroup.minisocial.dto.userDetail;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.joshtechnologygroup.minisocial.enums.Gender;
 import com.joshtechnologygroup.minisocial.enums.MaritalStatus;
 import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailDTO;
@@ -9,6 +11,7 @@ import jakarta.validation.constraints.*;
 import lombok.Builder;
 
 @Builder
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record UserDetailDTO(
         @NotNull(message = "User ID is required")
         @PositiveOrZero(message = "User ID must be unsigned")

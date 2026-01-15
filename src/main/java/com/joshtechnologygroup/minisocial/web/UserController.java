@@ -1,8 +1,10 @@
 package com.joshtechnologygroup.minisocial.web;
 
 import com.joshtechnologygroup.minisocial.annotation.StandardSecurityResponse;
-import com.joshtechnologygroup.minisocial.dto.user.*;
-import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
+import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
+import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
+import com.joshtechnologygroup.minisocial.dto.user.UserQueryParams;
+import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
 import com.joshtechnologygroup.minisocial.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,17 +16,16 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
-@StandardSecurityResponse
 @Tag(name = "User Management", description = "APIs for managing user accounts and profiles")
 @Slf4j
 class UserController {
@@ -36,12 +37,13 @@ class UserController {
 
     @GetMapping("/users")
     @Operation(description = "Get a list of all users with filtering and sorting", summary = "Query Active Users")
+    @StandardSecurityResponse
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successfully retrieved list of active users",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
     })
     public ResponseEntity<List<UserDTO>> getActiveUsers(@Valid UserQueryParams userQueryParams) {
-        log.warn("Received user query params: {}", userQueryParams);
+        log.debug("Received user query params: {}", userQueryParams);
         return new ResponseEntity<>(userService.getAllUsers(userQueryParams), HttpStatus.OK);
     }
 
@@ -50,23 +52,28 @@ class UserController {
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "User created successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
+            @ApiResponse(responseCode = "422", description = "Validation failed",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))
+            )
     })
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserCreateRequest req) {
         return new ResponseEntity<>(userService.createUser(req), HttpStatus.CREATED);
     }
 
-    @PutMapping("/user/{id}")
+    @PutMapping("/user/")
     @Operation(description = "Update an existing user account", summary = "Update User")
+    @StandardSecurityResponse
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User updated successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
     })
-    public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserUpdateRequest req, @AuthenticationPrincipal UserDetails userDetails, @PositiveOrZero @PathVariable Long id) {
-        return new ResponseEntity<>(userService.updateUser(req, userDetails.getUsername(), id), HttpStatus.OK);
+    public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserUpdateRequest req, @AuthenticationPrincipal UserDetails userDetails) {
+        return new ResponseEntity<>(userService.updateUser(req, userDetails.getUsername()), HttpStatus.OK);
     }
 
     @GetMapping("/user/{id}")
+    @StandardSecurityResponse
     @Operation(description = "Get user details by ID", summary = "Retrieve User by ID")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User details retrieved successfully",
@@ -74,19 +81,19 @@ class UserController {
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
     })
     public ResponseEntity<UserDTO> getUser(@PositiveOrZero @PathVariable Long id) {
-        Optional<UserDTO> dto = userService.getUser(id);
-        if (dto.isEmpty()) throw new UserDoesNotExistException();
-        return new ResponseEntity<>(dto.get(), HttpStatus.OK);
+        UserDTO dto = userService.getUser(id);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @DeleteMapping("/user/{id}")
+    @DeleteMapping("/user/")
+    @StandardSecurityResponse
     @Operation(description = "Delete a user account by ID", summary = "Delete User")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User deleted successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
     })
-    public ResponseEntity<UserDTO> deleteUser(@PositiveOrZero @PathVariable Long id) {
-        return new ResponseEntity<>(userService.deleteUser(id), HttpStatus.OK);
+    public ResponseEntity<UserDTO> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {
+        return new ResponseEntity<>(userService.deleteUser(userDetails.getUsername()), HttpStatus.OK);
     }
 }

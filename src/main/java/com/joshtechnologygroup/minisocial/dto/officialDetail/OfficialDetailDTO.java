@@ -1,11 +1,14 @@
 package com.joshtechnologygroup.minisocial.dto.officialDetail;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 
 import static com.joshtechnologygroup.minisocial.constants.ValidationConstants.PHONE_NUMBER_REGEX;
 
 @Builder
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record OfficialDetailDTO(
         @NotNull(message = "User ID is required")
         @PositiveOrZero(message = "User ID must be unsigned")
