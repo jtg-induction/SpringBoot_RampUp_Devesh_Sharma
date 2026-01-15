@@ -1,5 +1,6 @@
 package com.joshtechnologygroup.minisocial.web;
 
+import com.joshtechnologygroup.minisocial.annotation.BadDeserialzationResponse;
 import com.joshtechnologygroup.minisocial.annotation.StandardSecurityResponse;
 import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.dto.UserLogin;
@@ -32,6 +33,7 @@ class AuthController {
     }
 
     @PostMapping("/authenticate")
+    @BadDeserialzationResponse
     @Operation(description = "Authenticate user and issue JWT", summary = "User Authentication")
     @ApiResponses({
             @ApiResponse(
@@ -51,6 +53,7 @@ class AuthController {
     }
 
     @StandardSecurityResponse
+    @BadDeserialzationResponse
     @PostMapping("/update-password")
     @Operation(description = "Update user password", summary = "Update Password")
     @ApiResponses({

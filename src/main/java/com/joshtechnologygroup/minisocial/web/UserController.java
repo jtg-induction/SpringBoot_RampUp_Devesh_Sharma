@@ -1,5 +1,6 @@
 package com.joshtechnologygroup.minisocial.web;
 
+import com.joshtechnologygroup.minisocial.annotation.BadDeserialzationResponse;
 import com.joshtechnologygroup.minisocial.annotation.StandardSecurityResponse;
 import com.joshtechnologygroup.minisocial.dto.user.ActiveUserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
@@ -46,6 +47,7 @@ class UserController {
 
     @PostMapping("/user")
     @Operation(description = "Create a new user account", summary = "Create User")
+    @BadDeserialzationResponse
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "User created successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
@@ -57,9 +59,10 @@ class UserController {
         return new ResponseEntity<>(userService.createUser(req), HttpStatus.CREATED);
     }
 
-    @PutMapping("/user/")
+    @PutMapping("/user/me")
     @Operation(description = "Update an existing user account", summary = "Update User")
     @StandardSecurityResponse
+    @BadDeserialzationResponse
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User updated successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
@@ -82,7 +85,7 @@ class UserController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @DeleteMapping("/user/")
+    @DeleteMapping("/user/me")
     @StandardSecurityResponse
     @Operation(description = "Delete a user account by ID", summary = "Delete User")
     @ApiResponses({
