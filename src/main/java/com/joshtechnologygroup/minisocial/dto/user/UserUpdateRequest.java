@@ -1,11 +1,14 @@
 package com.joshtechnologygroup.minisocial.dto.user;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailDTO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 
 @Builder
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record UserUpdateRequest(
         @Email(message = "Invalid Email format")
         @NotNull(message = "Email is required")

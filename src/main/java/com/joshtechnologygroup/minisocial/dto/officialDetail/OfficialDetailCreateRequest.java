@@ -1,5 +1,7 @@
 package com.joshtechnologygroup.minisocial.dto.officialDetail;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -8,6 +10,7 @@ import lombok.Builder;
 import static com.joshtechnologygroup.minisocial.constants.ValidationConstants.PHONE_NUMBER_REGEX;
 
 @Builder
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record OfficialDetailCreateRequest(
         @Size(min = 3, max = 100, message = "Employee Code must be between 3 and 100 characters long")
         @NotBlank(message = "Employee Code is required")

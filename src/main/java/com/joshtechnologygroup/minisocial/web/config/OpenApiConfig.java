@@ -23,4 +23,10 @@ public class OpenApiConfig {
                                 .scheme("bearer")
                                 .bearerFormat("JWT")));
     }
+
+//    @Bean
+//    public ModelResolver modelResolver(ObjectMapper objectMapper) {
+//        // This ensures SpringDoc uses the same ObjectMapper as your Spring Boot app
+//        return new ModelResolver(new com.fasterxml.jackson.databind.ObjectMapper(objectMapper));
+//    }
 }

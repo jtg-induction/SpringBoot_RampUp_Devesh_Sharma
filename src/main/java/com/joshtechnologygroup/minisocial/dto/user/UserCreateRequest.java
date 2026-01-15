@@ -1,5 +1,7 @@
 package com.joshtechnologygroup.minisocial.dto.user;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailCreateRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -9,6 +11,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 @Builder
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record UserCreateRequest(
         @Email(message = "Invalid Email format")
         @NotBlank(message = "Email is required")
