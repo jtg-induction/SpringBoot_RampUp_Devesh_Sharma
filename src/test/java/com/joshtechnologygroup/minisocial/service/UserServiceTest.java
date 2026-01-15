@@ -281,10 +281,16 @@ class UserServiceTest {
         List<User> users = List.of(user1, user2);
 
         // Create UserDetailDTOs
-        UserDetailDTO detailDTO1 = UserDetailFactory.defaultUserDetailDTO(user1.getId()).build();
-        UserDetailDTO detailDTO2 = UserDetailFactory.defaultUserDetailDTO(user2.getId()).build();
-        UserDTO userDTO1 = UserFactory.defaultUserDTO(user1).userDetails(detailDTO1).build();
-        UserDTO userDTO2 = UserFactory.defaultUserDTO(user2).userDetails(detailDTO2).build();
+        UserDetailDTO detailDTO1 = UserDetailFactory.defaultUserDetailDTO(user1.getId())
+                .build();
+        UserDetailDTO detailDTO2 = UserDetailFactory.defaultUserDetailDTO(user2.getId())
+                .build();
+        UserDTO userDTO1 = UserFactory.defaultUserDTO(user1)
+                .userDetails(detailDTO1)
+                .build();
+        UserDTO userDTO2 = UserFactory.defaultUserDTO(user2)
+                .userDetails(detailDTO2)
+                .build();
 
         when(userRepository.findAll(any(Specification.class))).thenReturn(users);
         when(userMapper.toDto(any(User.class)))
@@ -314,12 +320,21 @@ class UserServiceTest {
         List<User> users = List.of(user1, user2, user3);
 
         // Create UserDetailDTOs
-        UserDetailDTO detailDTO1 = UserDetailFactory.defaultUserDetailDTO(user1.getId()).build();
-        UserDetailDTO detailDTO2 = UserDetailFactory.defaultUserDetailDTO(user2.getId()).build();
-        UserDetailDTO detailDTO3 = UserDetailFactory.defaultUserDetailDTO(user3.getId()).build();
-        UserDTO userDTO1 = UserFactory.defaultUserDTO(user1).userDetails(detailDTO1).build();
-        UserDTO userDTO2 = UserFactory.defaultUserDTO(user2).userDetails(detailDTO2).build();
-        UserDTO userDTO3 = UserFactory.defaultUserDTO(user3).userDetails(detailDTO3).build();
+        UserDetailDTO detailDTO1 = UserDetailFactory.defaultUserDetailDTO(user1.getId())
+                .build();
+        UserDetailDTO detailDTO2 = UserDetailFactory.defaultUserDetailDTO(user2.getId())
+                .build();
+        UserDetailDTO detailDTO3 = UserDetailFactory.defaultUserDetailDTO(user3.getId())
+                .build();
+        UserDTO userDTO1 = UserFactory.defaultUserDTO(user1)
+                .userDetails(detailDTO1)
+                .build();
+        UserDTO userDTO2 = UserFactory.defaultUserDTO(user2)
+                .userDetails(detailDTO2)
+                .build();
+        UserDTO userDTO3 = UserFactory.defaultUserDTO(user3)
+                .userDetails(detailDTO3)
+                .build();
 
         // Use lenient stubbing to avoid strict argument matching issues with random data
         when(userRepository.findAll(any(Specification.class))).thenReturn(users);

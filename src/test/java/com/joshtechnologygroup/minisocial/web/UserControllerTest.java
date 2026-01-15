@@ -177,11 +177,26 @@ class UserControllerTest {
 
         assert (list.size() == 5);
         // Verify sorting
-        assert (list.get(0).userDetails().firstName().equals("Sarah"));
-        assert (list.get(1).userDetails().firstName().equals("Mike"));
-        assert (list.get(2).userDetails().firstName().equals("John"));
-        assert (list.get(3).userDetails().firstName().equals("Jane"));
-        assert (list.get(4).userDetails().firstName().equals("David"));
+        assert (list.get(0)
+                .userDetails()
+                .firstName()
+                .equals("Sarah"));
+        assert (list.get(1)
+                .userDetails()
+                .firstName()
+                .equals("Mike"));
+        assert (list.get(2)
+                .userDetails()
+                .firstName()
+                .equals("John"));
+        assert (list.get(3)
+                .userDetails()
+                .firstName()
+                .equals("Jane"));
+        assert (list.get(4)
+                .userDetails()
+                .firstName()
+                .equals("David"));
     }
 
     @Test
@@ -198,11 +213,21 @@ class UserControllerTest {
 
         assert (list.size() == 5);
         // Verify sorting
-        assert (list.get(0).email().equals("sarah.wilson@test.com"));
-        assert (list.get(1).email().equals("mike.johnson@test.com"));
-        assert (list.get(2).email().equals("john.doe@test.com"));
-        assert (list.get(3).email().equals("jane.smith@test.com"));
-        assert (list.get(4).email().equals("david.brown@test.com"));
+        assert (list.get(0)
+                .email()
+                .equals("sarah.wilson@test.com"));
+        assert (list.get(1)
+                .email()
+                .equals("mike.johnson@test.com"));
+        assert (list.get(2)
+                .email()
+                .equals("john.doe@test.com"));
+        assert (list.get(3)
+                .email()
+                .equals("jane.smith@test.com"));
+        assert (list.get(4)
+                .email()
+                .equals("david.brown@test.com"));
     }
 
     @Test
@@ -219,11 +244,31 @@ class UserControllerTest {
 
         assert (list.size() == 5);
         // Verify sorting by residential city
-        assert (list.get(0).userDetails().residentialDetails().city().equals("Phoenix"));
-        assert (list.get(1).userDetails().residentialDetails().city().equals("New York"));
-        assert (list.get(2).userDetails().residentialDetails().city().equals("Los Angeles"));
-        assert (list.get(3).userDetails().residentialDetails().city().equals("Houston"));
-        assert (list.get(4).userDetails().residentialDetails().city().equals("Chicago"));
+        assert (list.get(0)
+                .userDetails()
+                .residentialDetails()
+                .city()
+                .equals("Phoenix"));
+        assert (list.get(1)
+                .userDetails()
+                .residentialDetails()
+                .city()
+                .equals("New York"));
+        assert (list.get(2)
+                .userDetails()
+                .residentialDetails()
+                .city()
+                .equals("Los Angeles"));
+        assert (list.get(3)
+                .userDetails()
+                .residentialDetails()
+                .city()
+                .equals("Houston"));
+        assert (list.get(4)
+                .userDetails()
+                .residentialDetails()
+                .city()
+                .equals("Chicago"));
     }
 
     @Test
@@ -240,11 +285,31 @@ class UserControllerTest {
 
         assert (list.size() == 5);
         // Verify sorting
-        assert (list.get(0).userDetails().officialDetails().companyName().equals("TechCorp Inc"));
-        assert (list.get(1).userDetails().officialDetails().companyName().equals("StartupTech LLC"));
-        assert (list.get(2).userDetails().officialDetails().companyName().equals("MegaCorp Industries"));
-        assert (list.get(3).userDetails().officialDetails().companyName().equals("Innovate Solutions"));
-        assert (list.get(4).userDetails().officialDetails().companyName().equals("Global Firm Ltd"));
+        assert (list.get(0)
+                .userDetails()
+                .officialDetails()
+                .companyName()
+                .equals("TechCorp Inc"));
+        assert (list.get(1)
+                .userDetails()
+                .officialDetails()
+                .companyName()
+                .equals("StartupTech LLC"));
+        assert (list.get(2)
+                .userDetails()
+                .officialDetails()
+                .companyName()
+                .equals("MegaCorp Industries"));
+        assert (list.get(3)
+                .userDetails()
+                .officialDetails()
+                .companyName()
+                .equals("Innovate Solutions"));
+        assert (list.get(4)
+                .userDetails()
+                .officialDetails()
+                .companyName()
+                .equals("Global Firm Ltd"));
     }
 
     @Test
@@ -263,7 +328,9 @@ class UserControllerTest {
 
         // Verify sorting
         List<String> genders = list.stream()
-                .map(user -> user.userDetails().gender().toString())
+                .map(user -> user.userDetails()
+                        .gender()
+                        .toString())
                 .toList();
 
         assert (genders.contains("MALE"));
@@ -283,8 +350,11 @@ class UserControllerTest {
                 .readValue(res);
 
         assert (list.size() == 3);
-        assert (list.stream().allMatch(user ->
-                user.userDetails().age() >= 28 && user.userDetails().age() <= 32));
+        assert (list.stream()
+                .allMatch(user ->
+                        user.userDetails()
+                                .age() >= 28 && user.userDetails()
+                                .age() <= 32));
     }
 
     @Test
@@ -300,9 +370,16 @@ class UserControllerTest {
                 .readValue(res);
 
         assert (list.size() == 2);
-        assert (list.stream().allMatch(user ->
-                user.userDetails().gender().toString().equals("MALE") &&
-                        user.userDetails().maritalStatus().toString().equals("SINGLE")));
+        assert (list.stream()
+                .allMatch(user ->
+                        user.userDetails()
+                                .gender()
+                                .toString()
+                                .equals("MALE") &&
+                                user.userDetails()
+                                        .maritalStatus()
+                                        .toString()
+                                        .equals("SINGLE")));
     }
 
     @Test
@@ -318,8 +395,14 @@ class UserControllerTest {
                 .readValue(res);
 
         assert (list.size() == 2);
-        assert (list.stream().anyMatch(user -> user.userDetails().firstName().equals("John")));
-        assert (list.stream().anyMatch(user -> user.userDetails().firstName().equals("Mike")));
+        assert (list.stream()
+                .anyMatch(user -> user.userDetails()
+                        .firstName()
+                        .equals("John")));
+        assert (list.stream()
+                .anyMatch(user -> user.userDetails()
+                        .firstName()
+                        .equals("Mike")));
     }
 
     @Test
@@ -335,8 +418,15 @@ class UserControllerTest {
                 .readValue(res);
 
         assert (list.size() == 1);
-        assert (list.get(0).userDetails().firstName().equals("John"));
-        assert (list.get(0).userDetails().officialDetails().companyName().equals("TechCorp Inc"));
+        assert (list.get(0)
+                .userDetails()
+                .firstName()
+                .equals("John"));
+        assert (list.get(0)
+                .userDetails()
+                .officialDetails()
+                .companyName()
+                .equals("TechCorp Inc"));
     }
 
     @Test
@@ -352,7 +442,10 @@ class UserControllerTest {
                 .readValue(res);
 
         assert (!list.isEmpty());
-        assert (list.stream().anyMatch(user -> user.userDetails().firstName().startsWith("J")));
+        assert (list.stream()
+                .anyMatch(user -> user.userDetails()
+                        .firstName()
+                        .startsWith("J")));
     }
 
     @Test
@@ -398,8 +491,14 @@ class UserControllerTest {
                 .readValue(res);
 
         assert (list.size() == 2);
-        assert (list.stream().anyMatch(user -> user.userDetails().firstName().equals("Jane")));
-        assert (list.stream().anyMatch(user -> user.userDetails().firstName().equals("Sarah")));
+        assert (list.stream()
+                .anyMatch(user -> user.userDetails()
+                        .firstName()
+                        .equals("Jane")));
+        assert (list.stream()
+                .anyMatch(user -> user.userDetails()
+                        .firstName()
+                        .equals("Sarah")));
     }
 
     @Test
@@ -415,9 +514,15 @@ class UserControllerTest {
                 .readValue(res);
 
         assert (list.size() == 3);
-        assert (list.stream().allMatch(user ->
-                user.userDetails().gender().toString().equals("MALE") &&
-                        user.userDetails().age() >= 25 && user.userDetails().age() <= 35));
+        assert (list.stream()
+                .allMatch(user ->
+                        user.userDetails()
+                                .gender()
+                                .toString()
+                                .equals("MALE") &&
+                                user.userDetails()
+                                        .age() >= 25 && user.userDetails()
+                                .age() <= 35));
     }
 
     @Test
@@ -433,8 +538,14 @@ class UserControllerTest {
                 .readValue(res);
 
         assert (list.size() == 2);
-        assert (list.stream().anyMatch(user -> user.userDetails().firstName().equals("John")));
-        assert (list.stream().anyMatch(user -> user.userDetails().firstName().equals("Mike")));
+        assert (list.stream()
+                .anyMatch(user -> user.userDetails()
+                        .firstName()
+                        .equals("John")));
+        assert (list.stream()
+                .anyMatch(user -> user.userDetails()
+                        .firstName()
+                        .equals("Mike")));
     }
 }
 

@@ -36,10 +36,10 @@ class UserController {
     }
 
     @GetMapping("/users")
-    @Operation(description = "Get a list of all users with filtering and sorting", summary = "Query Active Users")
+    @Operation(description = "Get a list of all users with filtering and sorting", summary = "Query All Users")
     @StandardSecurityResponse
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved list of active users",
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved list of users",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
     })
     public ResponseEntity<List<UserDTO>> getActiveUsers(@Valid UserQueryParams userQueryParams) {
