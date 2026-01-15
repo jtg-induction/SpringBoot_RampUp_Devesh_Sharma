@@ -2,16 +2,10 @@ package com.joshtechnologygroup.minisocial.service;
 
 import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
-import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailMapper;
-import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailMapper;
 import com.joshtechnologygroup.minisocial.dto.user.*;
-import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailMapper;
 import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsException;
 import com.joshtechnologygroup.minisocial.exception.UnauthorizedException;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
-import com.joshtechnologygroup.minisocial.repository.OfficialDetailRepository;
-import com.joshtechnologygroup.minisocial.repository.ResidentialDetailRepository;
-import com.joshtechnologygroup.minisocial.repository.UserDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,36 +23,18 @@ public class UserService {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
-    private final UserDetailRepository userDetailRepository;
-    private final ResidentialDetailRepository residentialDetailRepository;
-    private final OfficialDetailRepository officialDetailRepository;
     private final UserMapper userMapper;
-    private final UserDetailMapper userDetailMapper;
-    private final ResidentialDetailMapper residentialDetailMapper;
-    private final OfficialDetailMapper officialDetailMapper;
 
     public UserService(
             UserRepository userRepository,
             AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder,
-            UserDetailRepository userDetailRepository,
-            ResidentialDetailRepository residentialDetailRepository,
-            OfficialDetailRepository officialDetailRepository,
-            UserMapper userMapper,
-            UserDetailMapper userDetailMapper,
-            ResidentialDetailMapper residentialDetailMapper,
-            OfficialDetailMapper officialDetailMapper
+            UserMapper userMapper
     ) {
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
-        this.userDetailRepository = userDetailRepository;
-        this.residentialDetailRepository = residentialDetailRepository;
-        this.officialDetailRepository = officialDetailRepository;
         this.userMapper = userMapper;
-        this.userDetailMapper = userDetailMapper;
-        this.residentialDetailMapper = residentialDetailMapper;
-        this.officialDetailMapper = officialDetailMapper;
     }
 
     public void updateUserPassword(UpdatePasswordRequest request) {
