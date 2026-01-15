@@ -2,7 +2,6 @@ package com.joshtechnologygroup.minisocial.factory;
 
 import com.joshtechnologygroup.minisocial.TestDataConfig;
 import com.joshtechnologygroup.minisocial.bean.ResidentialDetail;
-import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailDTO;
 import net.datafaker.Faker;
 
@@ -30,21 +29,6 @@ public class ResidentialDetailFactory {
         return residentialDetail;
     }
 
-    public static ResidentialDetailCreateRequest.ResidentialDetailCreateRequestBuilder defaultResidentialDetailCreateRequest() {
-        ResidentialDetail residentialDetail = defaultResidentialDetail();
-        return defaultResidentialDetailCreateRequest(residentialDetail);
-    }
-
-    public static ResidentialDetailCreateRequest.ResidentialDetailCreateRequestBuilder defaultResidentialDetailCreateRequest(ResidentialDetail residentialDetail) {
-        return ResidentialDetailCreateRequest.builder()
-                .address(residentialDetail.getAddress())
-                .city(residentialDetail.getCity())
-                .state(residentialDetail.getState())
-                .country(residentialDetail.getCountry())
-                .contactNo1(residentialDetail.getContactNo1())
-                .contactNo2(residentialDetail.getContactNo2());
-    }
-
     public static ResidentialDetailDTO.ResidentialDetailDTOBuilder defaultResidentialDetailDTO() {
         return defaultResidentialDetailDTO((long) FAKER.number()
                 .positive());
@@ -58,7 +42,6 @@ public class ResidentialDetailFactory {
 
     public static ResidentialDetailDTO.ResidentialDetailDTOBuilder defaultResidentialDetailDTO(ResidentialDetail residentialDetail) {
         return ResidentialDetailDTO.builder()
-                .userId(residentialDetail.getUserId())
                 .address(residentialDetail.getAddress())
                 .city(residentialDetail.getCity())
                 .state(residentialDetail.getState())

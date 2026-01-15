@@ -1,10 +1,10 @@
 package com.joshtechnologygroup.minisocial.service;
 
-import com.joshtechnologygroup.minisocial.dto.user.*;
-import com.joshtechnologygroup.minisocial.enums.MaritalStatus;
+import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
+import com.joshtechnologygroup.minisocial.enums.MaritalStatus;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
 import com.joshtechnologygroup.minisocial.factory.ResidentialDetailFactory;
 import com.joshtechnologygroup.minisocial.factory.UserDetailFactory;
@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -49,24 +50,6 @@ class UserServiceIntegrationTest {
         assertThat(result.id()).isNotNull();
         assertThat(result.email()).isEqualTo("john.doe@example.com");
 
-        assertThat(result.userDetails()).isNotNull();
-        assertThat(result.userDetails()
-                .firstName()).isNotNull();
-        assertThat(result.userDetails()
-                .gender()).isNotNull();
-
-        assertThat(result.userDetails()
-                .residentialDetails()).isNotNull();
-        assertThat(result.userDetails()
-                .residentialDetails()
-                .city()).isNotNull();
-
-        assertThat(result.userDetails()
-                .officialDetails()).isNotNull();
-        assertThat(result.userDetails()
-                .officialDetails()
-                .companyName()).isNotNull();
-
         assertThat(userRepository.count()).isEqualTo(1);
         assertThat(userRepository.findByEmail("john.doe@example.com")).isPresent();
     }
@@ -78,6 +61,10 @@ class UserServiceIntegrationTest {
                 .build();
         UserDTO savedUser = userService.createUser(request);
         Long id = savedUser.id();
+        Optional<User> user = userRepository.findById(id);
+        assertThat(user).isPresent();
+        UserUpdateRequest userUpdateRequest = UserFactory.defaultUserUpdateRequest(user.get()).build();
+        userService.updateUser(userUpdateRequest, savedUser.email());
 
         UserDTO dto = userService.getUser(id);
 
@@ -107,15 +94,19 @@ class UserServiceIntegrationTest {
         // Create users through service layer (more realistic integration test)
         UserCreateRequest activeUserReq = UserFactory.defaultUserCreateRequest()
                 .email("active@company.com")
-                .active(true)
                 .build();
         userService.createUser(activeUserReq);
 
         UserCreateRequest inactiveUserReq = UserFactory.defaultUserCreateRequest()
                 .email("inactive@company.com")
-                .active(false)
                 .build();
-        userService.createUser(inactiveUserReq);
+        UserDTO inactiveUserDTO = userService.createUser(inactiveUserReq);
+
+        // Make user inactive directly via repository for test setup
+        Optional<User> inactiveUser = userRepository.findById(inactiveUserDTO.id());
+        assertThat(inactiveUser).isPresent();
+        inactiveUser.get().setActive(false);
+        userRepository.save(inactiveUser.get());
 
         // Execute
         List<UserDTO> result = userService.getAllUsers(UserFactory.activeUserQueryParams());
@@ -170,6 +161,10 @@ class UserServiceIntegrationTest {
                 .build();
         UserDTO createdUser = userService.createUser(createReq);
         String userEmail = createdUser.email();
+        Optional<User> user = userRepository.findByEmail(userEmail);
+        assertThat(user).isPresent();
+        UserUpdateRequest userUpdateRequest = UserFactory.defaultUserUpdateRequest(user.get()).build();
+        userService.updateUser(userUpdateRequest, createdUser.email());
 
         // Verify user exists
         assertThat(userRepository.findByEmail(userEmail)).isPresent();

@@ -21,6 +21,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -71,7 +72,20 @@ class UserController {
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
     })
-    public ResponseEntity<UserDTO> updateUser(@Valid @RequestBody UserUpdateRequest req, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<UserDTO> updateUser(@Validated(UserUpdateRequest.Put.class) @RequestBody UserUpdateRequest req, @AuthenticationPrincipal UserDetails userDetails) {
+        return new ResponseEntity<>(userService.updateUser(req, userDetails.getUsername()), HttpStatus.OK);
+    }
+
+    @PatchMapping("/user/me")
+    @Operation(description = "Partially update an existing user account", summary = "Partially update User")
+    @StandardSecurityResponse
+    @BadDeserialzationResponse
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User updated successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
+    })
+    public ResponseEntity<UserDTO> partiallyUpdateUser(@Valid @RequestBody UserUpdateRequest req, @AuthenticationPrincipal UserDetails userDetails) {
         return new ResponseEntity<>(userService.updateUser(req, userDetails.getUsername()), HttpStatus.OK);
     }
 
@@ -85,6 +99,19 @@ class UserController {
     })
     public ResponseEntity<UserDTO> getUser(@PositiveOrZero @PathVariable Long id) {
         UserDTO dto = userService.getUser(id);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
+    }
+
+    @GetMapping("/user/me")
+    @StandardSecurityResponse
+    @Operation(description = "Get logged in user's details", summary = "Get Current User")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User details retrieved successfully",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
+            @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
+    })
+    public ResponseEntity<UserDTO> getUser(@AuthenticationPrincipal UserDetails userDetails) {
+        UserDTO dto = userService.getCurrentUser(userDetails.getUsername());
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 

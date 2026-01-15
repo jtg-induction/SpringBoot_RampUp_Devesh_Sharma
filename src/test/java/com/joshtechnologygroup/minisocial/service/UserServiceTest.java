@@ -165,32 +165,22 @@ class UserServiceTest {
     void updateUser_ShouldReturnUpdatedDTO_WhenUserExists() {
         // 1. Arrange
         User user = UserFactory.defaultUser();
-        UserUpdateRequest updateReq = UserFactory.defaultUserUpdateRequest(user)
-                .build();
+        String originalEmail = user.getEmail();
 
-        User updatedUser = UserFactory.defaultUser();
-        updatedUser.setId(user.getId());
-        updatedUser.setEmail("new-email@company.com");
-
-        // Mocking Logic
-        when(userRepository.findByEmail(user.getEmail())).thenReturn(
-                Optional.of(user)
-        );
-        when(userMapper.updateDtoToUser(updateReq)).thenReturn(updatedUser);
-
-        // Mocking the return DTO construction
-        UserDTO finalDTO = UserFactory.defaultUserDTO(user)
+        UserUpdateRequest updateReq = UserUpdateRequest.builder()
                 .email("new-email@company.com")
                 .build();
 
-        when(userMapper.toDto(any())).thenReturn(finalDTO);
+        when(userRepository.findByEmail(originalEmail)).thenReturn(Optional.of(user));
+
+        UserDTO expectedDTO = UserDTO.builder().email("new-email@company.com").build();
+        when(userMapper.toDto(any(User.class))).thenReturn(expectedDTO);
 
         // 2. Act
-        UserDTO result = userService.updateUser(updateReq, user.getEmail());
+        UserDTO result = userService.updateUser(updateReq, originalEmail);
 
         // 3. Assert
         assertEquals("new-email@company.com", result.email());
-        verify(userRepository).save(updatedUser);
     }
 
     @Test

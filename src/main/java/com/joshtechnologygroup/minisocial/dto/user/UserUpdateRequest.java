@@ -11,18 +11,15 @@ import lombok.Builder;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record UserUpdateRequest(
         @Email(message = "Invalid Email format")
-        @NotNull(message = "Email is required")
+        @NotNull(message = "Email is required", groups = {Put.class})
         @Size(max = 255, message = "Email must not exceed 255 characters")
         String email,
 
-        @Size(min = 8, max = 255, message = "Password must be between 8 and 255 characters long")
-        @NotBlank(message = "Password is required")
-        String password,
-
-        @NotNull(message = "active is required")
+        @NotNull(message = "active is required", groups = {Put.class})
         Boolean active,
 
-        @NotNull(message = "User Details are required")
+        @NotNull(message = "User Details are required", groups = {Put.class})
         @Valid UserDetailDTO userDetails
 ) {
+        public interface Put {};
 }

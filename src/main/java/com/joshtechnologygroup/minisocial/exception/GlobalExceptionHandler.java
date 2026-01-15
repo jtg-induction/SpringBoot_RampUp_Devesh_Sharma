@@ -5,6 +5,7 @@ import com.joshtechnologygroup.minisocial.error.ValidationProblemDetail;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -51,6 +52,19 @@ public class GlobalExceptionHandler {
                 e.getMessage()
         );
         problemDetail.setTitle("Value Conflict");
+
+        return problemDetail;
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ProblemDetail handleUsernameNotFoundException(
+            UsernameNotFoundException e
+    ) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.FORBIDDEN,
+                e.getMessage()
+        );
+        problemDetail.setTitle("Username Not Found - please login again");
 
         return problemDetail;
     }

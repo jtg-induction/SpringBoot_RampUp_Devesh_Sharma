@@ -33,7 +33,7 @@ public class User {
     private String password;
 
     @Column(name = "active")
-    private Boolean active;
+    private Boolean active = true;
 
     @Column(name = "created_at")
     @CreationTimestamp(source = SourceType.DB)
@@ -47,11 +47,11 @@ public class User {
     @EqualsAndHashCode.Exclude
     private UserDetail userDetail;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @EqualsAndHashCode.Exclude
     private OfficialDetail officialDetail;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @EqualsAndHashCode.Exclude
     private ResidentialDetail residentialDetail;
 

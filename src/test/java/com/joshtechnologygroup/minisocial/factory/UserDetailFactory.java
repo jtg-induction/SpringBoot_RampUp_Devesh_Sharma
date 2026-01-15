@@ -4,7 +4,6 @@ import com.joshtechnologygroup.minisocial.TestDataConfig;
 import com.joshtechnologygroup.minisocial.enums.Gender;
 import com.joshtechnologygroup.minisocial.enums.MaritalStatus;
 import com.joshtechnologygroup.minisocial.bean.UserDetail;
-import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailDTO;
 import net.datafaker.Faker;
 
@@ -32,24 +31,6 @@ public class UserDetailFactory {
         return userDetail;
     }
 
-    public static UserDetailCreateRequest.UserDetailCreateRequestBuilder defaultUserDetailCreateRequest() {
-        UserDetail userDetail = defaultUserDetail();
-        return defaultUserDetailCreateRequest(userDetail);
-    }
-
-    public static UserDetailCreateRequest.UserDetailCreateRequestBuilder defaultUserDetailCreateRequest(UserDetail userDetail) {
-        return UserDetailCreateRequest.builder()
-                .firstName(userDetail.getFirstName())
-                .lastName(userDetail.getLastName())
-                .age(userDetail.getAge())
-                .gender(userDetail.getGender())
-                .maritalStatus(userDetail.getMaritalStatus())
-                .residentialDetails(ResidentialDetailFactory.defaultResidentialDetailCreateRequest()
-                        .build())
-                .officialDetails(OfficialDetailFactory.defaultOfficialDetailCreateRequest()
-                        .build());
-    }
-
     public static UserDetailDTO.UserDetailDTOBuilder defaultUserDetailDTO() {
         return defaultUserDetailDTO((long) FAKER.number()
                 .positive());
@@ -63,7 +44,6 @@ public class UserDetailFactory {
 
     public static UserDetailDTO.UserDetailDTOBuilder defaultUserDetailDTO(UserDetail userDetail) {
         return UserDetailDTO.builder()
-                .userId(userDetail.getUserId())
                 .firstName(userDetail.getFirstName())
                 .lastName(userDetail.getLastName())
                 .age(userDetail.getAge())

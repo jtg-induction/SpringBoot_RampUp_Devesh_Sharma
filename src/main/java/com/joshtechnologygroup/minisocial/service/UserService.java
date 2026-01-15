@@ -77,6 +77,13 @@ public class UserService {
         return userMapper.toDto(userWrapper.get());
     }
 
+    public UserDTO getCurrentUser(String email) {
+        Optional<User> userWrapper = userRepository.findByEmail(email);
+        if (userWrapper.isEmpty()) throw new UserDoesNotExistException();
+
+        return userMapper.toDto(userWrapper.get());
+    }
+
     public List<UserDTO> getAllUsers(UserQueryParams userQueryParams) {
         Specification<User> userSpecification = new UserSpecificationBuilder().withMinAge(userQueryParams.minAge())
                 .withMaxAge(userQueryParams.maxAge())
@@ -102,17 +109,15 @@ public class UserService {
 
     @Transactional
     public UserDTO updateUser(UserUpdateRequest req, String userEmail) {
-        Optional<User> existingUser = userRepository.findByEmail(userEmail);
-        if (existingUser.isEmpty())
-            throw new UserDoesNotExistException();
+        User existingUser = userRepository.findByEmail(userEmail)
+                .orElseThrow(UserDoesNotExistException::new);
+        userMapper.updateEntityFromDto(req, existingUser);
 
-        User user = userMapper.updateDtoToUser(req);
-        user.setId(existingUser.get()
-                .getId());
-        userRepository.save(user);
+        // 3. Save the modified entity (Hibernate will perform a partial update)
+        userRepository.save(existingUser);
 
-        log.info("User updated with ID {}: {}", user.getId(), user.getEmail());
-        return userMapper.toDto(user);
+        log.info("User updated with ID {}: {}", existingUser.getId(), existingUser.getEmail());
+        return userMapper.toDto(existingUser);
     }
 
     @Transactional

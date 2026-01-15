@@ -4,10 +4,7 @@ import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailMapper;
 import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailMapper;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailMapper;
-import org.mapstruct.AfterMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", uses = {
         UserDetailMapper.class,
@@ -20,9 +17,10 @@ public interface UserMapper {
     @Mapping(target = "followed", ignore = true)
     @Mapping(target = "followers", ignore = true)
     @Mapping(target = "id", ignore = true)
-    @Mapping(source = "userDetails", target = "userDetail")
-    @Mapping(source = "userDetails.residentialDetails", target = "residentialDetail")
-    @Mapping(source = "userDetails.officialDetails", target = "officialDetail")
+    @Mapping(target = "userDetail", ignore = true)
+    @Mapping(target = "residentialDetail", ignore = true)
+    @Mapping(target = "officialDetail", ignore = true)
+    @Mapping(target = "active", ignore = true)
     User createDtoToUser(UserCreateRequest req);
 
     @AfterMapping
@@ -33,15 +31,17 @@ public interface UserMapper {
     @Mapping(source = "userDetail", target = "userDetails")
     UserDTO toDto(User user);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "lastModified", ignore = true)
     @Mapping(target = "followed", ignore = true)
     @Mapping(target = "followers", ignore = true)
+    @Mapping(target = "password", ignore = true)
     @Mapping(source = "userDetails", target = "userDetail")
     @Mapping(source = "userDetails.residentialDetails", target = "residentialDetail")
     @Mapping(source = "userDetails.officialDetails", target = "officialDetail")
-    User updateDtoToUser(UserUpdateRequest req);
+    void updateEntityFromDto(UserUpdateRequest req, @MappingTarget User user);
 
     @AfterMapping
     default void afterUserUpdateRequestConversion(UserUpdateRequest req, @MappingTarget User user) {
