@@ -4,8 +4,6 @@ import com.joshtechnologygroup.minisocial.bean.OfficialDetail;
 import com.joshtechnologygroup.minisocial.bean.ResidentialDetail;
 import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.bean.UserDetail;
-import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailMapper;
-import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailMapper;
 import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserMapper;
@@ -17,7 +15,6 @@ import com.joshtechnologygroup.minisocial.factory.OfficialDetailFactory;
 import com.joshtechnologygroup.minisocial.factory.ResidentialDetailFactory;
 import com.joshtechnologygroup.minisocial.factory.UserDetailFactory;
 import com.joshtechnologygroup.minisocial.factory.UserFactory;
-import com.joshtechnologygroup.minisocial.repository.OfficialDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.ResidentialDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.UserDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
@@ -48,19 +45,10 @@ class UserServiceTest {
     private ResidentialDetailRepository residentialDetailRepository;
 
     @Mock
-    private OfficialDetailRepository officialDetailRepository;
-
-    @Mock
     private UserMapper userMapper;
 
     @Mock
     private UserDetailMapper userDetailMapper;
-
-    @Mock
-    private ResidentialDetailMapper residentialDetailMapper;
-
-    @Mock
-    private OfficialDetailMapper officialDetailMapper;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -74,12 +62,6 @@ class UserServiceTest {
         UserCreateRequest request = UserFactory.defaultUserCreateRequest()
                 .build();
         User user = UserFactory.defaultUser();
-        UserDetail userDetail = UserDetailFactory.defaultUserDetail(user.getId());
-        ResidentialDetail resDetail = ResidentialDetailFactory.defaultResidentialDetail(user.getId());
-        OfficialDetail offDetail = OfficialDetailFactory.defaultOfficialDetail(user.getId());
-
-        UserDetailDTO detailDTO = UserDetailFactory.defaultUserDetailDTO(user.getId())
-                .build();
         UserDTO expectedResponse = UserFactory.defaultUserDTO(user)
                 .build();
 
@@ -149,13 +131,13 @@ class UserServiceTest {
         );
 
         // Execute
-        Optional<UserDTO> result = userService.getUser(userEntity.getId());
+        UserDTO result = userService.getUser(userEntity.getId());
 
         // Verify
-        assertTrue(result.isPresent());
-        assertEquals(userEntity.getEmail(), result.get()
+        assertNotNull(result);
+        assertEquals(userEntity.getEmail(), result
                 .email());
-        assertEquals(mockDetailDTO.firstName(), result.get()
+        assertEquals(mockDetailDTO.firstName(), result
                 .userDetails()
                 .firstName());
 
@@ -170,10 +152,11 @@ class UserServiceTest {
         );
 
         // Execute
-        Optional<UserDTO> result = userService.getUser(99L);
+        assertThrows(UserDoesNotExistException.class, () ->
+                userService.getUser(99L)
+        );
 
         // Verify
-        assertTrue(result.isEmpty());
         verifyNoInteractions(userDetailMapper);
         verifyNoInteractions(userMapper);
     }
@@ -189,19 +172,13 @@ class UserServiceTest {
         updatedUser.setId(user.getId());
         updatedUser.setEmail("new-email@company.com");
 
-        UserDetail updatedDetail = UserDetailFactory.defaultUserDetail(user.getId());
-        ResidentialDetail updatedRes = ResidentialDetailFactory.defaultResidentialDetail(user.getId());
-        OfficialDetail updatedOff = OfficialDetailFactory.defaultOfficialDetail(user.getId());
-
         // Mocking Logic
-        when(userRepository.findById(user.getId())).thenReturn(
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(
                 Optional.of(user)
         );
         when(userMapper.updateDtoToUser(updateReq)).thenReturn(updatedUser);
 
         // Mocking the return DTO construction
-        UserDetailDTO detailDTO = UserDetailFactory.defaultUserDetailDTO(user.getId())
-                .build();
         UserDTO finalDTO = UserFactory.defaultUserDTO(user)
                 .email("new-email@company.com")
                 .build();
@@ -209,7 +186,7 @@ class UserServiceTest {
         when(userMapper.toDto(any())).thenReturn(finalDTO);
 
         // 2. Act
-        UserDTO result = userService.updateUser(updateReq, user.getEmail(), user.getId());
+        UserDTO result = userService.updateUser(updateReq, user.getEmail());
 
         // 3. Assert
         assertEquals("new-email@company.com", result.email());
@@ -221,10 +198,10 @@ class UserServiceTest {
         UserUpdateRequest req = UserFactory.defaultUserUpdateRequest()
                 .email("ghost@test.com")
                 .build();
-        when(userRepository.findById(999L)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.empty());
 
         assertThrows(UserDoesNotExistException.class, () ->
-                userService.updateUser(req, "test@mail.com", 999L)
+                userService.updateUser(req, "test@mail.com")
         );
         verify(userRepository, never()).save(any());
     }
@@ -250,7 +227,7 @@ class UserServiceTest {
                 .build();
 
         // Mock behavior
-        when(userRepository.findById(userId)).thenReturn(
+        when(userRepository.findByEmail(userEntity.getEmail())).thenReturn(
                 Optional.of(userEntity)
         );
         when(userMapper.toDto(userEntity)).thenReturn(
@@ -258,7 +235,7 @@ class UserServiceTest {
         );
 
         // Execute
-        UserDTO result = userService.deleteUser(userId);
+        UserDTO result = userService.deleteUser(userEntity.getEmail());
 
         // Verify
         assertNotNull(result);
@@ -267,7 +244,7 @@ class UserServiceTest {
         assertEquals(mockDetailDTO.firstName(), result.userDetails()
                 .firstName());
 
-        verify(userRepository).findById(userId);
+        verify(userRepository).findByEmail(userEntity.getEmail());
         verify(userRepository).deleteById(userId);
         verify(userMapper).toDto(userEntity);
     }
@@ -275,17 +252,17 @@ class UserServiceTest {
     @Test
     void deleteUser_ShouldThrowException_WhenUserDoesNotExist() {
         // Setup
-        Long nonExistentId = 999L;
-        when(userRepository.findById(nonExistentId)).thenReturn(
+        String nonExistentEmail = "fake@mail.com";
+        when(userRepository.findByEmail(nonExistentEmail)).thenReturn(
                 Optional.empty()
         );
 
         // Execute & Verify
         assertThrows(UserDoesNotExistException.class, () ->
-                userService.deleteUser(nonExistentId)
+                userService.deleteUser(nonExistentEmail)
         );
 
-        verify(userRepository).findById(nonExistentId);
+        verify(userRepository).findByEmail(nonExistentEmail);
         verify(userRepository, never()).deleteById(any());
         verifyNoInteractions(userDetailMapper);
         verifyNoInteractions(userMapper);

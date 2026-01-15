@@ -1,5 +1,7 @@
 package com.joshtechnologygroup.minisocial.dto.residentialDetail;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -8,6 +10,7 @@ import lombok.Builder;
 import static com.joshtechnologygroup.minisocial.constants.ValidationConstants.PHONE_NUMBER_REGEX;
 
 @Builder
+@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record ResidentialDetailCreateRequest(
         @Size(max = 255, message = "Address must not exceed 255 characters")
         @NotBlank(message = "Address is required")

@@ -4,7 +4,6 @@ import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.dto.user.*;
 import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsException;
-import com.joshtechnologygroup.minisocial.exception.UnauthorizedException;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -65,12 +64,11 @@ public class UserService {
         return userMapper.toDto(user);
     }
 
-    public Optional<UserDTO> getUser(Long id) {
+    public UserDTO getUser(Long id) {
         Optional<User> userWrapper = userRepository.findById(id);
-        if (userWrapper.isEmpty()) return Optional.empty();
-        User user = userWrapper.get();
+        if (userWrapper.isEmpty()) throw new UserDoesNotExistException();
 
-        return Optional.of(userMapper.toDto(user));
+        return userMapper.toDto(userWrapper.get());
     }
 
     public List<ActiveUserDTO> getActiveUsers() {
@@ -78,18 +76,14 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO updateUser(UserUpdateRequest req, String userEmail, Long id) {
-        Optional<User> existingUser = userRepository.findById(id);
+    public UserDTO updateUser(UserUpdateRequest req, String userEmail) {
+        Optional<User> existingUser = userRepository.findByEmail(userEmail);
         if (existingUser.isEmpty())
             throw new UserDoesNotExistException();
-        if (!existingUser.get()
-                .getEmail()
-                .equals(userEmail)) {
-            throw new UnauthorizedException("Attempted to modify another user");
-        }
 
         User user = userMapper.updateDtoToUser(req);
-        user.setId(id);
+        user.setId(existingUser.get()
+                .getId());
         userRepository.save(user);
 
         log.info("User updated with ID {}: {}", user.getId(), user.getEmail());
@@ -97,9 +91,9 @@ public class UserService {
     }
 
     @Transactional
-    public UserDTO deleteUser(Long id) {
+    public UserDTO deleteUser(String email) {
         // Get user data
-        Optional<User> userWrapper = userRepository.findById(id);
+        Optional<User> userWrapper = userRepository.findByEmail(email);
         if (userWrapper.isEmpty()) {
             throw new UserDoesNotExistException();
         }
@@ -109,7 +103,7 @@ public class UserService {
         // Create the DTO
         UserDTO userDTO = userMapper.toDto(user);
 
-        userRepository.deleteById(id);
+        userRepository.deleteById(user.getId());
 
         log.info("User deleted with ID {}: {}", user.getId(), user.getEmail());
         return userDTO;
