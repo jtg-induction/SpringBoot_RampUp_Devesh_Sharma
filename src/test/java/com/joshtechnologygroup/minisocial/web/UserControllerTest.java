@@ -21,6 +21,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -48,7 +49,7 @@ class UserControllerTest {
                 .getContentAsString();
         List<ActiveUserDTO> list = objectMapper.readerForListOf(ActiveUserDTO.class)
                 .readValue(res);
-        assert (list.size() == 3);
+        assertEquals(3, list.size());
     }
 
     @Test
@@ -125,7 +126,7 @@ class UserControllerTest {
         UserDTO dto = objectMapper.readerFor(UserDTO.class)
                 .readValue(res);
 
-        assert (dto.id() == 1);
+        assertEquals(1, dto.id());
     }
 
     @Test
@@ -146,7 +147,7 @@ class UserControllerTest {
         UserDTO dto = objectMapper.readerFor(UserDTO.class)
                 .readValue(res);
 
-        assert (dto.id() == 2);
+        assertEquals(2, dto.id());
     }
 
     @Test
