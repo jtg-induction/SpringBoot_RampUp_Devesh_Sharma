@@ -1,5 +1,6 @@
 package com.joshtechnologygroup.minisocial.web;
 
+import com.joshtechnologygroup.minisocial.annotation.BadDeserializationResponse;
 import com.joshtechnologygroup.minisocial.annotation.StandardSecurityResponse;
 import com.joshtechnologygroup.minisocial.dto.follower.UpdateFollowingRequest;
 import com.joshtechnologygroup.minisocial.service.FollowerService;
@@ -35,6 +36,7 @@ class FollowerController {
 
     @PostMapping("/followed")
     @Operation(summary = "Update User's Following List", description = "Updates the list of users that the authenticated user is following.")
+    @BadDeserializationResponse
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successfully updated the following list", content = @Content),
     })
