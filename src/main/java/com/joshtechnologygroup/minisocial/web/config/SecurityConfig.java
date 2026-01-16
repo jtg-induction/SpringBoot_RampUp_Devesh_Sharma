@@ -27,7 +27,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http)
-            throws Exception {
+            {
         return http
                 .authorizeHttpRequests(request ->
                         request
@@ -59,7 +59,7 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration auth
-    ) throws Exception {
+    ) {
         return auth.getAuthenticationManager();
     }
 }
