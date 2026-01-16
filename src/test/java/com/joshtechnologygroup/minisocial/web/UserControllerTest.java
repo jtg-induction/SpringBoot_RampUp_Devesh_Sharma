@@ -20,6 +20,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -50,7 +51,7 @@ class UserControllerTest {
         List<UserDTO> list = objectMapper
             .readerForListOf(UserDTO.class)
             .readValue(res);
-        assert (list.size() == 3);
+        assertEquals(3, list.size());
     }
 
     @Test
@@ -126,8 +127,7 @@ class UserControllerTest {
 
     @Test
     void createUser_shouldReturn409_whenDuplicateEmail() throws Exception {
-        UserCreateRequest userCreateRequest =
-            UserFactory.defaultUserCreateRequest()
+        UserCreateRequest userCreateRequest = UserFactory.defaultUserCreateRequest()
                 .email("john.doe@test.com")
                 .build();
 
@@ -231,8 +231,8 @@ class UserControllerTest {
 
         UserDTO dto = objectMapper.readerFor(UserDTO.class).readValue(res);
 
-        assert (dto.id() == 1);
-        assert (dto.email().equals("updated@test.com"));
+        assertEquals(1, dto.id());
+        assertEquals("updated@test.com", dto.email());
     }
 
     @Test
@@ -270,7 +270,7 @@ class UserControllerTest {
             .getContentAsString();
         UserDTO dto = objectMapper.readerFor(UserDTO.class).readValue(res);
 
-        assert (dto.id() == 2);
+        assertEquals(2, dto.id());
     }
 
     @Test

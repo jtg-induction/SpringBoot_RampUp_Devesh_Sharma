@@ -23,7 +23,7 @@ public class UserFactory {
         user.setEmail(FAKER.internet()
                 .emailAddress());
         user.setPassword(FAKER.credentials()
-                .password());
+                .password(8, 20, true, true, true));
         user.setActive(FAKER.bool()
                 .bool());
         user.setCreatedAt(Instant.now());

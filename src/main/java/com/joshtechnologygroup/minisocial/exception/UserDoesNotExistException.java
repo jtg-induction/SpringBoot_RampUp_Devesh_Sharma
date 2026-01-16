@@ -6,6 +6,6 @@ public class UserDoesNotExistException extends MiniSocialException {
     }
 
     public UserDoesNotExistException(String message) {
-        super("The user you attempted to access does not exist in the database: "  + message);
+        super(message);
     }
 }

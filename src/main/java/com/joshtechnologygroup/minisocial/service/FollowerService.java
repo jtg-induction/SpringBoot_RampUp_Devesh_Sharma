@@ -1,6 +1,7 @@
 package com.joshtechnologygroup.minisocial.service;
 
 import com.joshtechnologygroup.minisocial.bean.User;
+import com.joshtechnologygroup.minisocial.dto.follower.UpdateFollowingRequest;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import com.joshtechnologygroup.minisocial.exception.InvalidValueException;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
@@ -22,7 +23,8 @@ public class FollowerService {
     }
 
     @Transactional
-    public void updateFollowed(List<Long> followedIds, String userEmail) {
+    public void updateFollowed(UpdateFollowingRequest req, String userEmail) {
+        List<Long> followedIds = req.userIds();
         // Find user
         log.debug("Updating followed list for user {}: {}", userEmail, followedIds);
         User user = userRepository.findByEmail(userEmail)
@@ -51,12 +53,32 @@ public class FollowerService {
 
         // Add new followers
         for (User followed : newFollowedReferences) {
-            if (!currentFollowed.contains(followed)) {
+            if (!currentFollowed.contains(followed) && !followed.getId().equals(user.getId())) {
                 user.addFollowed(followed);
             }
         }
 
         log.info("Updated followed list for user {}: {}", userEmail, validIds);
+
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void addFollowed(String userEmail, Long followedId) {
+        User user = userRepository.findByEmail(userEmail).orElseThrow(UserDoesNotExistException::new);
+        User followedUser = userRepository.findById(followedId).orElseThrow(() -> new InvalidValueException("Invalid UserID"));
+        if(user.getFollowed().contains(followedUser) || followedUser.getEmail().equals(userEmail)) return;
+        user.addFollowed(followedUser);
+
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void removeFollowed(String userEmail, Long followedId) {
+        User user = userRepository.findByEmail(userEmail).orElseThrow(UserDoesNotExistException::new);
+        User followedUser = userRepository.findById(followedId).orElseThrow(() -> new InvalidValueException("Invalid UserID"));
+        if(!user.getFollowed().contains(followedUser)) return;
+        user.removeFollowed(followedUser);
 
         userRepository.save(user);
     }

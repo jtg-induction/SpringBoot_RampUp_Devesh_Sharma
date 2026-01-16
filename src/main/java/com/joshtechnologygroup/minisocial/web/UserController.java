@@ -1,6 +1,6 @@
 package com.joshtechnologygroup.minisocial.web;
 
-import com.joshtechnologygroup.minisocial.annotation.BadDeserialzationResponse;
+import com.joshtechnologygroup.minisocial.annotation.BadDeserializationResponse;
 import com.joshtechnologygroup.minisocial.annotation.StandardSecurityResponse;
 import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
@@ -51,7 +51,7 @@ class UserController {
 
     @PostMapping("/user")
     @Operation(description = "Create a new user account", summary = "Create User")
-    @BadDeserialzationResponse
+    @BadDeserializationResponse
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "User created successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
@@ -66,7 +66,7 @@ class UserController {
     @PutMapping("/user/me")
     @Operation(description = "Update an existing user account", summary = "Update User")
     @StandardSecurityResponse
-    @BadDeserialzationResponse
+    @BadDeserializationResponse
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User updated successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
@@ -79,7 +79,7 @@ class UserController {
     @PatchMapping("/user/me")
     @Operation(description = "Partially update an existing user account", summary = "Partially update User")
     @StandardSecurityResponse
-    @BadDeserialzationResponse
+    @BadDeserializationResponse
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "User updated successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),

@@ -1,17 +1,13 @@
 package com.joshtechnologygroup.minisocial.service;
 
 import com.joshtechnologygroup.minisocial.bean.User;
-import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.dto.user.*;
-import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsException;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
 import com.joshtechnologygroup.minisocial.exception.ValueConflictException;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import com.joshtechnologygroup.minisocial.specification.UserSpecificationBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,37 +19,23 @@ import java.util.Optional;
 @Slf4j
 public class UserService {
     private final UserRepository userRepository;
-    private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
     public UserService(
             UserRepository userRepository,
-            AuthenticationManager authenticationManager,
             PasswordEncoder passwordEncoder,
             UserMapper userMapper
     ) {
         this.userRepository = userRepository;
-        this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.userMapper = userMapper;
     }
 
-    public void updateUserPassword(UpdatePasswordRequest request) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.oldPassword()));
-
-        Optional<User> user = userRepository.findByEmail(request.email());
-        if (user.isEmpty()) throw new InvalidUserCredentialsException();
-
-        user.get()
-                .setPassword(passwordEncoder.encode(request.newPassword()));
-        userRepository.save(user.get());
-        log.info("Successfully Updated password for user {}", request.email());
-    }
-
     @Transactional
     public UserDTO createUser(UserCreateRequest req) {
-        if(userRepository.findByEmail(req.email()).isPresent())
+        if (userRepository.findByEmail(req.email())
+                .isPresent())
             throw new ValueConflictException("Email already in use");
 
         User user = userMapper.createDtoToUser(req);
