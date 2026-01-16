@@ -4,6 +4,7 @@ import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.dto.UserLogin;
 import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsException;
+import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import com.joshtechnologygroup.minisocial.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ public class AuthService {
             log.debug("Attempting to authenticate user {}", user.email());
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.email(), user.password()));
             Optional<User> dbUser = userRepository.findByEmail(user.email());
-            if (dbUser.isEmpty()) throw new RuntimeException();
+            if (dbUser.isEmpty()) throw new UserDoesNotExistException();
             String jwt = jwtUtil.generateToken(user.email(), dbUser.get()
                     .getId());
 

@@ -42,8 +42,8 @@ public class UpdatePasswordTest {
     void setup() {
         userRepository.deleteAll();
 
-        TEST_PASSWORD = "test-password";
-        SECOND_PASSWORD = "second-password";
+        TEST_PASSWORD = "test-password-1S";
+        SECOND_PASSWORD = "second-password-2S";
 
         // Create a test user
         User user = new User();
@@ -77,7 +77,7 @@ public class UpdatePasswordTest {
     @Test
     @WithMockUser(username = TEST_EMAIL)
     void changePasswordWrongPassword() throws Exception {
-        UpdatePasswordRequest req = new UpdatePasswordRequest("wrong-pass", SECOND_PASSWORD);
+        UpdatePasswordRequest req = new UpdatePasswordRequest("wrong-pass-1S", SECOND_PASSWORD);
         mockMvc.perform(post("/api/user/update-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))

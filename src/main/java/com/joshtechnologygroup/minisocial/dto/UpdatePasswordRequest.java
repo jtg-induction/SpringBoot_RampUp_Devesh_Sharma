@@ -2,6 +2,7 @@ package com.joshtechnologygroup.minisocial.dto;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import com.joshtechnologygroup.minisocial.util.Validations;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -19,5 +20,9 @@ public record UpdatePasswordRequest(
     @AssertTrue(message = "New Password must be different from Old Password")
     private boolean isNewPasswordDifferent() {
         return !newPassword.equals(oldPassword);
+    }
+    @AssertTrue(message = "New Password must have at least 1 number, 1 special character and 1 uppercase and lowercase character")
+    private boolean isNewPasswordStrong() {
+        return Validations.isPasswordStrong(newPassword);
     }
 }

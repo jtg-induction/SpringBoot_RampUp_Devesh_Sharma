@@ -3,11 +3,9 @@ package com.joshtechnologygroup.minisocial.dto.user;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailCreateRequest;
+import com.joshtechnologygroup.minisocial.util.Validations;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 
 @Builder
@@ -28,4 +26,8 @@ public record UserCreateRequest(
         @NotNull(message = "User Details are required")
         @Valid UserDetailCreateRequest userDetails
 ) {
+        @AssertTrue(message = "Password must contain 1 Uppercase and Lowercase Letter, 1 number and 1 special character")
+        private boolean isPasswordIsStrong() {
+                return Validations.isPasswordStrong(password);
+        }
 }
