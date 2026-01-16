@@ -64,6 +64,20 @@ To use the Spring Shell, run the application jar with the `--shell` argument
 ```sh
 ./gradlew build && java -jar build/libs/minisocial-0.0.1-SNAPSHOT.jar --shell`
 ```
-## Additional Resources
-- [Design Document](https://docs.google.com/document/d/18DldasPoUK8Pp5TlUITPDnU2d9lvr2p6V0CjDahxNfo/edit?usp=sharing)
-- [WBS](https://docs.google.com/spreadsheets/d/1w_lIvqW8_LCA_-W7phpHCAJYh4Wj7_bCFDvFw5shcVo/edit?usp=sharing)
+
+### Available Commands
+
+- `import-user-details` - Imports user data from csv files
+    - `-u` or `--user-details` - set the path for the user details csv file
+        - Format for user details csv:
+        ```csv
+        Email,Password,First Name,Last Name,Marital Status,Age,Gender,R_Address,R_City,R_State,R_Country,R_Contact_No_1,R_Contact_No_2,O_Address,O_City,O_State,O_Country,O_Employee_Code,O_Company_Contact_No,O_Company_Contact_Email,O_Company_Name
+        arjun.nair@zenithcorp.in,$2a$12$m7UoG79lSiUuVL785PNtmOpf7NJnq1tuetJdHINQfSmDci1hwOfVq,Arjun,Nair,MARRIED,32,MALE,"Flat 202, Palm Grove",Kochi,Kerala,India,+919845012345,+914842354567,"12th Floor, Cyber Tower",Kochi,Kerala,India,ZNC-441,+914844005000,info@zenithcorp.in,Zenith Corp
+        ```
+    - `-f` or `--following-details` - set the path for the following detail csv file
+      - Format for following details csv:
+        ```csv
+        user_email,following
+        arjun.nair@zenithcorp.in,maya.pillai@zenithcorp.in sara.khan@novatech.com vikram.rao@bluehorizon.co meera.joshi@stellaris.in
+        ```
+- `help` - Print available commands
