@@ -1,11 +1,11 @@
 package com.joshtechnologygroup.minisocial.annotation;
 
+import com.joshtechnologygroup.minisocial.error.ValidationProblemDetail;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.springframework.http.ProblemDetail;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -23,8 +23,8 @@ import java.lang.annotation.Target;
         ),
         @ApiResponse(
                 responseCode = "422",
-                description = "Validation failed",
-                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))
+                description = "Validation failed for the request",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationProblemDetail.class))
         )
 })
 public @interface StandardSecurityResponse {
