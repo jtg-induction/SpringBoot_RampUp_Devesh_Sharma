@@ -14,8 +14,8 @@ CREATE TABLE user_details
     first_name     VARCHAR(255) NOT NULL,
     last_name      VARCHAR(255),
     age            INT UNSIGNED    NOT NULL,
-    gender         ENUM('MALE', 'FEMALE') NOT NULL,
-    marital_status ENUM('SINGLE', 'MARRIED', 'DIVORCED', 'UNKNOWN') NOT NULL DEFAULT 'SINGLE',
+    gender         ENUM('FEMALE', 'MALE') NOT NULL,
+    marital_status ENUM('DIVORCED', 'MARRIED', 'SINGLE', 'UNKNOWN') NOT NULL DEFAULT 'SINGLE',
 
     FOREIGN KEY (user_id)
         REFERENCES users (id) ON DELETE CASCADE

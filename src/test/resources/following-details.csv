@@ -1,0 +1,11 @@
+user_email,following
+arjun.nair@zenithcorp.in,maya.pillai@zenithcorp.in sara.khan@novatech.com vikram.rao@bluehorizon.co meera.joshi@stellaris.in
+maya.pillai@zenithcorp.in,arjun.nair@zenithcorp.in
+sara.khan@novatech.com,rohan.sharma@novatech.com pooja.reddy@bluehorizon.co ananya.iyer@vortexglobal.com
+rohan.sharma@novatech.com,sara.khan@novatech.com
+vikram.rao@bluehorizon.co,pooja.reddy@bluehorizon.co arjun.nair@zenithcorp.in sara.khan@novatech.com amit.kulkarni@stellaris.in karthik.s@vortexglobal.com
+pooja.reddy@bluehorizon.co,vikram.rao@bluehorizon.co ananya.iyer@vortexglobal.com
+meera.joshi@stellaris.in,amit.kulkarni@stellaris.in maya.pillai@zenithcorp.in karthik.s@vortexglobal.com
+amit.kulkarni@stellaris.in,meera.joshi@stellaris.in rohan.sharma@novatech.com
+karthik.s@vortexglobal.com,ananya.iyer@vortexglobal.com vikram.rao@bluehorizon.co sara.khan@novatech.com arjun.nair@zenithcorp.in
+ananya.iyer@vortexglobal.com,karthik.s@vortexglobal.com

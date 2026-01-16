@@ -32,6 +32,10 @@ A collection of APIs and java tools to manage list of users available on a socia
 - Documentation & API
   - Springdoc
 
+- Import tool
+  - Spring Shell
+  - OpenCSV
+
 ## Installation & Setup
 1. Clone the repository:
    ```bash
@@ -52,3 +56,28 @@ A collection of APIs and java tools to manage list of users available on a socia
    ```
 
 6. Docs are accessible at `/swagger-ui/index.html`
+
+## Spring Shell
+
+The project includes a Spring Shell component that provides a command-line interface for utility tools for the application. 
+To use the Spring Shell, run the application jar with the `--shell` argument
+```sh
+./gradlew build && java -jar build/libs/minisocial-0.0.1-SNAPSHOT.jar --shell`
+```
+
+### Available Commands
+
+- `import-user-details` - Imports user data from csv files
+    - `-u` or `--user-details` - set the path for the user details csv file
+        - Format for user details csv:
+        ```csv
+        Email,Password,First Name,Last Name,Marital Status,Age,Gender,R_Address,R_City,R_State,R_Country,R_Contact_No_1,R_Contact_No_2,O_Address,O_City,O_State,O_Country,O_Employee_Code,O_Company_Contact_No,O_Company_Contact_Email,O_Company_Name
+        arjun.nair@zenithcorp.in,$2a$12$m7UoG79lSiUuVL785PNtmOpf7NJnq1tuetJdHINQfSmDci1hwOfVq,Arjun,Nair,MARRIED,32,MALE,"Flat 202, Palm Grove",Kochi,Kerala,India,+919845012345,+914842354567,"12th Floor, Cyber Tower",Kochi,Kerala,India,ZNC-441,+914844005000,info@zenithcorp.in,Zenith Corp
+        ```
+    - `-f` or `--following-details` - set the path for the following detail csv file
+      - Format for following details csv:
+        ```csv
+        user_email,following
+        arjun.nair@zenithcorp.in,maya.pillai@zenithcorp.in sara.khan@novatech.com vikram.rao@bluehorizon.co meera.joshi@stellaris.in
+        ```
+- `help` - Print available commands
