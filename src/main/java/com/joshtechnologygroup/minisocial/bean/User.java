@@ -32,7 +32,7 @@ public class User {
     private String password;
 
     @Column(name = "active")
-    private Boolean active;
+    private Boolean active = true;
 
     @Column(name = "created_at")
     @CreationTimestamp(source = SourceType.DB)

@@ -1,5 +1,6 @@
 package com.joshtechnologygroup.minisocial.service;
 
+import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.dto.user.ActiveUserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
@@ -106,16 +107,15 @@ class UserServiceIntegrationTest {
     void getActiveUsers_Integration_ShouldOnlyReturnActiveUsers() {
         // Create users through service layer (more realistic integration test)
         UserCreateRequest activeUserReq = UserFactory.defaultUserCreateRequest()
-                .email("active@company.com")
-                .active(true)
                 .build();
         userService.createUser(activeUserReq);
 
         UserCreateRequest inactiveUserReq = UserFactory.defaultUserCreateRequest()
-                .email("inactive@company.com")
-                .active(false)
                 .build();
         userService.createUser(inactiveUserReq);
+        User user = userRepository.findByEmail(inactiveUserReq.email()).get();
+        user.setActive(false);
+        userRepository.save(user);
 
         // Execute
         List<ActiveUserDTO> result = userService.getActiveUsers();
@@ -124,7 +124,7 @@ class UserServiceIntegrationTest {
         assertThat(result.size()).isEqualTo(1);
         assertThat(result.get(0)).isNotNull();
         assertThat(result.get(0)
-                .email()).isEqualTo("active@company.com");
+                .email()).isEqualTo(activeUserReq.email());
     }
 
     @Test

@@ -6,6 +6,7 @@ import com.joshtechnologygroup.minisocial.dto.user.ActiveUserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
+import com.joshtechnologygroup.minisocial.error.ValidationProblemDetail;
 import com.joshtechnologygroup.minisocial.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,7 +17,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -52,7 +52,7 @@ class UserController {
             @ApiResponse(responseCode = "201", description = "User created successfully",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
             @ApiResponse(responseCode = "422", description = "Validation failed",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationProblemDetail.class))
             )
     })
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserCreateRequest req) {

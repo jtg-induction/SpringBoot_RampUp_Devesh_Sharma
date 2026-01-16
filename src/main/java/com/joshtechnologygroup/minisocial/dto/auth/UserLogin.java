@@ -1,4 +1,4 @@
-package com.joshtechnologygroup.minisocial.dto;
+package com.joshtechnologygroup.minisocial.dto.auth;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;

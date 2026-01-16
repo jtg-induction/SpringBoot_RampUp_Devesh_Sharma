@@ -64,7 +64,7 @@ class UserControllerTest {
     @Test
     void createUser_shouldReturn422_whenMissingFields() throws Exception {
         UserCreateRequest userCreateRequest = UserFactory.defaultUserCreateRequest()
-                .userDetails(null)
+                .password(null)
                 .build();
         mockMvc.perform(post("/api/user").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userCreateRequest)))
@@ -82,13 +82,13 @@ class UserControllerTest {
     }
 
     @Test
-    void createUser_shouldReturn409_whenDuplicateEmail() throws Exception {
+    void createUser_shouldReturn422_whenDuplicateEmail() throws Exception {
         UserCreateRequest userCreateRequest = UserFactory.defaultUserCreateRequest()
                 .email("john.doe@test.com")
                 .build();
 
         mockMvc.perform(post("/api/user").contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userCreateRequest))).andExpect(status().isConflict());
+                        .content(objectMapper.writeValueAsString(userCreateRequest))).andExpect(status().isUnprocessableContent());
     }
     @Test
     void createUser_shouldReturn400_whenBadJson() throws Exception {

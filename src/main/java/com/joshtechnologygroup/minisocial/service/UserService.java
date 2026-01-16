@@ -34,7 +34,7 @@ public class UserService {
     public UserDTO createUser(UserCreateRequest req) {
         if (userRepository.findByEmail(req.email())
                 .isPresent())
-            throw new ValueConflictException("Email already in use");
+            throw new ValueConflictException("Validation Error");
 
         User user = userMapper.createDtoToUser(req);
         user.setPassword(passwordEncoder.encode(req.password()));

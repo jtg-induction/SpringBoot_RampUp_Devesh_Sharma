@@ -1,4 +1,4 @@
-package com.joshtechnologygroup.minisocial.dto;
+package com.joshtechnologygroup.minisocial.dto.auth;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -12,11 +12,11 @@ import static com.joshtechnologygroup.minisocial.constants.ValidationConstants.S
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record UpdatePasswordRequest(
         @NotBlank(message = "Old Password is required")
-        @Size(min = 8, max = 255, message = "Password must be between 8 and 255 characters long")
+        @Size(min = 8, max = 30, message = "Password must be between 8 and 30 characters long")
         String oldPassword,
 
         @NotBlank(message = "New Password is required")
-        @Size(min = 8, max = 255, message = "Password must be between 8 and 255 characters long")
+        @Size(min = 8, max = 30, message = "Password must be between 8 and 30 characters long")
         @Pattern(regexp = STRONG_PASSWORD_REGEX,message = "New Password must have at least 1 number, 1 special character and 1 uppercase and lowercase character")
         String newPassword
 ) {

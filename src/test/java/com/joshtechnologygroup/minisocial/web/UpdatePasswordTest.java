@@ -1,7 +1,7 @@
 package com.joshtechnologygroup.minisocial.web;
 
 import com.joshtechnologygroup.minisocial.bean.User;
-import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
+import com.joshtechnologygroup.minisocial.dto.auth.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,7 +61,7 @@ public class UpdatePasswordTest {
         mockMvc.perform(post("/api/user/update-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
@@ -92,5 +92,16 @@ public class UpdatePasswordTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isUnprocessableContent());
+    }
+
+    @Test
+    @WithMockUser(username = TEST_EMAIL)
+    void changePasswordBadJson() throws Exception {
+        String badJson = "{ oldPassword: test-password-1S }";
+
+        mockMvc.perform(post("/api/user/update-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(badJson))
+                .andExpect(status().isBadRequest());
     }
 }

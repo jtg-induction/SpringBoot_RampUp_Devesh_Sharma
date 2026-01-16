@@ -40,7 +40,6 @@ public class UserFactory {
         return UserCreateRequest.builder()
                 .email(user.getEmail())
                 .password(user.getPassword())
-                .active(user.getActive())
                 .userDetails(UserDetailFactory.defaultUserDetailCreateRequest()
                         .build());
     }
@@ -54,7 +53,6 @@ public class UserFactory {
         return UserDTO.builder()
                 .id(user.getId())
                 .email(user.getEmail())
-                .active(user.getActive())
                 .lastModified(user.getLastModified())
                 .userDetails(UserDetailFactory.defaultUserDetailDTO(user.getId())
                         .build());

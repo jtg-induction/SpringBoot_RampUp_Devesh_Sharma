@@ -20,11 +20,11 @@ public record UserDTO(
         @Email(message = "Invalid Email format")
         String email,
 
-        @NotNull(message = "active is required")
-        Boolean active,
-
-        @PastOrPresent(message = "lastModified should not be in future")
+        @NotNull
         Instant lastModified,
+
+        @NotNull
+        Instant createdAt,
 
         @NotNull(message = "User Details are required")
         @Valid UserDetailDTO userDetails

@@ -43,14 +43,13 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
     @ExceptionHandler(ValueConflictException.class)
-    public ProblemDetail handleValueConflictException(
+    public ValidationProblemDetail handleValueConflictException(
             ValueConflictException e
     ) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.CONFLICT,
-                e.getMessage()
-        );
-        problemDetail.setTitle("Value Conflict");
+        ValidationProblemDetail problemDetail = new ValidationProblemDetail(List.of());
+        problemDetail.setStatus(HttpStatus.UNPROCESSABLE_CONTENT);
+        problemDetail.setDetail("Validation Error");
+        problemDetail.setTitle("Validation Error");
 
         return problemDetail;
     }
