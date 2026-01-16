@@ -1,6 +1,7 @@
 package com.joshtechnologygroup.minisocial.service;
 
 import com.joshtechnologygroup.minisocial.bean.User;
+import com.joshtechnologygroup.minisocial.dto.follower.UpdateFollowingRequest;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import com.joshtechnologygroup.minisocial.exception.InvalidValueException;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
@@ -22,7 +23,8 @@ public class FollowerService {
     }
 
     @Transactional
-    public void updateFollowed(List<Long> followedIds, String userEmail) {
+    public void updateFollowed(UpdateFollowingRequest req, String userEmail) {
+        List<Long> followedIds = req.userIds();
         // Find user
         log.debug("Updating followed list for user {}: {}", userEmail, followedIds);
         User user = userRepository.findByEmail(userEmail)

@@ -1,6 +1,7 @@
 package com.joshtechnologygroup.minisocial.service;
 
 import com.joshtechnologygroup.minisocial.bean.User;
+import com.joshtechnologygroup.minisocial.dto.follower.UpdateFollowingRequest;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import com.joshtechnologygroup.minisocial.exception.InvalidValueException;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
@@ -31,11 +32,12 @@ class FollowerServiceTest {
         User user = UserFactory.defaultUser();
         User user1 = UserFactory.defaultUser();
         User user2 = UserFactory.defaultUser();
-        List<Long> updateRequest = List.of(user1.getId(), user2.getId());
+        UpdateFollowingRequest updateRequest = new UpdateFollowingRequest(
+                List.of(user1.getId(), user2.getId()));
 
         when(userRepository.save(user)).thenReturn(user);
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(userRepository.findExistingUserIds(updateRequest)).thenReturn(updateRequest);
+        when(userRepository.findExistingUserIds(updateRequest.userIds())).thenReturn(updateRequest.userIds());
         when(userRepository.getReferenceById(user1.getId())).thenReturn(user1);
         when(userRepository.getReferenceById(user2.getId())).thenReturn(user2);
 
@@ -52,7 +54,7 @@ class FollowerServiceTest {
 
         verify(userRepository, times(1)).save(any());
         verify(userRepository, times(1)).findByEmail(user.getEmail());
-        verify(userRepository, times(1)).findExistingUserIds(updateRequest);
+        verify(userRepository, times(1)).findExistingUserIds(updateRequest.userIds());
         verify(userRepository, times(2)).getReferenceById(any());
     }
 
@@ -60,24 +62,24 @@ class FollowerServiceTest {
     void updateFollowed_shouldThrow_whenInvalidId() {
         User user = UserFactory.defaultUser();
         User user1 = UserFactory.defaultUser();
-        List<Long> updateRequest = List.of(user1.getId(), 999L); // 999L does not exist
+        UpdateFollowingRequest updateRequest = new UpdateFollowingRequest(List.of(user1.getId(), 999L));
 
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-        when(userRepository.findExistingUserIds(updateRequest)).thenReturn(List.of(user1.getId()));
+        when(userRepository.findExistingUserIds(updateRequest.userIds())).thenReturn(List.of(user1.getId()));
 
         assertThrows(InvalidValueException.class, () ->
             followerService.updateFollowed(updateRequest, user.getEmail())
         );
 
         verify(userRepository, times(1)).findByEmail(user.getEmail());
-        verify(userRepository, times(1)).findExistingUserIds(updateRequest);
+        verify(userRepository, times(1)).findExistingUserIds(updateRequest.userIds());
         verify(userRepository, never()).save(any());
         verify(userRepository, never()).getReferenceById(any());
     }
 
     @Test
     void updateFollowed_shouldThrow_whenUserDoesNotExist() {
-        List<Long> updateRequest = List.of(1L, 2L);
+        UpdateFollowingRequest updateRequest = new UpdateFollowingRequest(List.of(1L, 2L));
 
         when(userRepository.findByEmail(any())).thenReturn(Optional.empty());
 

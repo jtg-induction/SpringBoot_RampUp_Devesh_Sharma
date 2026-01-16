@@ -1,6 +1,7 @@
 package com.joshtechnologygroup.minisocial.web;
 
 import com.joshtechnologygroup.minisocial.annotation.StandardSecurityResponse;
+import com.joshtechnologygroup.minisocial.dto.follower.UpdateFollowingRequest;
 import com.joshtechnologygroup.minisocial.service.FollowerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -9,7 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/user/me")
 @StandardSecurityResponse
 @Validated
 @Tag(name = "Followers Management", description = "APIs for managing user followers")
@@ -37,13 +38,10 @@ class FollowerController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successfully updated the following list", content = @Content),
     })
-    public ResponseEntity<Void> updateUserFollowingList(@RequestBody
-            List<
-                @NotNull(message = "ID cannot be null")
-                @PositiveOrZero(message = "ID must be unsigned") Long
-            > request, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Void> updateUserFollowingList(@RequestBody @Valid UpdateFollowingRequest request, @AuthenticationPrincipal UserDetails userDetails) {
         followerService.updateFollowed(request, userDetails.getUsername());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok()
+                .build();
     }
 
     @GetMapping("/followers")
@@ -65,7 +63,8 @@ class FollowerController {
     })
     public ResponseEntity<Void> addFollowed(@AuthenticationPrincipal UserDetails userDetails, @PositiveOrZero @PathVariable Long id) {
         followerService.addFollowed(userDetails.getUsername(), id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok()
+                .build();
     }
 
     @DeleteMapping("/followed/{id}")
@@ -75,7 +74,8 @@ class FollowerController {
     })
     public ResponseEntity<Void> removedFollowed(@AuthenticationPrincipal UserDetails userDetails, @PositiveOrZero @PathVariable Long id) {
         followerService.removeFollowed(userDetails.getUsername(), id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok()
+                .build();
     }
 
     @GetMapping("/followed")
@@ -86,7 +86,7 @@ class FollowerController {
             ),
     })
     public ResponseEntity<List<Long>> getUsersFollowedBy(@AuthenticationPrincipal UserDetails userDetails) {
-                List<Long> followed = followerService.getUsersFollowedBy(userDetails.getUsername());
-                return new ResponseEntity<>(followed, HttpStatus.OK);
+        List<Long> followed = followerService.getUsersFollowedBy(userDetails.getUsername());
+        return new ResponseEntity<>(followed, HttpStatus.OK);
     }
 }
