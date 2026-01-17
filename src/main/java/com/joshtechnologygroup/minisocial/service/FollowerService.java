@@ -1,0 +1,114 @@
+package com.joshtechnologygroup.minisocial.service;
+
+import com.joshtechnologygroup.minisocial.bean.User;
+import com.joshtechnologygroup.minisocial.dto.follower.UpdateFollowingRequest;
+import com.joshtechnologygroup.minisocial.exception.IllegalActionException;
+import com.joshtechnologygroup.minisocial.exception.InvalidIdException;
+import com.joshtechnologygroup.minisocial.exception.NoEffectException;
+import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
+import com.joshtechnologygroup.minisocial.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+@Service
+@Slf4j
+public class FollowerService {
+    private final UserRepository userRepository;
+
+    public FollowerService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    @Transactional
+    public void updateFollowed(UpdateFollowingRequest req, String userEmail) {
+        List<Long> followedIds = req.userIds();
+        // Find user
+        log.debug("Updating followed list for user {}: {}", userEmail, followedIds);
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(UserDoesNotExistException::new);
+        List<Long> validIds = userRepository.findExistingUserIds(followedIds);
+        if (validIds.size() != followedIds.size()) {
+            log.warn("Some user IDs do not exist. Requested: {}, Valid: {}", followedIds, validIds);
+            throw new InvalidIdException("One or more of the provided user IDs do not exist.");
+        }
+
+        // Find new followers
+        Set<User> currentFollowed = user.getFollowed();
+        Set<User> newFollowedReferences = new HashSet<>();
+
+        for (Long id : validIds) {
+            User followed = userRepository.getReferenceById(id);
+            newFollowedReferences.add(followed);
+        }
+
+        // Remove followers that are no longer in the list
+        for (User followed : currentFollowed) {
+            if (!newFollowedReferences.contains(followed)) {
+                user.removeFollowed(followed);
+            }
+        }
+
+        // Add new followers
+        for (User followed : newFollowedReferences) {
+            if (!currentFollowed.contains(followed) && !followed.getId().equals(user.getId())) {
+                user.addFollowed(followed);
+            }
+        }
+
+        log.info("Updated followed list for user {}: {}", userEmail, validIds);
+
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void addFollowed(String userEmail, Long followedId) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(UserDoesNotExistException::new);
+        User followedUser = userRepository.findById(followedId)
+                .orElseThrow(() -> new InvalidIdException("Invalid UserID"));
+        if (user.getFollowed()
+                .contains(followedUser))
+            throw new NoEffectException();
+        if (followedUser.getEmail()
+                .equals(userEmail)) throw new IllegalActionException("Users cannot follow themselves");
+        user.addFollowed(followedUser);
+
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void removeFollowed(String userEmail, Long followedId) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(UserDoesNotExistException::new);
+        User followedUser = userRepository.findById(followedId)
+                .orElseThrow(() -> new InvalidIdException("Invalid UserID"));
+        if (!user.getFollowed()
+                .contains(followedUser)) throw new NoEffectException();
+        user.removeFollowed(followedUser);
+
+        userRepository.save(user);
+    }
+
+    public List<Long> getUserFollowers(String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(UserDoesNotExistException::new);
+        return user.getFollowers()
+                .stream()
+                .map(User::getId)
+                .toList();
+    }
+
+    public List<Long> getUsersFollowedBy(String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(UserDoesNotExistException::new);
+        return user.getFollowed()
+                .stream()
+                .map(User::getId)
+                .toList();
+    }
+}

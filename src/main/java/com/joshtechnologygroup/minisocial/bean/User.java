@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -56,16 +57,26 @@ public class User {
     @EqualsAndHashCode.Exclude
     private ResidentialDetail residentialDetail;
 
-    @ManyToMany(mappedBy = "followers")
-    @EqualsAndHashCode.Exclude
-    Set<User> followed;
-
     @ManyToMany
     @EqualsAndHashCode.Exclude
     @JoinTable(
             name = "followers",
-            joinColumns = @JoinColumn(name = "followed_user"),
-            inverseJoinColumns = @JoinColumn(name = "following_user")
+            joinColumns = @JoinColumn(name = "following_user"),
+            inverseJoinColumns = @JoinColumn(name = "followed_user")
     )
-    Set<User> followers;
+    Set<User> followed = new HashSet<>();
+
+    @ManyToMany(mappedBy = "followed")
+    @EqualsAndHashCode.Exclude
+    Set<User> followers = new HashSet<>();
+
+    public void addFollowed(User followed) {
+        this.followed.add(followed);   // Add to owning side
+        followed.followers.add(this);    // Add to inverse side (in-memory)
+    }
+
+    public void removeFollowed(User followed) {
+        this.followed.remove(followed); // Remove from owning side
+        followed.followers.remove(this);  // Remove from inverse side (in-memory)
+    }
 }
