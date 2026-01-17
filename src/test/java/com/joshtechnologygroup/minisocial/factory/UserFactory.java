@@ -11,18 +11,15 @@ import java.time.Instant;
 import java.util.HashSet;
 
 public class UserFactory {
+
     private static final Faker FAKER = TestDataConfig.FAKER;
 
     public static User defaultUser() {
         User user = new User();
-        user.setId((long) FAKER.number()
-                .positive());
-        user.setEmail(FAKER.internet()
-                .emailAddress());
-        user.setPassword(FAKER.credentials()
-                .password(8, 20, true, true, true));
-        user.setActive(FAKER.bool()
-                .bool());
+        user.setId((long) FAKER.number().positive());
+        user.setEmail(FAKER.internet().emailAddress());
+        user.setPassword(FAKER.credentials().password(8, 20, true, true, true));
+        user.setActive(FAKER.bool().bool());
         user.setCreatedAt(Instant.now());
         user.setLastModified(Instant.now());
         user.setFollowers(new HashSet<>());
@@ -36,26 +33,25 @@ public class UserFactory {
         return defaultUserCreateRequest(user);
     }
 
-    public static UserCreateRequest.UserCreateRequestBuilder defaultUserCreateRequest(User user) {
+    public static UserCreateRequest.UserCreateRequestBuilder defaultUserCreateRequest(
+        User user
+    ) {
         return UserCreateRequest.builder()
-                .email(user.getEmail())
-                .password(user.getPassword())
-                .userDetails(UserDetailFactory.defaultUserDetailCreateRequest()
-                        .build());
-    }
-
-    public static UserDTO.UserDTOBuilder defaultUserDTO() {
-        User user = defaultUser();
-        return defaultUserDTO(user);
+            .email(user.getEmail())
+            .password(user.getPassword())
+            .userDetails(
+                UserDetailFactory.defaultUserDetailCreateRequest().build()
+            );
     }
 
     public static UserDTO.UserDTOBuilder defaultUserDTO(User user) {
         return UserDTO.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .lastModified(user.getLastModified())
-                .userDetails(UserDetailFactory.defaultUserDetailDTO(user.getId())
-                        .build());
+            .id(user.getId())
+            .email(user.getEmail())
+            .lastModified(user.getLastModified())
+            .userDetails(
+                UserDetailFactory.defaultUserDetailDTO(user.getId()).build()
+            );
     }
 
     public static UserUpdateRequest.UserUpdateRequestBuilder defaultUserUpdateRequest() {
@@ -63,12 +59,13 @@ public class UserFactory {
         return defaultUserUpdateRequest(user);
     }
 
-    public static UserUpdateRequest.UserUpdateRequestBuilder defaultUserUpdateRequest(User user) {
-        return UserUpdateRequest.builder()
-                .email(user.getEmail())
-                .password(user.getPassword())
-                .active(user.getActive())
-                .userDetails(UserDetailFactory.defaultUserDetailDTO(user.getId())
-                        .build());
+    public static UserUpdateRequest.UserUpdateRequestBuilder defaultUserUpdateRequest(
+        User user
+    ) {
+        return UserUpdateRequest.builder().userDetails(
+            UserDetailFactory.defaultUserDetailUpdateRequest(
+                user.getId()
+            ).build()
+        );
     }
 }

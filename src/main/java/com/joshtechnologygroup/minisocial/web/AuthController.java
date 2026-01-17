@@ -2,10 +2,10 @@ package com.joshtechnologygroup.minisocial.web;
 
 import com.joshtechnologygroup.minisocial.annotation.BadDeserializationResponse;
 import com.joshtechnologygroup.minisocial.annotation.StandardSecurityResponse;
+import com.joshtechnologygroup.minisocial.annotation.ValidationErrorResponse;
 import com.joshtechnologygroup.minisocial.dto.auth.AuthTokenResponse;
 import com.joshtechnologygroup.minisocial.dto.auth.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.dto.auth.UserLogin;
-import com.joshtechnologygroup.minisocial.error.ValidationProblemDetail;
 import com.joshtechnologygroup.minisocial.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 @Slf4j
 @Tag(name = "Authentication", description = "APIs for user authentication and password management")
 class AuthController {
@@ -38,6 +38,7 @@ class AuthController {
 
     @PostMapping("/authenticate")
     @BadDeserializationResponse
+    @ValidationErrorResponse
     @Operation(description = "Authenticate user and issue JWT", summary = "User Authentication")
     @ApiResponses({
             @ApiResponse(
@@ -49,11 +50,6 @@ class AuthController {
                     responseCode = "401",
                     description = "Invalid Username or Password",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))
-            ),
-            @ApiResponse(
-                    responseCode = "422",
-                    description = "Validation failed",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ValidationProblemDetail.class))
             )
     })
     public ResponseEntity<AuthTokenResponse> authenticate(@Valid @RequestBody UserLogin user) {
@@ -63,6 +59,7 @@ class AuthController {
 
     @StandardSecurityResponse
     @BadDeserializationResponse
+    @ValidationErrorResponse
     @PostMapping("/update-password")
     @Operation(description = "Update user password", summary = "Update Password")
     @ApiResponses({

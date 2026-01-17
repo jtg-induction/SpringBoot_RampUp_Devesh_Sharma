@@ -1,20 +1,22 @@
-package com.joshtechnologygroup.minisocial.dto.residentialDetail;
+package com.joshtechnologygroup.minisocial.dto.officialDetail;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
-
-import java.time.Instant;
 
 import static com.joshtechnologygroup.minisocial.constants.ValidationConstants.PHONE_NUMBER_REGEX;
 
 @Builder
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record ResidentialDetailDTO(
+public record OfficialDetailUpdateRequest(
+        @Size(min = 3, max = 100, message = "Employee Code must be between 3 and 100 characters long")
+        @NotBlank(message = "Employee Code is required")
+        String employeeCode,
+
         @Size(max = 255, message = "Address must not exceed 255 characters")
         @NotBlank(message = "Address is required")
         String address,
@@ -31,33 +33,18 @@ public record ResidentialDetailDTO(
         @NotBlank(message = "Country is required")
         String country,
 
-        @Size(
-                min = 13,
-                max = 13,
-                message = "Contact Number 1 must be 14 characters long"
-        )
-        @Pattern(
-                regexp = PHONE_NUMBER_REGEX,
-                message = "Contact number must be in the format '+CCXXXXXXXXXX' where CC is country code"
-        )
-        @NotBlank(message = "Contact Number 1 is required")
-        String contactNo1,
+        @Size(min = 13, max = 13, message = "Company Contact must be 14 characters long")
+        @Pattern(regexp = PHONE_NUMBER_REGEX, message = "Contact number must be in the format '+CCXXXXXXXXXX' where CC is country code")
+        @NotBlank(message = "Company Contact Number is required")
+        String companyContactNo,
 
-        @Size(
-                min = 13,
-                max = 13,
-                message = "Contact Number 2 must be 14 characters long"
-        )
-        @Pattern(
-                regexp = PHONE_NUMBER_REGEX,
-                message = "Contact number must be in the format '+CCXXXXXXXXXX' where CC is country code"
-        )
-        String contactNo2,
+        @Size(max = 255, message = "Company Contact Email must not exceed 255 characters")
+        @NotBlank(message = "Company Contact Email is required")
+        @Email
+        String companyContactEmail,
 
-        @NotNull
-        Instant lastModified,
-
-        @NotNull
-        Instant createdAt
+        @Size(max = 255, message = "Company Name must not exceed 255 characters")
+        @NotBlank(message = "Company Name is required")
+        String companyName
 ) {
 }

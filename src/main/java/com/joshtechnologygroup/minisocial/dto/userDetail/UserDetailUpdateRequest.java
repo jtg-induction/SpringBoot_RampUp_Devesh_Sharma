@@ -2,19 +2,17 @@ package com.joshtechnologygroup.minisocial.dto.userDetail;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailDTO;
-import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailDTO;
+import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailUpdateRequest;
+import com.joshtechnologygroup.minisocial.dto.residentialDetail.ResidentialDetailUpdateRequest;
 import com.joshtechnologygroup.minisocial.enums.Gender;
 import com.joshtechnologygroup.minisocial.enums.MaritalStatus;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 
-import java.time.Instant;
-
 @Builder
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record UserDetailDTO(
+public record UserDetailUpdateRequest(
         @Size(max = 100, message = "First name must not exceed 100 characters")
         @NotBlank(message = "First name is required")
         String firstName,
@@ -32,18 +30,12 @@ public record UserDetailDTO(
         @NotNull(message = "Marital status is required")
         MaritalStatus maritalStatus,
 
-        @NotNull
-        Instant lastModified,
-
-        @NotNull
-        Instant createdAt,
-
         @NotNull(message = "Residential Details are required")
         @Valid
-        ResidentialDetailDTO residentialDetails,
+        ResidentialDetailUpdateRequest residentialDetails,
 
         @NotNull(message = "Official Details are required")
         @Valid
-        OfficialDetailDTO officialDetails
+        OfficialDetailUpdateRequest officialDetails
 ) {
 }

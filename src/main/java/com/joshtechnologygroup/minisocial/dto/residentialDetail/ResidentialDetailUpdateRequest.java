@@ -3,18 +3,15 @@ package com.joshtechnologygroup.minisocial.dto.residentialDetail;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
-
-import java.time.Instant;
 
 import static com.joshtechnologygroup.minisocial.constants.ValidationConstants.PHONE_NUMBER_REGEX;
 
 @Builder
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record ResidentialDetailDTO(
+public record ResidentialDetailUpdateRequest(
         @Size(max = 255, message = "Address must not exceed 255 characters")
         @NotBlank(message = "Address is required")
         String address,
@@ -52,12 +49,6 @@ public record ResidentialDetailDTO(
                 regexp = PHONE_NUMBER_REGEX,
                 message = "Contact number must be in the format '+CCXXXXXXXXXX' where CC is country code"
         )
-        String contactNo2,
-
-        @NotNull
-        Instant lastModified,
-
-        @NotNull
-        Instant createdAt
+        String contactNo2
 ) {
 }

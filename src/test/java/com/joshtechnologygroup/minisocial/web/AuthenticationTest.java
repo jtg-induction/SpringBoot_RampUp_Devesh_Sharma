@@ -55,7 +55,7 @@ class AuthenticationTest {
     void authenticateUser_Success() throws Exception {
         UserLogin loginRequest = new UserLogin(TEST_EMAIL, TEST_PASSWORD);
 
-        String response = mockMvc.perform(post("/api/user/authenticate")
+        String response = mockMvc.perform(post("/api/users/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
@@ -72,7 +72,7 @@ class AuthenticationTest {
     void authenticateUser_WrongPassword() throws Exception {
         UserLogin loginRequest = new UserLogin(TEST_EMAIL, "wrong-password");
 
-        mockMvc.perform(post("/api/user/authenticate")
+        mockMvc.perform(post("/api/users/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized());
@@ -82,7 +82,7 @@ class AuthenticationTest {
     void authenticateUser_WrongEmail() throws Exception {
         UserLogin loginRequest = new UserLogin("nonexistent@example.com", TEST_PASSWORD);
 
-        mockMvc.perform(post("/api/user/authenticate")
+        mockMvc.perform(post("/api/users/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized());
@@ -92,7 +92,7 @@ class AuthenticationTest {
     void authenticateUser_InvalidEmail() throws Exception {
         UserLogin loginRequest = new UserLogin("invalid-email", TEST_PASSWORD);
 
-        mockMvc.perform(post("/api/user/authenticate")
+        mockMvc.perform(post("/api/users/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnprocessableContent());
@@ -101,7 +101,7 @@ class AuthenticationTest {
     @Test
     void authenticateUser_BadJson() throws Exception {
         String badJson = "{ email: bad-email }";
-        mockMvc.perform(post("/api/user/authenticate")
+        mockMvc.perform(post("/api/users/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(badJson))
                 .andExpect(status().isBadRequest());
