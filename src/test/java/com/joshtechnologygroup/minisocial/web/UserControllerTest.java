@@ -1,0 +1,192 @@
+package com.joshtechnologygroup.minisocial.web;
+
+import com.joshtechnologygroup.minisocial.bean.User;
+import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
+import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
+import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
+import com.joshtechnologygroup.minisocial.factory.UserFactory;
+import com.joshtechnologygroup.minisocial.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.web.servlet.MockMvc;
+import tools.jackson.databind.ObjectMapper;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+@Sql(scripts = "/user-data.sql")
+class UserControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Test
+    @WithMockUser(username = "test@gmail.com")
+    void getActiveUsers() throws Exception {
+        String res = mockMvc
+            .perform(get("/api/users"))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+        // Parse paginated response
+        var page = objectMapper.readTree(res);
+        var content = page.get("content");
+        assertEquals(3, content.size());
+    }
+
+    @Test
+    void createUser_shouldReturn201_whenValidInput() throws Exception {
+        UserCreateRequest userCreateRequest =
+            UserFactory.defaultUserCreateRequest().build();
+        mockMvc
+            .perform(
+                post("/api/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(userCreateRequest))
+            )
+            .andExpect(status().isCreated());
+    }
+
+    @Test
+    void createUser_shouldReturn422_whenMissingFields() throws Exception {
+        UserCreateRequest userCreateRequest =
+            UserFactory.defaultUserCreateRequest().password(null).build();
+        mockMvc
+            .perform(
+                post("/api/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(userCreateRequest))
+            )
+            .andExpect(status().isUnprocessableContent());
+    }
+
+    @Test
+    void createUser_shouldReturn422_whenInvalidEmail() throws Exception {
+        UserCreateRequest userCreateRequest =
+            UserFactory.defaultUserCreateRequest()
+                .email("invalid-email")
+                .build();
+        mockMvc
+            .perform(
+                post("/api/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(userCreateRequest))
+            )
+            .andExpect(status().isUnprocessableContent());
+    }
+
+    @Test
+    void createUser_shouldReturn422_whenDuplicateEmail() throws Exception {
+        UserCreateRequest userCreateRequest =
+            UserFactory.defaultUserCreateRequest()
+                .email("john.doe@test.com")
+                .build();
+
+        mockMvc
+            .perform(
+                post("/api/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(userCreateRequest))
+            )
+            .andExpect(status().isUnprocessableContent());
+    }
+
+    @Test
+    void createUser_shouldReturn400_whenBadJson() throws Exception {
+        String badJson = "{ email: test@gmail.com }";
+
+        mockMvc
+            .perform(
+                post("/api/users")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(badJson)
+            )
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockUser(username = "test@gmail.com")
+    void updateUser_shouldReturn404_NonExistingUser() throws Exception {
+        UserUpdateRequest userUpdateRequest =
+            UserFactory.defaultUserUpdateRequest().build();
+        mockMvc
+            .perform(
+                put("/api/users/profile")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(userUpdateRequest))
+            )
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = "john.doe@test.com")
+    void updateUser_shouldReturnDTO_validUser() throws Exception {
+        Optional<User> user = userRepository.findById(1L);
+        if (user.isEmpty()) throw new Exception(
+            "User not found in test database"
+        );
+        UserUpdateRequest userUpdateRequest =
+            UserFactory.defaultUserUpdateRequest(user.get()).build();
+        String res = mockMvc
+            .perform(
+                put("/api/users/profile")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(userUpdateRequest))
+            )
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+
+        UserDTO dto = objectMapper.readerFor(UserDTO.class).readValue(res);
+
+        assertEquals(1, dto.id());
+    }
+
+    @Test
+    @WithMockUser(username = "test@gmail.com")
+    void getUser_shouldReturn422_whenNegativeId() throws Exception {
+        mockMvc
+            .perform(get("/api/users/-1"))
+            .andExpect(status().isUnprocessableContent());
+    }
+
+    @Test
+    @WithMockUser(username = "jane.smith@test.com")
+    void deleteUser_shouldReturn200_whenExists() throws Exception {
+        String res = mockMvc
+            .perform(delete("/api/users/profile"))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+        UserDTO dto = objectMapper.readerFor(UserDTO.class).readValue(res);
+
+        assertEquals(2, dto.id());
+    }
+
+    @Test
+    @WithMockUser(username = "test@gmail.com")
+    void deleteUser_shouldReturn404_whenNotExists() throws Exception {
+        mockMvc.perform(delete("/api/users/profile")).andExpect(status().isNotFound());
+    }
+}

@@ -1,19 +1,39 @@
 package com.joshtechnologygroup.minisocial.exception;
 
+import com.joshtechnologygroup.minisocial.error.ValidationError;
+import com.joshtechnologygroup.minisocial.error.ValidationProblemDetail;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 // Class with handlers for custom exceptions
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(UserDoesNotExistException.class)
+    public ProblemDetail handleUserDoesNotExistException(
+            UserDoesNotExistException e
+    ) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.NOT_FOUND,
+                e.getMessage()
+        );
+        problemDetail.setTitle("User Not Found");
+
+        return problemDetail;
+    }
+
     @ExceptionHandler(InvalidUserCredentialsException.class)
-    public ProblemDetail handleUserDoesNotExistException(InvalidUserCredentialsException e) {
+    public ProblemDetail handleInvalidUserCredentialsException(
+            InvalidUserCredentialsException e
+    ) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.UNAUTHORIZED,
                 e.getMessage()
@@ -22,24 +42,66 @@ public class GlobalExceptionHandler {
 
         return problemDetail;
     }
+    @ExceptionHandler(ValueConflictException.class)
+    public ValidationProblemDetail handleValueConflictException(
+            ValueConflictException e
+    ) {
+        ValidationProblemDetail problemDetail = new ValidationProblemDetail(List.of());
+        problemDetail.setStatus(HttpStatus.UNPROCESSABLE_CONTENT);
+        problemDetail.setDetail("Validation Error");
+        problemDetail.setTitle("Validation Error");
+
+        return problemDetail;
+    }
+
     // Validation Exception Handler
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ProblemDetail handleValidationErrors(MethodArgumentNotValidException ex) {
-        // Create a standard RFC 7807 ProblemDetail object
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_CONTENT);
-        problemDetail.setTitle("Validation Failed");
-        problemDetail.setDetail("One or more fields in the request are invalid.");
+    public ValidationProblemDetail handleBodyValidation(MethodArgumentNotValidException ex) {
 
-        // Extract each specific field error and message
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult()
-                .getFieldErrors()
-                .forEach(error ->
-                        errors.put(error.getField(), error.getDefaultMessage())
-                );
+        List<ValidationError> errors =
+                ex.getBindingResult()
+                        .getFieldErrors()
+                        .stream()
+                        .map(err -> new ValidationError(
+                                err.getField(),
+                                err.getDefaultMessage()
+                        ))
+                        .toList();
 
-        // Add the field-level errors as custom properties
-        problemDetail.setProperty("invalid_params", errors);
+        return new ValidationProblemDetail(errors);
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ValidationProblemDetail handleMethodValidation(
+            HandlerMethodValidationException ex
+    ) {
+
+        List<ValidationError> errors = new ArrayList<>();
+
+        ex.getParameterValidationResults().forEach(result -> {
+            String paramName = result.getMethodParameter().getParameterName();
+
+            result.getResolvableErrors().forEach(error ->
+                    errors.add(new ValidationError(
+                            paramName,
+                            error.getDefaultMessage()
+                    ))
+            );
+        });
+
+        return new ValidationProblemDetail(errors);
+    }
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ProblemDetail handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex
+    ) {
+        String message = ex.getMessage();
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                message
+        );
+        problemDetail.setTitle("Invalid Request Body - Deserialization Failed");
 
         return problemDetail;
     }

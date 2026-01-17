@@ -3,9 +3,10 @@ CREATE TABLE users
     id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     email         VARCHAR(255) NOT NULL UNIQUE,
     password      VARCHAR(512) NOT NULL,
-    active        BOOLEAN  DEFAULT FALSE,
-    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
-    last_modified DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    active        BOOLEAN  NOT NULL DEFAULT FALSE,
+    created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_modified DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    version       BIGINT NOT NULL DEFAULT 0
 );
 
 CREATE TABLE user_details
@@ -16,6 +17,9 @@ CREATE TABLE user_details
     age            INT UNSIGNED    NOT NULL,
     gender         ENUM('MALE', 'FEMALE') NOT NULL,
     marital_status ENUM('SINGLE', 'MARRIED', 'DIVORCED', 'UNKNOWN') NOT NULL DEFAULT 'SINGLE',
+    created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_modified DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    version       BIGINT NOT NULL DEFAULT 0,
 
     FOREIGN KEY (user_id)
         REFERENCES users (id) ON DELETE CASCADE
@@ -33,6 +37,9 @@ CREATE TABLE residential_details
     country     VARCHAR(255) NOT NULL,
     contact_no1 VARCHAR(255) NOT NULL,
     contact_no2 VARCHAR(255),
+    created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_modified DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    version       BIGINT NOT NULL DEFAULT 0,
 
     FOREIGN KEY (user_id)
         REFERENCES users (id) ON DELETE CASCADE
@@ -51,6 +58,9 @@ CREATE TABLE official_details
     company_contact_no    VARCHAR(255) NOT NULL,
     company_contact_email VARCHAR(255) NOT NULL,
     company_name          VARCHAR(255) NOT NULL,
+    created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_modified DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    version       BIGINT NOT NULL DEFAULT 0,
 
     FOREIGN KEY (user_id)
         REFERENCES users (id) ON DELETE CASCADE

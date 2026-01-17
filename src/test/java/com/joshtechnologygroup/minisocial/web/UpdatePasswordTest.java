@@ -1,9 +1,8 @@
 package com.joshtechnologygroup.minisocial.web;
 
 import com.joshtechnologygroup.minisocial.bean.User;
+import com.joshtechnologygroup.minisocial.dto.auth.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
-import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
-import com.joshtechnologygroup.minisocial.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
@@ -37,17 +37,13 @@ public class UpdatePasswordTest {
     private final String TEST_EMAIL = "test@example.com";
     private String TEST_PASSWORD;
     private String SECOND_PASSWORD;
-    private String authToken;
-
-    @Autowired
-    private JwtUtil jwtUtil;
 
     @BeforeEach
-    void setup() throws Exception {
+    void setup() {
         userRepository.deleteAll();
 
-        TEST_PASSWORD = "test-password";
-        SECOND_PASSWORD = "second-password";
+        TEST_PASSWORD = "test-password-1S";
+        SECOND_PASSWORD = "second-password-2S";
 
         // Create a test user
         User user = new User();
@@ -55,67 +51,57 @@ public class UpdatePasswordTest {
         user.setPassword(passwordEncoder.encode(TEST_PASSWORD));
         user.setActive(true);
         userRepository.save(user);
-
-        authToken = jwtUtil.generateToken(TEST_EMAIL, user.getId());
     }
 
     @Test
+    @WithMockUser(username = TEST_EMAIL)
     void changePassword() throws Exception {
-        UpdatePasswordRequest req = new UpdatePasswordRequest(TEST_EMAIL, TEST_PASSWORD, SECOND_PASSWORD);
-        mockMvc.perform(post("/api/user/update-password")
-                        .header("Authorization", "Bearer " + authToken)
+        UpdatePasswordRequest req = new UpdatePasswordRequest(TEST_PASSWORD, SECOND_PASSWORD);
+
+        mockMvc.perform(post("/api/users/update-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
+    @WithMockUser(username = TEST_EMAIL)
     void changePasswordShortPassword() throws Exception {
-        UpdatePasswordRequest req = new UpdatePasswordRequest(TEST_EMAIL, TEST_PASSWORD, "short");
-        mockMvc.perform(post("/api/user/update-password")
-                        .header("Authorization", "Bearer " + authToken)
+        UpdatePasswordRequest req = new UpdatePasswordRequest(TEST_PASSWORD, "short");
+        mockMvc.perform(post("/api/users/update-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isUnprocessableContent());
     }
 
     @Test
-    void changePasswordInvalidEmail() throws Exception {
-        UpdatePasswordRequest req = new UpdatePasswordRequest("invalid-email", TEST_PASSWORD, SECOND_PASSWORD);
-        mockMvc.perform(post("/api/user/update-password")
-                        .header("Authorization", "Bearer " + authToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isUnprocessableContent());
-    }
-
-    @Test
-    void changePasswordWrongEmail() throws Exception {
-        UpdatePasswordRequest req = new UpdatePasswordRequest("wrong-email@mail.com", TEST_PASSWORD, SECOND_PASSWORD);
-        mockMvc.perform(post("/api/user/update-password")
-                        .header("Authorization", "Bearer " + authToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
+    @WithMockUser(username = TEST_EMAIL)
     void changePasswordWrongPassword() throws Exception {
-        UpdatePasswordRequest req = new UpdatePasswordRequest(TEST_EMAIL, "wrong-pass", SECOND_PASSWORD);
-        mockMvc.perform(post("/api/user/update-password")
-                        .header("Authorization", "Bearer " + authToken)
+        UpdatePasswordRequest req = new UpdatePasswordRequest("wrong-pass-1S", SECOND_PASSWORD);
+        mockMvc.perform(post("/api/users/update-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
+    @WithMockUser(username = TEST_EMAIL)
     void changePasswordSameAsOld() throws Exception {
-        UpdatePasswordRequest req = new UpdatePasswordRequest(TEST_EMAIL, TEST_PASSWORD, TEST_PASSWORD);
-        mockMvc.perform(post("/api/user/update-password")
-                        .header("Authorization", "Bearer " + authToken)
+        UpdatePasswordRequest req = new UpdatePasswordRequest(TEST_PASSWORD, TEST_PASSWORD);
+        mockMvc.perform(post("/api/users/update-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isUnprocessableContent());
+    }
+
+    @Test
+    @WithMockUser(username = TEST_EMAIL)
+    void changePasswordBadJson() throws Exception {
+        String badJson = "{ oldPassword: test-password-1S }";
+
+        mockMvc.perform(post("/api/users/update-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(badJson))
+                .andExpect(status().isBadRequest());
     }
 }

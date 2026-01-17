@@ -6,9 +6,10 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.*;
+
+import java.time.Instant;
 
 @Data
 @Entity
@@ -21,7 +22,8 @@ public class UserDetail {
     @MapsId
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @JoinColumn(name = "user_id", nullable = false)
+    @EqualsAndHashCode.Exclude
+    @JoinColumn(name = "user_id")
     private User user;
 
     @Size(max = 255)
@@ -46,4 +48,15 @@ public class UserDetail {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MaritalStatus maritalStatus;
+
+    @Version
+    private Long version;
+
+    @Column(name = "created_at")
+    @CreationTimestamp()
+    private Instant createdAt;
+
+    @Column(name = "last_modified")
+    @UpdateTimestamp()
+    private Instant lastModified;
 }
