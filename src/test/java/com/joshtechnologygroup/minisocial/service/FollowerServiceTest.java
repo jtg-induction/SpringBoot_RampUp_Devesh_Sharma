@@ -2,8 +2,10 @@ package com.joshtechnologygroup.minisocial.service;
 
 import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.dto.follower.UpdateFollowingRequest;
+import com.joshtechnologygroup.minisocial.exception.IllegalActionException;
+import com.joshtechnologygroup.minisocial.exception.NoEffectException;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
-import com.joshtechnologygroup.minisocial.exception.InvalidValueException;
+import com.joshtechnologygroup.minisocial.exception.InvalidIdException;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
 import com.joshtechnologygroup.minisocial.factory.UserFactory;
 import org.junit.jupiter.api.Test;
@@ -42,13 +44,18 @@ class FollowerServiceTest {
         when(userRepository.getReferenceById(user2.getId())).thenReturn(user2);
 
         followerService.updateFollowed(updateRequest, user.getEmail());
-        assertEquals(2, user.getFollowed().size());
-        assertTrue(user.getFollowed().contains(user1));
-        assertTrue(user.getFollowed().contains(user2));
-        assertTrue(user1.getFollowers().contains(user));
+        assertEquals(2, user.getFollowed()
+                .size());
+        assertTrue(user.getFollowed()
+                .contains(user1));
+        assertTrue(user.getFollowed()
+                .contains(user2));
+        assertTrue(user1.getFollowers()
+                .contains(user));
         assertEquals(1, user1.getFollowers()
                 .size());
-        assertTrue(user2.getFollowers().contains(user));
+        assertTrue(user2.getFollowers()
+                .contains(user));
         assertEquals(1, user2.getFollowers()
                 .size());
 
@@ -67,8 +74,8 @@ class FollowerServiceTest {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(userRepository.findExistingUserIds(updateRequest.userIds())).thenReturn(List.of(user1.getId()));
 
-        assertThrows(InvalidValueException.class, () ->
-            followerService.updateFollowed(updateRequest, user.getEmail())
+        assertThrows(InvalidIdException.class, () ->
+                followerService.updateFollowed(updateRequest, user.getEmail())
         );
 
         verify(userRepository, times(1)).findByEmail(user.getEmail());
@@ -84,7 +91,7 @@ class FollowerServiceTest {
         when(userRepository.findByEmail(any())).thenReturn(Optional.empty());
 
         assertThrows(UserDoesNotExistException.class, () ->
-            followerService.updateFollowed(updateRequest, "test@gmail.com")
+                followerService.updateFollowed(updateRequest, "test@gmail.com")
         );
 
         verify(userRepository, times(1)).findByEmail(any());
@@ -154,8 +161,10 @@ class FollowerServiceTest {
 
         followerService.addFollowed(user.getEmail(), followedUser.getId());
 
-        assertTrue(user.getFollowed().contains(followedUser));
-        assertTrue(followedUser.getFollowers().contains(user));
+        assertTrue(user.getFollowed()
+                .contains(followedUser));
+        assertTrue(followedUser.getFollowers()
+                .contains(user));
         verify(userRepository, times(1)).save(user);
     }
 
@@ -168,9 +177,12 @@ class FollowerServiceTest {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(userRepository.findById(followedUser.getId())).thenReturn(Optional.of(followedUser));
 
-        followerService.addFollowed(user.getEmail(), followedUser.getId());
+        assertThrows(NoEffectException.class, () ->
+                followerService.addFollowed(user.getEmail(), followedUser.getId())
+        );
 
-        assertEquals(1, user.getFollowed().size());
+        assertEquals(1, user.getFollowed()
+                .size());
         verify(userRepository, never()).save(user);
     }
 
@@ -181,9 +193,12 @@ class FollowerServiceTest {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
-        followerService.addFollowed(user.getEmail(), user.getId());
+        assertThrows(IllegalActionException.class, () ->
+                followerService.addFollowed(user.getEmail(), user.getId())
+        );
 
-        assertEquals(0, user.getFollowed().size());
+        assertEquals(0, user.getFollowed()
+                .size());
         verify(userRepository, never()).save(user);
     }
 
@@ -204,7 +219,7 @@ class FollowerServiceTest {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(userRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(InvalidValueException.class, () ->
+        assertThrows(InvalidIdException.class, () ->
                 followerService.addFollowed(user.getEmail(), 999L));
 
         verify(userRepository, never()).save(any());
@@ -222,8 +237,10 @@ class FollowerServiceTest {
 
         followerService.removeFollowed(user.getEmail(), followedUser.getId());
 
-        assertFalse(user.getFollowed().contains(followedUser));
-        assertFalse(followedUser.getFollowers().contains(user));
+        assertFalse(user.getFollowed()
+                .contains(followedUser));
+        assertFalse(followedUser.getFollowers()
+                .contains(user));
         verify(userRepository, times(1)).save(user);
     }
 
@@ -236,9 +253,11 @@ class FollowerServiceTest {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(userRepository.findById(followedUser.getId())).thenReturn(Optional.of(followedUser));
 
-        followerService.removeFollowed(user.getEmail(), followedUser.getId());
+        assertThrows(NoEffectException.class, () ->
+                followerService.removeFollowed(user.getEmail(), followedUser.getId()));
 
-        assertEquals(0, user.getFollowed().size());
+        assertEquals(0, user.getFollowed()
+                .size());
         verify(userRepository, never()).save(user);
     }
 
@@ -259,7 +278,7 @@ class FollowerServiceTest {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(userRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(InvalidValueException.class, () ->
+        assertThrows(InvalidIdException.class, () ->
                 followerService.removeFollowed(user.getEmail(), 999L));
 
         verify(userRepository, never()).save(any());

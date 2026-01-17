@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/user/me")
+@RequestMapping("/api/users/me")
 @StandardSecurityResponse
 @Validated
 @Tag(name = "Followers Management", description = "APIs for managing user followers")
@@ -34,8 +34,8 @@ class FollowerController {
         this.followerService = followerService;
     }
 
-    @PostMapping("/followed")
-    @Operation(summary = "Update User's Following List", description = "Updates the list of users that the authenticated user is following.")
+    @PutMapping("/following")
+    @Operation(summary = "Update Current User's Following List", description = "Updates the list of users that the authenticated user is following.")
     @BadDeserializationResponse
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successfully updated the following list", content = @Content),
@@ -47,7 +47,7 @@ class FollowerController {
     }
 
     @GetMapping("/followers")
-    @Operation(summary = "Get User Followers", description = "Retrieves the list of user IDs that are following the authenticated user.")
+    @Operation(summary = "Get Current User's Followers", description = "Retrieves the list of user IDs that are following the authenticated user.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successfully retrieved the followers list",
                     content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = Long.class)))
@@ -58,30 +58,34 @@ class FollowerController {
         return new ResponseEntity<>(followers, HttpStatus.OK);
     }
 
-    @PostMapping("/followed/{id}")
+    @PostMapping("/following/{id}")
     @Operation(summary = "Follow a user", description = "Add a new followed user to the current user's following list")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Successfully added followed user", content = @Content),
+            @ApiResponse(responseCode = "204", description = "Successfully added followed user", content = @Content),
+            @ApiResponse(responseCode = "304", description = "User is already followed", content = @Content),
+            @ApiResponse(responseCode = "404", description = "User to follow does not exist", content = @Content),
     })
     public ResponseEntity<Void> addFollowed(@AuthenticationPrincipal UserDetails userDetails, @PositiveOrZero @PathVariable Long id) {
         followerService.addFollowed(userDetails.getUsername(), id);
-        return ResponseEntity.ok()
+        return ResponseEntity.noContent()
                 .build();
     }
 
-    @DeleteMapping("/followed/{id}")
+    @DeleteMapping("/following/{id}")
     @Operation(summary = "Unfollow a user", description = "Remove a followed user from the current user's following list")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Successfully added followed user", content = @Content),
+            @ApiResponse(responseCode = "204", description = "Successfully unfollowed user", content = @Content),
+            @ApiResponse(responseCode = "304", description = "User is not currently followed", content = @Content),
+            @ApiResponse(responseCode = "404", description = "User to unfollow does not exist", content = @Content),
     })
-    public ResponseEntity<Void> removedFollowed(@AuthenticationPrincipal UserDetails userDetails, @PositiveOrZero @PathVariable Long id) {
+    public ResponseEntity<Void> removeFollowed(@AuthenticationPrincipal UserDetails userDetails, @PositiveOrZero @PathVariable Long id) {
         followerService.removeFollowed(userDetails.getUsername(), id);
-        return ResponseEntity.ok()
+        return ResponseEntity.noContent()
                 .build();
     }
 
-    @GetMapping("/followed")
-    @Operation(summary = "Get Users Followed By", description = "Retrieves the list of user IDs that the authenticated user is following.")
+    @GetMapping("/following")
+    @Operation(summary = "Get Users Followed By Current User", description = "Retrieves the list of user IDs that the authenticated user is following.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Successfully retrieved the followed users list",
                     content = @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = Long.class)))

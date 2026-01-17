@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
 @ApiResponses({
         @ApiResponse(
                 responseCode = "403",
-                description = "Authorization token is missing or invalid",
+                description = "Authorization token is missing or invalid, or illegal action attempted",
                 content = @Content
         )
 })
