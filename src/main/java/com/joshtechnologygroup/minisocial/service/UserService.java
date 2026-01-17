@@ -6,16 +6,18 @@ import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
 import com.joshtechnologygroup.minisocial.exception.ValueConflictException;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
 @Slf4j
 public class UserService {
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
@@ -32,14 +34,15 @@ public class UserService {
 
     @Transactional
     public UserDTO createUser(UserCreateRequest req) {
-        if (userRepository.findByEmail(req.email())
-                .isPresent())
-            throw new ValueConflictException("Email already in use");
+        if (
+                userRepository.findByEmail(req.email())
+                        .isPresent()
+        ) throw new ValueConflictException("Validation Error");
 
         User user = userMapper.createDtoToUser(req);
         user.setPassword(passwordEncoder.encode(req.password()));
 
-        userRepository.save(user);
+        userRepository.saveAndFlush(user);
 
         log.info(
                 "New user created with ID {}: {}",
@@ -57,23 +60,27 @@ public class UserService {
         return userMapper.toDto(userWrapper.get());
     }
 
-    public List<ActiveUserDTO> getActiveUsers() {
-        return userRepository.findActiveUsers();
+    public UserDTO getUserByEmail(String email) {
+        Optional<User> userWrapper = userRepository.findByEmail(email);
+        if (userWrapper.isEmpty()) throw new UserDoesNotExistException();
+
+        return userMapper.toDto(userWrapper.get());
+    }
+
+    public Page<ActiveUserDTO> getActiveUsers(Pageable pageable) {
+        return userRepository.findActiveUsers(pageable);
     }
 
     @Transactional
     public UserDTO updateUser(UserUpdateRequest req, String userEmail) {
-        Optional<User> existingUser = userRepository.findByEmail(userEmail);
-        if (existingUser.isEmpty())
-            throw new UserDoesNotExistException();
+        User existingUser = userRepository.findByEmail(userEmail)
+                .orElseThrow(UserDoesNotExistException::new);
 
-        User user = userMapper.updateDtoToUser(req);
-        user.setId(existingUser.get()
-                .getId());
-        userRepository.save(user);
+        userMapper.updateUserFromDto(req, existingUser);
+        userRepository.saveAndFlush(existingUser);
 
-        log.info("User updated with ID {}: {}", user.getId(), user.getEmail());
-        return userMapper.toDto(user);
+        log.info("User updated with ID {}: {}", existingUser.getId(), existingUser.getEmail());
+        return userMapper.toDto(existingUser);
     }
 
     @Transactional

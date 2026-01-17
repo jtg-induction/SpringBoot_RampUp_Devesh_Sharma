@@ -7,9 +7,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.*;
+
+import java.time.Instant;
 
 @Data
 @Entity
@@ -48,4 +48,15 @@ public class UserDetail {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MaritalStatus maritalStatus;
+
+    @Version
+    private Long version;
+
+    @Column(name = "created_at")
+    @CreationTimestamp()
+    private Instant createdAt;
+
+    @Column(name = "last_modified")
+    @UpdateTimestamp()
+    private Instant lastModified;
 }

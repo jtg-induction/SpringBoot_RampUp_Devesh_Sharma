@@ -1,8 +1,8 @@
 package com.joshtechnologygroup.minisocial.service;
 
 import com.joshtechnologygroup.minisocial.bean.User;
-import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
-import com.joshtechnologygroup.minisocial.dto.UserLogin;
+import com.joshtechnologygroup.minisocial.dto.auth.UpdatePasswordRequest;
+import com.joshtechnologygroup.minisocial.dto.auth.UserLogin;
 import com.joshtechnologygroup.minisocial.exception.InvalidUserCredentialsException;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;

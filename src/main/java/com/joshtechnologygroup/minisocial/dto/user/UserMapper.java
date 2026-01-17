@@ -9,24 +9,34 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring", uses = {
+@Mapper(
+    componentModel = "spring",
+    uses = {
         UserDetailMapper.class,
         ResidentialDetailMapper.class,
-        OfficialDetailMapper.class
-})
+        OfficialDetailMapper.class,
+    }
+)
 public interface UserMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "lastModified", ignore = true)
     @Mapping(target = "followed", ignore = true)
     @Mapping(target = "followers", ignore = true)
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(source = "userDetails", target = "userDetail")
-    @Mapping(source = "userDetails.residentialDetails", target = "residentialDetail")
+    @Mapping(
+        source = "userDetails.residentialDetails",
+        target = "residentialDetail"
+    )
     @Mapping(source = "userDetails.officialDetails", target = "officialDetail")
     User createDtoToUser(UserCreateRequest req);
 
     @AfterMapping
-    default void afterUserCreateRequestConversion(UserCreateRequest req, @MappingTarget User user) {
+    default void afterUserCreateRequestConversion(
+        UserCreateRequest req,
+        @MappingTarget User user
+    ) {
         linkUserDetails(user);
     }
 
@@ -38,15 +48,16 @@ public interface UserMapper {
     @Mapping(target = "lastModified", ignore = true)
     @Mapping(target = "followed", ignore = true)
     @Mapping(target = "followers", ignore = true)
+    @Mapping(target = "email", ignore = true)
+    @Mapping(target = "password", ignore = true)
+    @Mapping(target = "active", ignore = true)
     @Mapping(source = "userDetails", target = "userDetail")
-    @Mapping(source = "userDetails.residentialDetails", target = "residentialDetail")
+    @Mapping(
+        source = "userDetails.residentialDetails",
+        target = "residentialDetail"
+    )
     @Mapping(source = "userDetails.officialDetails", target = "officialDetail")
-    User updateDtoToUser(UserUpdateRequest req);
-
-    @AfterMapping
-    default void afterUserUpdateRequestConversion(UserUpdateRequest req, @MappingTarget User user) {
-        linkUserDetails(user);
-    }
+    void updateUserFromDto(UserUpdateRequest req, @MappingTarget User user);
 
     private void linkUserDetails(@MappingTarget User user) {
         if (user.getUserDetail() != null) {

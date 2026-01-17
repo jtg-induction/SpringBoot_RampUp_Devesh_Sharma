@@ -5,6 +5,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.Instant;
 
 @Data
 @Entity
@@ -48,4 +52,15 @@ public class ResidentialDetail {
     @Size(max = 255)
     @Column
     private String contactNo2;
+
+    @Version
+    private Long version;
+
+    @Column(name = "created_at")
+    @CreationTimestamp()
+    private Instant createdAt;
+
+    @Column(name = "last_modified")
+    @UpdateTimestamp()
+    private Instant lastModified;
 }

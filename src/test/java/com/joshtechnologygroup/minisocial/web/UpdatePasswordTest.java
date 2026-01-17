@@ -1,7 +1,7 @@
 package com.joshtechnologygroup.minisocial.web;
 
 import com.joshtechnologygroup.minisocial.bean.User;
-import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
+import com.joshtechnologygroup.minisocial.dto.auth.UpdatePasswordRequest;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,17 +58,17 @@ public class UpdatePasswordTest {
     void changePassword() throws Exception {
         UpdatePasswordRequest req = new UpdatePasswordRequest(TEST_PASSWORD, SECOND_PASSWORD);
 
-        mockMvc.perform(post("/api/user/update-password")
+        mockMvc.perform(post("/api/users/update-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
     @WithMockUser(username = TEST_EMAIL)
     void changePasswordShortPassword() throws Exception {
         UpdatePasswordRequest req = new UpdatePasswordRequest(TEST_PASSWORD, "short");
-        mockMvc.perform(post("/api/user/update-password")
+        mockMvc.perform(post("/api/users/update-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isUnprocessableContent());
@@ -78,7 +78,7 @@ public class UpdatePasswordTest {
     @WithMockUser(username = TEST_EMAIL)
     void changePasswordWrongPassword() throws Exception {
         UpdatePasswordRequest req = new UpdatePasswordRequest("wrong-pass-1S", SECOND_PASSWORD);
-        mockMvc.perform(post("/api/user/update-password")
+        mockMvc.perform(post("/api/users/update-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isUnauthorized());
@@ -88,9 +88,20 @@ public class UpdatePasswordTest {
     @WithMockUser(username = TEST_EMAIL)
     void changePasswordSameAsOld() throws Exception {
         UpdatePasswordRequest req = new UpdatePasswordRequest(TEST_PASSWORD, TEST_PASSWORD);
-        mockMvc.perform(post("/api/user/update-password")
+        mockMvc.perform(post("/api/users/update-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isUnprocessableContent());
+    }
+
+    @Test
+    @WithMockUser(username = TEST_EMAIL)
+    void changePasswordBadJson() throws Exception {
+        String badJson = "{ oldPassword: test-password-1S }";
+
+        mockMvc.perform(post("/api/users/update-password")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(badJson))
+                .andExpect(status().isBadRequest());
     }
 }

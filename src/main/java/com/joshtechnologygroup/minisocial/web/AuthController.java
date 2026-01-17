@@ -2,8 +2,10 @@ package com.joshtechnologygroup.minisocial.web;
 
 import com.joshtechnologygroup.minisocial.annotation.BadDeserializationResponse;
 import com.joshtechnologygroup.minisocial.annotation.StandardSecurityResponse;
-import com.joshtechnologygroup.minisocial.dto.UpdatePasswordRequest;
-import com.joshtechnologygroup.minisocial.dto.UserLogin;
+import com.joshtechnologygroup.minisocial.annotation.ValidationErrorResponse;
+import com.joshtechnologygroup.minisocial.dto.auth.AuthTokenResponse;
+import com.joshtechnologygroup.minisocial.dto.auth.UpdatePasswordRequest;
+import com.joshtechnologygroup.minisocial.dto.auth.UserLogin;
 import com.joshtechnologygroup.minisocial.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 @Slf4j
 @Tag(name = "Authentication", description = "APIs for user authentication and password management")
 class AuthController {
@@ -36,37 +38,44 @@ class AuthController {
 
     @PostMapping("/authenticate")
     @BadDeserializationResponse
+    @ValidationErrorResponse
     @Operation(description = "Authenticate user and issue JWT", summary = "User Authentication")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
                     description = "Authentication successful, JWT issued",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthTokenResponse.class))
             ),
             @ApiResponse(
-                    responseCode = "422",
-                    description = "Validation failed",
+                    responseCode = "401",
+                    description = "Invalid Username or Password",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))
             )
     })
-    public ResponseEntity<String> authenticate(@Valid @RequestBody UserLogin user) {
+    public ResponseEntity<AuthTokenResponse> authenticate(@Valid @RequestBody UserLogin user) {
         String jwt = authService.authenticate(user);
-        return new ResponseEntity<>(jwt, HttpStatus.OK);
+        return new ResponseEntity<>(new AuthTokenResponse(jwt), HttpStatus.OK);
     }
 
     @StandardSecurityResponse
     @BadDeserializationResponse
+    @ValidationErrorResponse
     @PostMapping("/update-password")
     @Operation(description = "Update user password", summary = "Update Password")
     @ApiResponses({
             @ApiResponse(
-                    responseCode = "200",
+                    responseCode = "204",
                     description = "Password changed successfully",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+                    content = @Content(mediaType = "application/json", schema = @Schema)
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Invalid Username or Password",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))
             ),
     })
-    public ResponseEntity<String> updatePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Void> updatePassword(@Valid @RequestBody UpdatePasswordRequest updatePasswordRequest, @AuthenticationPrincipal UserDetails userDetails) {
         authService.updatePassword(updatePasswordRequest, userDetails.getUsername());
-        return new ResponseEntity<>("Password changed successfully", HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

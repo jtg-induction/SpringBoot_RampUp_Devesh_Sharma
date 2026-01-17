@@ -2,6 +2,8 @@ package com.joshtechnologygroup.minisocial.repository;
 
 import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.dto.user.ActiveUserDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,7 +17,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("""
             SELECT id as userId, email FROM User WHERE active = true
             """)
-    List<ActiveUserDTO> findActiveUsers();
+    Page<ActiveUserDTO> findActiveUsers(Pageable pageable);
 
     @Query("""
             SELECT u.id FROM User u WHERE u.id IN :ids

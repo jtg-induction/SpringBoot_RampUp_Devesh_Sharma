@@ -5,15 +5,13 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 
+import java.time.Instant;
+
 import static com.joshtechnologygroup.minisocial.constants.ValidationConstants.PHONE_NUMBER_REGEX;
 
 @Builder
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record OfficialDetailDTO(
-        @NotNull(message = "User ID is required")
-        @PositiveOrZero(message = "User ID must be unsigned")
-        Long userId,
-
         @Size(min = 3, max = 100, message = "Employee Code must be between 3 and 100 characters long")
         @NotBlank(message = "Employee Code is required")
         String employeeCode,
@@ -45,6 +43,12 @@ public record OfficialDetailDTO(
 
         @Size(max = 255, message = "Company Name must not exceed 255 characters")
         @NotBlank(message = "Company Name is required")
-        String companyName
+        String companyName,
+
+        @NotNull
+        Instant lastModified,
+
+        @NotNull
+        Instant createdAt
 ) {
 }
