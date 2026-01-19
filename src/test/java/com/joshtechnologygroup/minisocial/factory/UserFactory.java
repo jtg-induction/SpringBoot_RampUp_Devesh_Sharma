@@ -8,7 +8,6 @@ import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
 import net.datafaker.Faker;
 
 import java.time.Instant;
-import java.util.HashSet;
 
 public class UserFactory {
 
@@ -22,8 +21,6 @@ public class UserFactory {
         user.setActive(FAKER.bool().bool());
         user.setCreatedAt(Instant.now());
         user.setLastModified(Instant.now());
-        user.setFollowers(new HashSet<>());
-        user.setFollowed(new HashSet<>());
 
         return user;
     }

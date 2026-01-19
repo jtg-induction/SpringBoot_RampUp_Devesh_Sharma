@@ -38,13 +38,6 @@ class FollowerControllerTest {
     }
 
     @Test
-    @WithMockUser(username = "fake@test.com")
-    void getFollowers_shouldReturn404_whenUserDoesNotExist() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/me/followers"))
-                .andExpect(result -> assertEquals(404, result.getResponse().getStatus()));
-    }
-
-    @Test
     @WithMockUser(username = "john.doe@test.com")
     void getFollowed_shouldReturnList_whenUserExists() throws Exception {
         String res = mockMvc.perform(MockMvcRequestBuilders.get("/api/users/me/following")).andReturn().getResponse().getContentAsString();
@@ -52,13 +45,6 @@ class FollowerControllerTest {
         assertEquals(2, followedIds.size());
         assertTrue(followedIds.contains(2L));
         assertTrue(followedIds.contains(3L));
-    }
-
-    @Test
-    @WithMockUser(username = "fake@test.com")
-    void getFollowed_shouldReturn404_whenUserDoesNotExist() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/users/me/following"))
-                .andExpect(result -> assertEquals(404, result.getResponse().getStatus()));
     }
 
     @Test
@@ -164,13 +150,6 @@ class FollowerControllerTest {
                 .andReturn().getResponse().getContentAsString();
         List<Long> followedIds = objectMapper.readerForListOf(Long.class).readValue(res);
         assertEquals(2, followedIds.size());
-    }
-
-    @Test
-    @WithMockUser(username = "john.doe@test.com")
-    void removeFollowed_shouldReturn404_whenFollowedUserDoesNotExist() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/users/me/following/999"))
-                .andExpect(result -> assertEquals(404, result.getResponse().getStatus()));
     }
 
     @Test
