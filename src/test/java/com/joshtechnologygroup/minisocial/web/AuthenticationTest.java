@@ -1,8 +1,8 @@
 package com.joshtechnologygroup.minisocial.web;
 
 import com.joshtechnologygroup.minisocial.bean.User;
+import com.joshtechnologygroup.minisocial.dto.auth.UserLogin;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
-import com.joshtechnologygroup.minisocial.dto.UserLogin;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -54,7 +55,7 @@ class AuthenticationTest {
     void authenticateUser_Success() throws Exception {
         UserLogin loginRequest = new UserLogin(TEST_EMAIL, TEST_PASSWORD);
 
-        String response = mockMvc.perform(post("/api/user/authenticate")
+        String response = mockMvc.perform(post("/api/users/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
@@ -64,14 +65,24 @@ class AuthenticationTest {
 
         assertNotNull(response);
         // Check if response is there
-        assert (!response.isEmpty());
+        assertFalse(response.isEmpty());
     }
 
     @Test
     void authenticateUser_WrongPassword() throws Exception {
         UserLogin loginRequest = new UserLogin(TEST_EMAIL, "wrong-password");
 
-        mockMvc.perform(post("/api/user/authenticate")
+        mockMvc.perform(post("/api/users/authenticate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void authenticateUser_WrongEmail() throws Exception {
+        UserLogin loginRequest = new UserLogin("nonexistent@example.com", TEST_PASSWORD);
+
+        mockMvc.perform(post("/api/users/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized());
@@ -79,11 +90,20 @@ class AuthenticationTest {
 
     @Test
     void authenticateUser_InvalidEmail() throws Exception {
-        UserLogin loginRequest = new UserLogin("nonexistent@example.com", TEST_PASSWORD);
+        UserLogin loginRequest = new UserLogin("invalid-email", TEST_PASSWORD);
 
-        mockMvc.perform(post("/api/user/authenticate")
+        mockMvc.perform(post("/api/users/authenticate")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isUnprocessableContent());
+    }
+
+    @Test
+    void authenticateUser_BadJson() throws Exception {
+        String badJson = "{ email: bad-email }";
+        mockMvc.perform(post("/api/users/authenticate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(badJson))
+                .andExpect(status().isBadRequest());
     }
 }

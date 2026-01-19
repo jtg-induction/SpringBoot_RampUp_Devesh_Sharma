@@ -4,11 +4,12 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -31,24 +32,36 @@ public class User {
     private String password;
 
     @Column(name = "active")
-    private Boolean active;
+    private Boolean active = true;
 
     @Column(name = "created_at")
-    @CreationTimestamp(source = SourceType.DB)
+    @CreationTimestamp()
     private Instant createdAt;
 
     @Column(name = "last_modified")
-    @UpdateTimestamp(source = SourceType.DB)
+    @UpdateTimestamp()
     private Instant lastModified;
 
-    @ManyToMany(mappedBy = "followers")
-    Set<User> followed;
+    @Version
+    private Long version;
 
-    @ManyToMany
-    @JoinTable(
-            name = "followers",
-            joinColumns = @JoinColumn(name = "followed_user"),
-            inverseJoinColumns = @JoinColumn(name = "following_user")
-    )
-    Set<User> followers;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @EqualsAndHashCode.Exclude
+    private UserDetail userDetail;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @EqualsAndHashCode.Exclude
+    private OfficialDetail officialDetail;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @EqualsAndHashCode.Exclude
+    private ResidentialDetail residentialDetail;
+
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
+    private Set<UserFollow> followingLinks = new HashSet<>();
+
+    @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
+    @EqualsAndHashCode.Exclude
+    private Set<UserFollow> followerLinks = new HashSet<>();
 }

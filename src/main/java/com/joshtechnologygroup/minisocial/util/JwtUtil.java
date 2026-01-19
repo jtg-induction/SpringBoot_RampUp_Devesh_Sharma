@@ -23,14 +23,17 @@ public class JwtUtil {
     }
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(apiConfig.getJwtKey().getBytes(StandardCharsets.UTF_8));
+        return Keys.hmacShaKeyFor(apiConfig.getJwtKey()
+                .getBytes(StandardCharsets.UTF_8));
     }
 
     private String createToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
                 .claims(claims)
                 .subject(subject)
-                .header().empty().add("typ", "JWT")
+                .header()
+                .empty()
+                .add("typ", "JWT")
                 .and()
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + apiConfig.getJwtExpiry()))
