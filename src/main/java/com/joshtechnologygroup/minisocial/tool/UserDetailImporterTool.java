@@ -9,11 +9,10 @@ import org.springframework.shell.core.command.annotation.EnableCommand;
 import org.springframework.shell.core.command.annotation.Option;
 import org.springframework.stereotype.Component;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 
-import static com.joshtechnologygroup.minisocial.tool.util.CsvParser.parseFollowingrDetailsCsv;
+import static com.joshtechnologygroup.minisocial.tool.util.CsvParser.parseFollowingDetailsCsv;
 import static com.joshtechnologygroup.minisocial.tool.util.CsvParser.parseUserDetailsCsv;
 
 @EnableCommand(UserDetailImporterTool.class)
@@ -45,7 +44,7 @@ public class UserDetailImporterTool {
                     shortName = 'b',
                     defaultValue = "50",
                     description = "Batch size for database inserts"
-            ) String batchSizeStr) throws FileNotFoundException {
+            ) String batchSizeStr) {
         try {
 
             int batchSize = 50;
@@ -60,9 +59,9 @@ public class UserDetailImporterTool {
                 return;
             }
 
-            List<UserFollowingDetailRow> followingDetailRows = null;
+            List<UserFollowingDetailRow> followingDetailRows;
             try {
-                followingDetailRows = parseFollowingrDetailsCsv(followingDetailsCsv);
+                followingDetailRows = parseFollowingDetailsCsv(followingDetailsCsv);
             } catch (IOException e) {
                 log.error("IOException occurred while importing following details: {}", e.getMessage());
                 return;
@@ -92,7 +91,7 @@ public class UserDetailImporterTool {
             for (int i = 0; i < batches; i++) {
                 int batchStart = i * batchSize;
                 int batchEnd = Math.min(batchStart + batchSize, userDetailRows.size());
-                userDetailImportService.importFollowingDetails(followingDetailRows);
+                userDetailImportService.importFollowingDetails(followingDetailRows.subList(batchStart, batchEnd));
             }
             log.info("Following details import completed.");
             log.info("User detail import process finished successfully.");
