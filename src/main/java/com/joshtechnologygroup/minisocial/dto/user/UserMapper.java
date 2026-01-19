@@ -20,8 +20,8 @@ import org.mapstruct.MappingTarget;
 public interface UserMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "lastModified", ignore = true)
-    @Mapping(target = "followed", ignore = true)
-    @Mapping(target = "followers", ignore = true)
+    @Mapping(target = "followerLinks", ignore = true)
+    @Mapping(target = "followingLinks", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "active", ignore = true)
     @Mapping(source = "userDetails", target = "userDetail")
@@ -30,6 +30,7 @@ public interface UserMapper {
         target = "residentialDetail"
     )
     @Mapping(source = "userDetails.officialDetails", target = "officialDetail")
+    @Mapping(target = "version", ignore = true)
     User createDtoToUser(UserCreateRequest req);
 
     @AfterMapping
@@ -46,11 +47,12 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "lastModified", ignore = true)
-    @Mapping(target = "followed", ignore = true)
-    @Mapping(target = "followers", ignore = true)
+    @Mapping(target = "followerLinks", ignore = true)
+    @Mapping(target = "followingLinks", ignore = true)
     @Mapping(target = "email", ignore = true)
     @Mapping(target = "password", ignore = true)
     @Mapping(target = "active", ignore = true)
+    @Mapping(target = "version", ignore = true)
     @Mapping(source = "userDetails", target = "userDetail")
     @Mapping(
         source = "userDetails.residentialDetails",

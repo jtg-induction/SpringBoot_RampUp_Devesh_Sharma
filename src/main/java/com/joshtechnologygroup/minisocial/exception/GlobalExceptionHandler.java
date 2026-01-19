@@ -54,6 +54,32 @@ public class GlobalExceptionHandler {
         return problemDetail;
     }
 
+    @ExceptionHandler(NoEffectException.class)
+    public ProblemDetail handleUserAlreadyFollowedException(
+            NoEffectException e
+    ) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.NOT_MODIFIED,
+                e.getMessage()
+        );
+        problemDetail.setTitle("User Already Followed");
+
+        return problemDetail;
+    }
+
+    @ExceptionHandler(IllegalActionException.class)
+    public ProblemDetail handleIllegalActionException(
+            IllegalActionException e
+    ) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.FORBIDDEN,
+                e.getMessage()
+        );
+        problemDetail.setTitle("Illegal Action");
+
+        return problemDetail;
+    }
+
     // Validation Exception Handler
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ValidationProblemDetail handleBodyValidation(MethodArgumentNotValidException ex) {
@@ -102,6 +128,17 @@ public class GlobalExceptionHandler {
                 message
         );
         problemDetail.setTitle("Invalid Request Body - Deserialization Failed");
+
+        return problemDetail;
+    }
+
+    @ExceptionHandler(InvalidIdException.class)
+    public ProblemDetail handleInvalidValueException(InvalidIdException e) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.NOT_FOUND,
+                e.getMessage()
+        );
+        problemDetail.setTitle("Invalid Value");
 
         return problemDetail;
     }
