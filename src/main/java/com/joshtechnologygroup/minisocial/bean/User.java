@@ -5,9 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SourceType;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -36,12 +35,15 @@ public class User {
     private Boolean active = true;
 
     @Column(name = "created_at")
-    @CreationTimestamp(source = SourceType.DB)
+    @CreationTimestamp()
     private Instant createdAt;
 
     @Column(name = "last_modified")
-    @UpdateTimestamp(source = SourceType.DB)
+    @UpdateTimestamp()
     private Instant lastModified;
+
+    @Version
+    private Long version;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @EqualsAndHashCode.Exclude
@@ -55,26 +57,11 @@ public class User {
     @EqualsAndHashCode.Exclude
     private ResidentialDetail residentialDetail;
 
-    @ManyToMany
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
     @EqualsAndHashCode.Exclude
-    @JoinTable(
-            name = "followers",
-            joinColumns = @JoinColumn(name = "following_user"),
-            inverseJoinColumns = @JoinColumn(name = "followed_user")
-    )
-    Set<User> followed = new HashSet<>();
+    private Set<UserFollow> followingLinks = new HashSet<>();
 
-    @ManyToMany(mappedBy = "followed")
+    @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
     @EqualsAndHashCode.Exclude
-    Set<User> followers = new HashSet<>();
-
-    public void addFollowed(User followed) {
-        this.followed.add(followed);   // Add to owning side
-        followed.followers.add(this);    // Add to inverse side (in-memory)
-    }
-
-    public void removeFollowed(User followed) {
-        this.followed.remove(followed); // Remove from owning side
-        followed.followers.remove(this);  // Remove from inverse side (in-memory)
-    }
+    private Set<UserFollow> followerLinks = new HashSet<>();
 }

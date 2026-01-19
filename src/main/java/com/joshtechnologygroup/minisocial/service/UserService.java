@@ -6,13 +6,17 @@ import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
 import com.joshtechnologygroup.minisocial.exception.ValueConflictException;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import com.joshtechnologygroup.minisocial.specification.UserSpecificationBuilder;
+import com.joshtechnologygroup.minisocial.util.UserSortUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -34,14 +38,15 @@ public class UserService {
 
     @Transactional
     public UserDTO createUser(UserCreateRequest req) {
-        if (userRepository.findByEmail(req.email())
-                .isPresent())
-            throw new ValueConflictException("Email already in use");
+        if (
+                userRepository.findByEmail(req.email())
+                        .isPresent()
+        ) throw new ValueConflictException("Validation Error");
 
         User user = userMapper.createDtoToUser(req);
         user.setPassword(passwordEncoder.encode(req.password()));
 
-        userRepository.save(user);
+        userRepository.saveAndFlush(user);
 
         log.info(
                 "New user created with ID {}: {}",
@@ -66,7 +71,7 @@ public class UserService {
         return userMapper.toDto(userWrapper.get());
     }
 
-    public List<UserDTO> getAllUsers(UserQueryParams userQueryParams) {
+    public Page<UserDTO> getAllUsers(UserQueryParams userQueryParams, Pageable pageable) {
         Specification<User> userSpecification = new UserSpecificationBuilder().withMinAge(userQueryParams.minAge())
                 .withMaxAge(userQueryParams.maxAge())
                 .withMinFollowers(userQueryParams.minFollowerCount())
@@ -81,22 +86,28 @@ public class UserService {
                 .officialCityIn(userQueryParams.officialCities())
                 .companyNameIn(userQueryParams.companyName())
                 .isActive(userQueryParams.active())
-                .orderBy(userQueryParams.sortOrders())
                 .build();
-        List<User> users = userRepository.findAll(userSpecification);
-        return users.stream()
-                .map(userMapper::toDto)
-                .toList();
+
+        Sort sort = UserSortUtil.createSort(userQueryParams.sortOrders());
+        Sort finalSort = sort.isSorted() ? sort : pageable.getSort();
+
+        Pageable sortedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                finalSort
+        );
+
+        Page<User> users = userRepository.findAll(userSpecification, sortedPageable);
+        return users.map(userMapper::toDto);
     }
 
     @Transactional
     public UserDTO updateUser(UserUpdateRequest req, String userEmail) {
         User existingUser = userRepository.findByEmail(userEmail)
                 .orElseThrow(UserDoesNotExistException::new);
-        userMapper.updateEntityFromDto(req, existingUser);
 
-        // 3. Save the modified entity (Hibernate will perform a partial update)
-        userRepository.save(existingUser);
+        userMapper.updateUserFromDto(req, existingUser);
+        userRepository.saveAndFlush(existingUser);
 
         log.info("User updated with ID {}: {}", existingUser.getId(), existingUser.getEmail());
         return userMapper.toDto(existingUser);

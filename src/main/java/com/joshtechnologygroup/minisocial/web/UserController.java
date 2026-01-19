@@ -2,6 +2,7 @@ package com.joshtechnologygroup.minisocial.web;
 
 import com.joshtechnologygroup.minisocial.annotation.BadDeserializationResponse;
 import com.joshtechnologygroup.minisocial.annotation.StandardSecurityResponse;
+import com.joshtechnologygroup.minisocial.annotation.ValidationErrorResponse;
 import com.joshtechnologygroup.minisocial.dto.user.UserCreateRequest;
 import com.joshtechnologygroup.minisocial.dto.user.UserDTO;
 import com.joshtechnologygroup.minisocial.dto.user.UserQueryParams;
@@ -9,22 +10,23 @@ import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
 import com.joshtechnologygroup.minisocial.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -37,64 +39,58 @@ class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/users")
+    @GetMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Get a list of all users with filtering and sorting", summary = "Query All Users")
     @StandardSecurityResponse
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved list of users",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved list of users")
     })
-    public ResponseEntity<List<UserDTO>> getActiveUsers(@Valid UserQueryParams userQueryParams) {
+    public ResponseEntity<PagedModel<UserDTO>> getActiveUsers(@Valid UserQueryParams userQueryParams, @PageableDefault(size = 20, sort = "id") Pageable pageable) {
         log.debug("Received user query params: {}", userQueryParams);
-        return new ResponseEntity<>(userService.getAllUsers(userQueryParams), HttpStatus.OK);
+        Page<UserDTO> users = userService.getAllUsers(userQueryParams, pageable);
+        return new ResponseEntity<>(new PagedModel<>(users), HttpStatus.OK);
     }
 
-    @PostMapping("/user")
+    @PostMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Create a new user account", summary = "Create User")
     @BadDeserializationResponse
+    @ValidationErrorResponse
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "User created successfully",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
-            @ApiResponse(responseCode = "422", description = "Validation failed",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))
-            )
+            @ApiResponse(responseCode = "201", description = "User created successfully"),
     })
     public ResponseEntity<UserDTO> createUser(@Valid @RequestBody UserCreateRequest req) {
         return new ResponseEntity<>(userService.createUser(req), HttpStatus.CREATED);
     }
 
-    @PutMapping("/user/me")
+    @PutMapping(value = "/users/profile", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Update an existing user account", summary = "Update User")
     @StandardSecurityResponse
     @BadDeserializationResponse
+    @ValidationErrorResponse
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User updated successfully",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
-            @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
+            @ApiResponse(responseCode = "200", description = "User updated successfully")
     })
     public ResponseEntity<UserDTO> updateUser(@Validated(UserUpdateRequest.Put.class) @RequestBody UserUpdateRequest req, @AuthenticationPrincipal UserDetails userDetails) {
         return new ResponseEntity<>(userService.updateUser(req, userDetails.getUsername()), HttpStatus.OK);
     }
 
-    @PatchMapping("/user/me")
+    @PatchMapping(value = "/users/profile", produces = MediaType.APPLICATION_JSON_VALUE)
     @Operation(description = "Partially update an existing user account", summary = "Partially update User")
     @StandardSecurityResponse
     @BadDeserializationResponse
+    @ValidationErrorResponse
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User updated successfully",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
-            @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
+            @ApiResponse(responseCode = "200", description = "User updated successfully"),
     })
     public ResponseEntity<UserDTO> partiallyUpdateUser(@Valid @RequestBody UserUpdateRequest req, @AuthenticationPrincipal UserDetails userDetails) {
         return new ResponseEntity<>(userService.updateUser(req, userDetails.getUsername()), HttpStatus.OK);
     }
 
-    @GetMapping("/user/{id}")
+    @GetMapping(value = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
     @StandardSecurityResponse
     @Operation(description = "Get user details by ID", summary = "Retrieve User by ID")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User details retrieved successfully",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
+            @ApiResponse(responseCode = "200", description = "User details retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
     })
     public ResponseEntity<UserDTO> getUser(@PositiveOrZero @PathVariable Long id) {
@@ -102,12 +98,11 @@ class UserController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @GetMapping("/user/me")
+    @GetMapping(value = "/users/profile", produces = MediaType.APPLICATION_JSON_VALUE)
     @StandardSecurityResponse
     @Operation(description = "Get logged in user's details", summary = "Get Current User")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User details retrieved successfully",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
+            @ApiResponse(responseCode = "200", description = "User details retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
     })
     public ResponseEntity<UserDTO> getUser(@AuthenticationPrincipal UserDetails userDetails) {
@@ -115,12 +110,11 @@ class UserController {
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @DeleteMapping("/user/me")
+    @DeleteMapping(value = "/users/profile", produces = MediaType.APPLICATION_JSON_VALUE)
     @StandardSecurityResponse
     @Operation(description = "Delete a user account by ID", summary = "Delete User")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "User deleted successfully",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
+            @ApiResponse(responseCode = "200", description = "User deleted successfully"),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content),
     })
     public ResponseEntity<UserDTO> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {

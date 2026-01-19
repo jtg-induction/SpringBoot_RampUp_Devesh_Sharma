@@ -5,7 +5,7 @@ import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface ResidentialDetailMapper {
-    ResidentialDetailDTO entityToDTO(ResidentialDetail residentialDetail);
+    ResidentialDetailDTO toDto(ResidentialDetail residentialDetail);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "user", ignore = true)

@@ -6,22 +6,20 @@ import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.bean.UserDetail;
 import com.joshtechnologygroup.minisocial.dto.user.*;
 import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailDTO;
-import com.joshtechnologygroup.minisocial.dto.userDetail.UserDetailMapper;
 import com.joshtechnologygroup.minisocial.enums.UserSortOrder;
 import com.joshtechnologygroup.minisocial.exception.UserDoesNotExistException;
+import com.joshtechnologygroup.minisocial.exception.ValueConflictException;
 import com.joshtechnologygroup.minisocial.factory.OfficialDetailFactory;
 import com.joshtechnologygroup.minisocial.factory.ResidentialDetailFactory;
 import com.joshtechnologygroup.minisocial.factory.UserDetailFactory;
 import com.joshtechnologygroup.minisocial.factory.UserFactory;
-import com.joshtechnologygroup.minisocial.repository.ResidentialDetailRepository;
-import com.joshtechnologygroup.minisocial.repository.UserDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -39,16 +37,7 @@ class UserServiceTest {
     private UserRepository userRepository;
 
     @Mock
-    private UserDetailRepository userDetailRepository;
-
-    @Mock
-    private ResidentialDetailRepository residentialDetailRepository;
-
-    @Mock
     private UserMapper userMapper;
-
-    @Mock
-    private UserDetailMapper userDetailMapper;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -59,17 +48,16 @@ class UserServiceTest {
     @Test
     void createUser_ShouldReturnFullUserDTO_WhenInputIsValid() {
         // Prepare Request
-        UserCreateRequest request = UserFactory.defaultUserCreateRequest()
-                .build();
+        UserCreateRequest request =
+            UserFactory.defaultUserCreateRequest().build();
         User user = UserFactory.defaultUser();
-        UserDTO expectedResponse = UserFactory.defaultUserDTO(user)
-                .build();
+        UserDTO expectedResponse = UserFactory.defaultUserDTO(user).build();
 
         // Mock Mapper behaviors
         when(userMapper.createDtoToUser(any())).thenReturn(user);
 
         // Mock Repository behaviors
-        when(userRepository.save(any())).thenReturn(user);
+        when(userRepository.saveAndFlush(any())).thenReturn(user);
 
         // Mock the Final DTO Mapping
         when(userMapper.toDto(any())).thenReturn(expectedResponse);
@@ -85,22 +73,21 @@ class UserServiceTest {
         assertEquals(user.getEmail(), result.email());
         assertNotNull(result.userDetails());
 
-        verify(userRepository, times(1)).save(any());
+        verify(userRepository, times(1)).saveAndFlush(any());
     }
 
     @Test
     void createUser_ShouldThrowException_WhenEmailAlreadyExists() {
-        UserCreateRequest request = UserFactory.defaultUserCreateRequest()
-                .build();
+        UserCreateRequest request =
+            UserFactory.defaultUserCreateRequest().build();
 
-        when(userMapper.createDtoToUser(any())).thenReturn(new User());
-        when(userRepository.save(any())).thenThrow(new DataIntegrityViolationException("Email exists"));
-        when(passwordEncoder.encode(any())).thenReturn("encodedPassword");
+        when(userRepository.findByEmail(request.email())).thenReturn(
+            Optional.of(new User())
+        );
 
-        assertThrows(DataIntegrityViolationException.class, () -> userService.createUser(request));
-
-        verifyNoInteractions(userDetailRepository);
-        verifyNoInteractions(residentialDetailRepository);
+        assertThrows(ValueConflictException.class, () ->
+            userService.createUser(request)
+        );
     }
 
     @Test
@@ -108,38 +95,44 @@ class UserServiceTest {
         // Setup
         User userEntity = UserFactory.defaultUser();
 
-        UserDetail userDetail = UserDetailFactory.defaultUserDetail(userEntity.getId());
-        ResidentialDetail resDetail = ResidentialDetailFactory.defaultResidentialDetail(userEntity.getId());
-        OfficialDetail offDetail = OfficialDetailFactory.defaultOfficialDetail(userEntity.getId());
+        UserDetail userDetail = UserDetailFactory.defaultUserDetail(
+            userEntity.getId()
+        );
+        ResidentialDetail resDetail =
+            ResidentialDetailFactory.defaultResidentialDetail(
+                userEntity.getId()
+            );
+        OfficialDetail offDetail = OfficialDetailFactory.defaultOfficialDetail(
+            userEntity.getId()
+        );
         userEntity.setUserDetail(userDetail);
         userEntity.setResidentialDetail(resDetail);
         userEntity.setOfficialDetail(offDetail);
 
         // Create DTO that matches the entity data
-        UserDetailDTO mockDetailDTO = UserDetailFactory.defaultUserDetailDTO(userDetail)
-                .build();
+        UserDetailDTO mockDetailDTO = UserDetailFactory.defaultUserDetailDTO(
+            userDetail
+        ).build();
         UserDTO expectedDTO = UserFactory.defaultUserDTO(userEntity)
-                .userDetails(mockDetailDTO)
-                .build();
+            .userDetails(mockDetailDTO)
+            .build();
 
         // Mock behavior
         when(userRepository.findById(userEntity.getId())).thenReturn(
-                Optional.of(userEntity)
+            Optional.of(userEntity)
         );
-        when(userMapper.toDto(userEntity)).thenReturn(
-                expectedDTO
-        );
+        when(userMapper.toDto(userEntity)).thenReturn(expectedDTO);
 
         // Execute
         UserDTO result = userService.getUser(userEntity.getId());
 
         // Verify
         assertNotNull(result);
-        assertEquals(userEntity.getEmail(), result
-                .email());
-        assertEquals(mockDetailDTO.firstName(), result
-                .userDetails()
-                .firstName());
+        assertEquals(userEntity.getEmail(), result.email());
+        assertEquals(
+            mockDetailDTO.firstName(),
+            result.userDetails().firstName()
+        );
 
         verify(userRepository).findById(userEntity.getId());
     }
@@ -147,17 +140,14 @@ class UserServiceTest {
     @Test
     void getUser_ShouldReturnEmpty_WhenUserDoesNotExist() {
         // Mock
-        when(userRepository.findById(99L)).thenReturn(
-                Optional.empty()
-        );
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         // Execute
         assertThrows(UserDoesNotExistException.class, () ->
-                userService.getUser(99L)
+            userService.getUser(99L)
         );
 
         // Verify
-        verifyNoInteractions(userDetailMapper);
         verifyNoInteractions(userMapper);
     }
 
@@ -165,35 +155,46 @@ class UserServiceTest {
     void updateUser_ShouldReturnUpdatedDTO_WhenUserExists() {
         // 1. Arrange
         User user = UserFactory.defaultUser();
-        String originalEmail = user.getEmail();
+        UserUpdateRequest updateReq = UserFactory.defaultUserUpdateRequest(
+                user
+        ).build();
 
-        UserUpdateRequest updateReq = UserUpdateRequest.builder()
+        User updatedUser = UserFactory.defaultUser();
+        updatedUser.setId(user.getId());
+        updatedUser.setEmail("new-email@company.com");
+
+        // Mocking Logic
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(
+                Optional.of(user)
+        );
+
+        // Mocking the return DTO construction
+        UserDTO finalDTO = UserFactory.defaultUserDTO(user)
                 .email("new-email@company.com")
                 .build();
 
-        when(userRepository.findByEmail(originalEmail)).thenReturn(Optional.of(user));
-
-        UserDTO expectedDTO = UserDTO.builder().email("new-email@company.com").build();
-        when(userMapper.toDto(any(User.class))).thenReturn(expectedDTO);
+        when(userMapper.toDto(any())).thenReturn(finalDTO);
 
         // 2. Act
-        UserDTO result = userService.updateUser(updateReq, originalEmail);
+        UserDTO result = userService.updateUser(updateReq, user.getEmail());
 
         // 3. Assert
         assertEquals("new-email@company.com", result.email());
+        verify(userRepository).saveAndFlush(user);
+        verify(userMapper).updateUserFromDto(updateReq, user);
     }
 
     @Test
     void updateUser_ShouldThrowException_WhenUserNotFound() {
-        UserUpdateRequest req = UserFactory.defaultUserUpdateRequest()
-                .email("ghost@test.com")
-                .build();
-        when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.empty());
+        UserUpdateRequest req = UserFactory.defaultUserUpdateRequest().build();
+        when(userRepository.findByEmail("test@mail.com")).thenReturn(
+            Optional.empty()
+        );
 
         assertThrows(UserDoesNotExistException.class, () ->
-                userService.updateUser(req, "test@mail.com")
+            userService.updateUser(req, "test@mail.com")
         );
-        verify(userRepository, never()).save(any());
+        verify(userRepository, never()).saveAndFlush(any());
     }
 
     @Test
@@ -203,26 +204,28 @@ class UserServiceTest {
         Long userId = userEntity.getId();
 
         UserDetail userDetail = UserDetailFactory.defaultUserDetail(userId);
-        ResidentialDetail resDetail = ResidentialDetailFactory.defaultResidentialDetail(userId);
-        OfficialDetail offDetail = OfficialDetailFactory.defaultOfficialDetail(userId);
+        ResidentialDetail resDetail =
+            ResidentialDetailFactory.defaultResidentialDetail(userId);
+        OfficialDetail offDetail = OfficialDetailFactory.defaultOfficialDetail(
+            userId
+        );
         userEntity.setUserDetail(userDetail);
         userEntity.setResidentialDetail(resDetail);
         userEntity.setOfficialDetail(offDetail);
 
         // Create DTO that matches the entity data
-        UserDetailDTO mockDetailDTO = UserDetailFactory.defaultUserDetailDTO(userDetail)
-                .build();
+        UserDetailDTO mockDetailDTO = UserDetailFactory.defaultUserDetailDTO(
+            userDetail
+        ).build();
         UserDTO expectedDTO = UserFactory.defaultUserDTO(userEntity)
-                .userDetails(mockDetailDTO)
-                .build();
+            .userDetails(mockDetailDTO)
+            .build();
 
         // Mock behavior
         when(userRepository.findByEmail(userEntity.getEmail())).thenReturn(
-                Optional.of(userEntity)
+            Optional.of(userEntity)
         );
-        when(userMapper.toDto(userEntity)).thenReturn(
-                expectedDTO
-        );
+        when(userMapper.toDto(userEntity)).thenReturn(expectedDTO);
 
         // Execute
         UserDTO result = userService.deleteUser(userEntity.getEmail());
@@ -231,8 +234,10 @@ class UserServiceTest {
         assertNotNull(result);
         assertEquals(userId, result.id());
         assertEquals(userEntity.getEmail(), result.email());
-        assertEquals(mockDetailDTO.firstName(), result.userDetails()
-                .firstName());
+        assertEquals(
+            mockDetailDTO.firstName(),
+            result.userDetails().firstName()
+        );
 
         verify(userRepository).findByEmail(userEntity.getEmail());
         verify(userRepository).deleteById(userId);
@@ -244,17 +249,16 @@ class UserServiceTest {
         // Setup
         String nonExistentEmail = "fake@mail.com";
         when(userRepository.findByEmail(nonExistentEmail)).thenReturn(
-                Optional.empty()
+            Optional.empty()
         );
 
         // Execute & Verify
         assertThrows(UserDoesNotExistException.class, () ->
-                userService.deleteUser(nonExistentEmail)
+            userService.deleteUser(nonExistentEmail)
         );
 
         verify(userRepository).findByEmail(nonExistentEmail);
         verify(userRepository, never()).deleteById(any());
-        verifyNoInteractions(userDetailMapper);
         verifyNoInteractions(userMapper);
     }
 
@@ -282,17 +286,18 @@ class UserServiceTest {
                 .userDetails(detailDTO2)
                 .build();
 
-        when(userRepository.findAll(any(Specification.class))).thenReturn(users);
+        Page<User> userPage = new PageImpl<>(users, PageRequest.of(0, 10), users.size());
+        when(userRepository.findAll(any(Specification.class),any(Pageable.class))).thenReturn(userPage);
         when(userMapper.toDto(any(User.class)))
                 .thenReturn(userDTO1, userDTO2);
 
         // Execute
-        List<UserDTO> result = userService.getAllUsers(queryParams);
+        Page<UserDTO> result = userService.getAllUsers(queryParams, PageRequest.of(0, 10, Sort.unsorted()));
 
         // Verify
         assertNotNull(result);
-        assertEquals(2, result.size());
-        verify(userRepository).findAll(any(Specification.class));
+        assertEquals(2, result.getContent().size());
+        verify(userRepository).findAll(any(Specification.class), any(Pageable.class));
     }
 
     @Test
@@ -327,16 +332,17 @@ class UserServiceTest {
                 .build();
 
         // Use lenient stubbing to avoid strict argument matching issues with random data
-        when(userRepository.findAll(any(Specification.class))).thenReturn(users);
+        Page<User> userPage = new PageImpl<>(users, PageRequest.of(0, 10), users.size());
+        when(userRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(userPage);
         when(userMapper.toDto(any(User.class)))
                 .thenReturn(userDTO1, userDTO2, userDTO3);
 
         // Execute
-        List<UserDTO> result = userService.getAllUsers(queryParams);
+        Page<UserDTO> result = userService.getAllUsers(queryParams, PageRequest.of(0, 10, Sort.unsorted()));
 
         // Verify
         assertNotNull(result);
-        assertEquals(3, result.size());
-        verify(userRepository).findAll(any(Specification.class));
+        assertEquals(3, result.getContent().size());
+        verify(userRepository).findAll(any(Specification.class), any(Pageable.class));
     }
 }

@@ -3,16 +3,17 @@ package com.joshtechnologygroup.minisocial.dto.officialDetail;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.joshtechnologygroup.minisocial.dto.user.UserUpdateRequest;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
-
-import java.time.Instant;
 
 import static com.joshtechnologygroup.minisocial.constants.ValidationConstants.PHONE_NUMBER_REGEX;
 
 @Builder
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record OfficialDetailDTO(
+public record OfficialDetailUpdateRequest(
         @Size(min = 3, max = 100, message = "Employee Code must be between 3 and 100 characters long")
         @NotBlank(message = "Employee Code is required", groups = UserUpdateRequest.Put.class)
         String employeeCode,
@@ -40,16 +41,11 @@ public record OfficialDetailDTO(
 
         @Size(max = 255, message = "Company Contact Email must not exceed 255 characters")
         @NotBlank(message = "Company Contact Email is required", groups = UserUpdateRequest.Put.class)
+        @Email
         String companyContactEmail,
 
         @Size(max = 255, message = "Company Name must not exceed 255 characters")
         @NotBlank(message = "Company Name is required", groups = UserUpdateRequest.Put.class)
-        String companyName,
-
-        @NotNull
-        Instant lastModified,
-
-        @NotNull
-        Instant createdAt
+        String companyName
 ) {
 }

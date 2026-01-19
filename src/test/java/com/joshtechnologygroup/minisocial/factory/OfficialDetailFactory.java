@@ -3,6 +3,7 @@ package com.joshtechnologygroup.minisocial.factory;
 import com.joshtechnologygroup.minisocial.TestDataConfig;
 import com.joshtechnologygroup.minisocial.bean.OfficialDetail;
 import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailDTO;
+import com.joshtechnologygroup.minisocial.dto.officialDetail.OfficialDetailUpdateRequest;
 import net.datafaker.Faker;
 
 public class OfficialDetailFactory {
@@ -49,5 +50,27 @@ public class OfficialDetailFactory {
                 .companyContactNo(officialDetail.getCompanyContactNo())
                 .companyContactEmail(officialDetail.getCompanyContactEmail())
                 .companyName(officialDetail.getCompanyName());
+    }
+
+    public static OfficialDetailUpdateRequest.OfficialDetailUpdateRequestBuilder defaultOfficialDetailUpdateRequest(
+        Long userId
+    ) {
+        OfficialDetail officialDetail = defaultOfficialDetail();
+        officialDetail.setUserId(userId);
+        return defaultOfficialDetailUpdateRequest(officialDetail);
+    }
+
+    public static OfficialDetailUpdateRequest.OfficialDetailUpdateRequestBuilder defaultOfficialDetailUpdateRequest(
+        OfficialDetail officialDetail
+    ) {
+        return OfficialDetailUpdateRequest.builder()
+            .employeeCode(officialDetail.getEmployeeCode())
+            .address(officialDetail.getAddress())
+            .city(officialDetail.getCity())
+            .state(officialDetail.getState())
+            .country(officialDetail.getCountry())
+            .companyContactNo(officialDetail.getCompanyContactNo())
+            .companyContactEmail(officialDetail.getCompanyContactEmail())
+            .companyName(officialDetail.getCompanyName());
     }
 }

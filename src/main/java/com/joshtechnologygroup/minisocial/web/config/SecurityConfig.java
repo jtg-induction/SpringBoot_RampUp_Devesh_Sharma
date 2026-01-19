@@ -35,7 +35,7 @@ public class SecurityConfig {
                                 .permitAll()
                                 .requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/api-docs/**", "/swagger-ui.html") // Docs endpoints
                                 .permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/user", "/api/user/authenticate")// Login endpoint
+                                .requestMatchers(HttpMethod.POST, "/api/users", "/api/users/authenticate")// Login endpoint
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()

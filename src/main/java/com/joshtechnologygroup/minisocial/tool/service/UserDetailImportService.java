@@ -5,6 +5,7 @@ import com.joshtechnologygroup.minisocial.repository.OfficialDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.ResidentialDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.UserDetailRepository;
 import com.joshtechnologygroup.minisocial.repository.UserRepository;
+import com.joshtechnologygroup.minisocial.service.FollowerService;
 import com.joshtechnologygroup.minisocial.tool.bean.UserDetailRow;
 import com.joshtechnologygroup.minisocial.tool.bean.UserFollowingDetailRow;
 import jakarta.transaction.Transactional;
@@ -21,12 +22,14 @@ public class UserDetailImportService {
     private final UserDetailRepository userDetailRepository;
     private final ResidentialDetailRepository residentialDetailRepository;
     private final OfficialDetailRepository officialDetailRepository;
+    private final FollowerService followerService;
 
-    public UserDetailImportService(UserRepository userRepository, UserDetailRepository userDetailRepository, ResidentialDetailRepository residentialDetailRepository, OfficialDetailRepository officialDetailRepository) {
+    public UserDetailImportService(UserRepository userRepository, UserDetailRepository userDetailRepository, ResidentialDetailRepository residentialDetailRepository, OfficialDetailRepository officialDetailRepository, FollowerService followerService) {
         this.userRepository = userRepository;
         this.userDetailRepository = userDetailRepository;
         this.residentialDetailRepository = residentialDetailRepository;
         this.officialDetailRepository = officialDetailRepository;
+        this.followerService = followerService;
     }
 
     @Transactional
@@ -115,7 +118,7 @@ public class UserDetailImportService {
                     log.warn("Followed user with email {} not found. Skipping.", followedEmail);
                     continue;
                 }
-                user.addFollowed(followedUser);
+                followerService.addFollowed(user.getEmail(), followedUser.getId());
                 userModified = true;
             }
 

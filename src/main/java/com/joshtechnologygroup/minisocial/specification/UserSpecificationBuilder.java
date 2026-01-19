@@ -3,11 +3,8 @@ package com.joshtechnologygroup.minisocial.specification;
 import com.joshtechnologygroup.minisocial.bean.User;
 import com.joshtechnologygroup.minisocial.enums.Gender;
 import com.joshtechnologygroup.minisocial.enums.MaritalStatus;
-import com.joshtechnologygroup.minisocial.enums.UserSortOrder;
-import jakarta.persistence.criteria.Order;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class UserSpecificationBuilder {
@@ -66,7 +63,7 @@ public class UserSpecificationBuilder {
     public UserSpecificationBuilder withMinFollowers(Integer minFollowers) {
         if (minFollowers != null) {
             spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.greaterThanOrEqualTo(criteriaBuilder.size(root.get("followers")), minFollowers)
+                    criteriaBuilder.greaterThanOrEqualTo(criteriaBuilder.size(root.get("followerLinks")), minFollowers)
             );
         }
         return this;
@@ -75,7 +72,7 @@ public class UserSpecificationBuilder {
     public UserSpecificationBuilder withMaxFollowers(Integer maxFollowers) {
         if (maxFollowers != null) {
             spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.lessThanOrEqualTo(criteriaBuilder.size(root.get("followers")), maxFollowers)
+                    criteriaBuilder.lessThanOrEqualTo(criteriaBuilder.size(root.get("followerLinks")), maxFollowers)
             );
         }
         return this;
@@ -84,7 +81,7 @@ public class UserSpecificationBuilder {
     public UserSpecificationBuilder withMinFollowing(Integer minFollowing) {
         if (minFollowing != null) {
             spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.greaterThanOrEqualTo(criteriaBuilder.size(root.get("followed")), minFollowing)
+                    criteriaBuilder.greaterThanOrEqualTo(criteriaBuilder.size(root.get("followingLinks")), minFollowing)
             );
         }
         return this;
@@ -93,7 +90,7 @@ public class UserSpecificationBuilder {
     public UserSpecificationBuilder withMaxFollowing(Integer maxFollowing) {
         if (maxFollowing != null) {
             spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.lessThanOrEqualTo(criteriaBuilder.size(root.get("followed")), maxFollowing)
+                    criteriaBuilder.lessThanOrEqualTo(criteriaBuilder.size(root.get("followingLinks")), maxFollowing)
             );
         }
         return this;
@@ -156,51 +153,6 @@ public class UserSpecificationBuilder {
             spec = spec.and((root, query, criteriaBuilder) ->
                     criteriaBuilder.equal(root.get("active"), isActive)
             );
-        }
-        return this;
-    }
-
-    public UserSpecificationBuilder orderBy(List<UserSortOrder> order) {
-        if (order != null && !order.isEmpty()) {
-            spec = spec.and((root, query, criteriaBuilder) -> {
-                List<Order> orders = new ArrayList<>();
-
-                for (UserSortOrder ord : order) {
-                    switch (ord) {
-                        case NAME -> {
-                            // Order by first and last name
-                            orders.add(criteriaBuilder.desc(root.join("userDetail")
-                                    .get("firstName")));
-                            orders.add(criteriaBuilder.desc(root.join("userDetail")
-                                    .get("lastName")));
-                        }
-                        case EMAIL -> orders.add(criteriaBuilder.desc(root.get("email")));
-                        case RESIDENTIAL_DETAIL -> {
-                            orders.add(criteriaBuilder.desc(root.join("residentialDetail")
-                                    .get("city")));
-                            orders.add(criteriaBuilder.desc(root.join("residentialDetail")
-                                    .get("state")));
-                            orders.add(criteriaBuilder.desc(root.join("residentialDetail")
-                                    .get("country")));
-                        }
-                        case FOLLOWING_COUNT -> orders.add(criteriaBuilder.desc(
-                                criteriaBuilder.size(root.get("followed"))));
-                        case FOLLOWER_COUNT -> orders.add(criteriaBuilder.desc(
-                                criteriaBuilder.size(root.get("followers"))));
-                        case GENDER -> orders.add(criteriaBuilder.desc(root.join("userDetail")
-                                .get("gender")));
-                        case MARITAL_STATUS -> orders.add(criteriaBuilder.desc(root.join("userDetail")
-                                .get("maritalStatus")));
-                        case COMPANY_NAME -> orders.add(criteriaBuilder.desc(root.join("officialDetail")
-                                .get("companyName")));
-                    }
-                }
-
-                if (!orders.isEmpty()) {
-                    query.orderBy(orders.toArray(new Order[0]));
-                }
-                return criteriaBuilder.conjunction();
-            });
         }
         return this;
     }

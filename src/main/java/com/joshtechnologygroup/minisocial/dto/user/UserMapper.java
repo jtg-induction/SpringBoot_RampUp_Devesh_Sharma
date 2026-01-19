@@ -14,13 +14,11 @@ import org.mapstruct.*;
 public interface UserMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "lastModified", ignore = true)
-    @Mapping(target = "followed", ignore = true)
-    @Mapping(target = "followers", ignore = true)
+    @Mapping(target = "followerLinks", ignore = true)
+    @Mapping(target = "followingLinks", ignore = true)
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "userDetail", ignore = true)
-    @Mapping(target = "residentialDetail", ignore = true)
-    @Mapping(target = "officialDetail", ignore = true)
     @Mapping(target = "active", ignore = true)
+    @Mapping(target = "version", ignore = true)
     User createDtoToUser(UserCreateRequest req);
 
     @Mapping(source = "userDetail", target = "userDetails")
@@ -30,20 +28,19 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "lastModified", ignore = true)
-    @Mapping(target = "followed", ignore = true)
-    @Mapping(target = "followers", ignore = true)
+    @Mapping(target = "followerLinks", ignore = true)
+    @Mapping(target = "followingLinks", ignore = true)
+    @Mapping(target = "email", ignore = true)
     @Mapping(target = "password", ignore = true)
+    @Mapping(target = "active", ignore = true)
+    @Mapping(target = "version", ignore = true)
     @Mapping(source = "userDetails", target = "userDetail")
     @Mapping(source = "userDetails.residentialDetails", target = "residentialDetail")
     @Mapping(source = "userDetails.officialDetails", target = "officialDetail")
-    void updateEntityFromDto(UserUpdateRequest req, @MappingTarget User user);
+    void updateUserFromDto(UserUpdateRequest req, @MappingTarget User user);
 
     @AfterMapping
-    default void afterUserUpdateRequestConversion(UserUpdateRequest req, @MappingTarget User user) {
-        linkUserDetails(user);
-    }
-
-    private void linkUserDetails(@MappingTarget User user) {
+    default void linkUserDetails(@MappingTarget User user) {
         if (user.getUserDetail() != null) {
             user.getUserDetail().setUser(user);
         }

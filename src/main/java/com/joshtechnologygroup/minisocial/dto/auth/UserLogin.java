@@ -1,4 +1,4 @@
-package com.joshtechnologygroup.minisocial.dto;
+package com.joshtechnologygroup.minisocial.dto.auth;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -14,7 +14,7 @@ public record UserLogin(
         String email,
 
         @NotBlank(message = "Password is required")
-        @Size(min = 8, max = 255, message = "Password must be between 8 and 255 characters long")
+        @Size(min = 8, max = 30, message = "Password must be between 8 and 30 characters long")
         String password
 ) {
 }

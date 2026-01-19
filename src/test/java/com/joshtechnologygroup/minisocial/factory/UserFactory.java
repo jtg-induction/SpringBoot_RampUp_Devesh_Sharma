@@ -10,7 +10,6 @@ import com.joshtechnologygroup.minisocial.enums.UserSortOrder;
 import net.datafaker.Faker;
 
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.List;
 
 public class UserFactory {
@@ -18,18 +17,12 @@ public class UserFactory {
 
     public static User defaultUser() {
         User user = new User();
-        user.setId((long) FAKER.number()
-                .positive());
-        user.setEmail(FAKER.internet()
-                .emailAddress());
-        user.setPassword(FAKER.credentials()
-                .password(8, 20, true, true, true));
-        user.setActive(FAKER.bool()
-                .bool());
+        user.setId((long) FAKER.number().positive());
+        user.setEmail(FAKER.internet().emailAddress());
+        user.setPassword(FAKER.credentials().password(8, 20, true, true, true));
+        user.setActive(FAKER.bool().bool());
         user.setCreatedAt(Instant.now());
         user.setLastModified(Instant.now());
-        user.setFollowers(new HashSet<>());
-        user.setFollowed(new HashSet<>());
 
         return user;
     }
@@ -47,12 +40,12 @@ public class UserFactory {
 
     public static UserDTO.UserDTOBuilder defaultUserDTO(User user) {
         return UserDTO.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .active(user.getActive())
-                .lastModified(user.getLastModified())
-                .userDetails(UserDetailFactory.defaultUserDetailDTO(user.getId())
-                        .build());
+            .id(user.getId())
+            .email(user.getEmail())
+            .lastModified(user.getLastModified())
+            .userDetails(
+                UserDetailFactory.defaultUserDetailDTO(user.getId()).build()
+            );
     }
 
     public static UserUpdateRequest.UserUpdateRequestBuilder defaultUserUpdateRequest() {
@@ -60,12 +53,14 @@ public class UserFactory {
         return defaultUserUpdateRequest(user);
     }
 
-    public static UserUpdateRequest.UserUpdateRequestBuilder defaultUserUpdateRequest(User user) {
-        return UserUpdateRequest.builder()
-                .email(user.getEmail())
-                .active(user.getActive())
-                .userDetails(UserDetailFactory.defaultUserDetailDTO(user.getId())
-                        .build());
+    public static UserUpdateRequest.UserUpdateRequestBuilder defaultUserUpdateRequest(
+        User user
+    ) {
+        return UserUpdateRequest.builder().userDetails(
+            UserDetailFactory.defaultUserDetailUpdateRequest(
+                user.getId()
+            ).build()
+        );
     }
 
     public static UserQueryParams activeUserQueryParams() {
